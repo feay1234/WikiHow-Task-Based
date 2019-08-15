@@ -1,15 +1,4 @@
-# ❓❔👾 Gquestions CLI Usage ❔❓
-
- ![pybadge] (https://img.shields.io/badge/python-%3E%3D3.7-important.svg)  ![badge](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)
-
-
-
-[![asciicast](https://asciinema.org/a/4wrOzHnxQVcTImuofzdMxB35L.svg)](https://asciinema.org/a/4wrOzHnxQVcTImuofzdMxB35L)
-
-## ⚠ Disclaimer
-> This software is not authorized by Google and doesn't follow Google's
-> robots.txt. Scraping without Google explicit written permission is a violation of thei
-> terms and conditions on scraping and can potentially cause a lawsuit
+# WikiHow Task-Based Project
 
 ## Install dependencies
 ```
