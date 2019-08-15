@@ -1,0 +1,3 @@
+[MainThread] - 2019-08-15 17:54:26,009 - GoogleScraper.core - INFO - Going to scrape 1 keywords with 1 proxies by using 1 threads.
+[MainThread] - 2019-08-15 17:54:26,009 - GoogleScraper.scraping - INFO - [+] HttpScrape[localhost][search-type:normal][https://www.google.com/search?] using search engine "google". Num keywords=1, num pages for keyword=[1]
+[Thread-2] - 2019-08-15 17:54:28,014 - GoogleScraper.scraping - INFO - [HttpScrape-google][localhost]]Keyword: "apple" with [1] pages, slept 2 seconds before scraping. 1/1 already scraped.
