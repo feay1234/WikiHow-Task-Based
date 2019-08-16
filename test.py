@@ -97,10 +97,10 @@ class MultiThreadScraper:
 
         self.base_url = base_url
         self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=2)
+        self.pool = ThreadPoolExecutor(max_workers=20)
         self.scraped_pages = set([])
         self.to_crawl = Queue()
-        df = pd.read_csv("data/articles.txt").values.tolist()[:10]
+        df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
         for i in df:
             self.to_crawl.put(i[0])
 
