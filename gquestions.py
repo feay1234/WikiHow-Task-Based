@@ -77,7 +77,7 @@ Search on Google and returns the list of PAA questions in SERP.
 """
 
 
-def newSearch(browser, query):
+def newSearch(browser, query, lang="en"):
     if lang == "en":
         browser.get("https://www.google.com?hl=en")
         searchbox = browser.find_element_by_xpath("//input[@aria-label='Search']")
@@ -108,7 +108,7 @@ Helper function that scroll into view the PAA questions element.
 """
 
 
-def scrollToFeedback(browser):
+def scrollToFeedback(browser, lang="en"):
     if lang == "en":
         el = browser.find_element_by_xpath("//div[@class='kno-ftr']//div/following-sibling::a[text()='Feedback']")
     else:
@@ -169,12 +169,12 @@ Where the magic happens
 """
 
 
-def crawlQuestions(start_paa, paa_list, initialSet, query, browser, depth=0):
+def crawlQuestions(start_paa, paa_list, initialSet, query, browser, depth=0, lang="en"):
     _tmp = createNode(paa_lst=paa_list, name=query, children=True)
 
     outer_cnt = 0
     for q in start_paa:
-        scrollToFeedback(browser)
+        scrollToFeedback(browser, lang)
         if "Dictionary" in q.text:
             continue
         test = createNode(paa_lst=paa_list, n=0,
@@ -334,14 +334,14 @@ def flatten_csv(data, depth, prettyname):
         logging.warning(f"{e}")
 
 
-def call():
+def crawl(keyword):
     logging.basicConfig(level=logging.INFO)
     # args = docopt(usage)
     args = {'--csv': True,
             '--headless': False,
             '--help': False,
             '<depth>': None,
-            '<keyword>': 'how to work full',
+            '<keyword>': keyword,
             'depth': False,
             'en': True,
             'es': False,
@@ -378,8 +378,7 @@ def call():
         paa_list = []
 
         crawlQuestions(start_paa, paa_list, initialSet, query, browser, depth)
-        treeData = 'var treeData = ' + json.dumps(paa_list) + ';'
-
+        # treeData = 'var treeData = ' + json.dumps(paa_list) + ';'
         # if paa_list[0]['children']:
         # root = os.path.dirname(os.path.abspath(__file__))
         # templates_dir = os.path.join(root, 'templates')
