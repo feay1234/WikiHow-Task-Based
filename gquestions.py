@@ -338,7 +338,7 @@ def crawl(keyword):
     logging.basicConfig(level=logging.INFO)
     # args = docopt(usage)
     args = {'--csv': True,
-            '--headless': False,
+            '--headless': True,
             '--help': False,
             '<depth>': None,
             '<keyword>': keyword,
@@ -397,7 +397,7 @@ def crawl(keyword):
 
     browser.close()
 
-if __name__ == "__main__":
-    global lang
-    lang = "en"
-    call()
+# if __name__ == "__main__":
+    # global lang
+    # lang = "en"
+    # call()

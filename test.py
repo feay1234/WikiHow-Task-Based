@@ -32,7 +32,7 @@ from gquestions import initBrowser, newSearch, crawlQuestions, prettyOutputName,
 def crawl(keyword):
     # args = docopt(usage)
     args = {'--csv': True,
-            '--headless': False,
+            '--headless': True,
             '--help': False,
             '<depth>': None,
             '<keyword>': keyword,
@@ -84,10 +84,10 @@ def crawl(keyword):
         #         treeData=treeData,
         #     ))
 
-    if args['--csv']:
-        if paa_list[0]['children']:
-            _path = 'csv/' + prettyOutputName(query, 'csv')
-            flatten_csv(paa_list, depth, _path)
+    # if args['--csv']:
+    #     if paa_list[0]['children']:
+    #         _path = 'csv/' + prettyOutputName(query, 'csv')
+    #         flatten_csv(paa_list, depth, _path)
 
     browser.close()
 
@@ -97,7 +97,7 @@ class MultiThreadScraper:
 
         self.base_url = base_url
         self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=20)
+        self.pool = ThreadPoolExecutor(max_workers=50)
         self.scraped_pages = set([])
         self.to_crawl = Queue()
         df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
@@ -134,7 +134,7 @@ class MultiThreadScraper:
             try:
                 target_url = self.to_crawl.get(timeout=10)
                 if target_url not in self.scraped_pages:
-                    print(target_url)
+                    # print(target_url)
                     self.scraped_pages.add(target_url)
                     self.pool.submit(self.scrape_page, target_url)
                     # job.add_done_callback(self.post_scrape_callback)
