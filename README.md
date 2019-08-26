@@ -5,6 +5,8 @@
 pip install -r requirements.txt
 ```
 
+download data from https://github.com/mahnazkoupaee/WikiHow-Dataset
+
 ## 🔍 Usage:
 
 ```
