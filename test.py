@@ -72,10 +72,10 @@ def crawl(keyword):
         #             treeData=treeData,
         #         ))
 
-    if args['--csv']:
-        if paa_list[0]['children']:
-            _path = 'tmp/' + prettyOutputName(query, 'csv')
-            flatten_csv(paa_list, depth, _path)
+    # if args['--csv']:
+    #     if paa_list[0]['children']:
+    #         _path = 'tmp/' + prettyOutputName(query, 'csv')
+    #         flatten_csv(paa_list, depth, _path)
 
     browser.close()
 
@@ -85,11 +85,7 @@ class MultiThreadScraper:
 
         self.base_url = base_url
         self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-<<<<<<< HEAD
-        self.pool = ThreadPoolExecutor(max_workers=2)
-=======
         self.pool = ThreadPoolExecutor(max_workers=20)
->>>>>>> 895b74792a836a05c7368ac8f280811618ef2e12
         self.scraped_pages = set([])
         self.to_crawl = Queue()
         df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()[:10]
@@ -118,11 +114,6 @@ class MultiThreadScraper:
     def scrape_page(self, url):
         try:
             crawl(url)
-<<<<<<< HEAD
-        except Exception as e:
-            print("Scrape page")
-            print(e)
-=======
 
         except Exception as e:
             # add to file and add to the pool
@@ -130,8 +121,7 @@ class MultiThreadScraper:
             #     f.write("%s\n" % url)
             print("error: %s" % url)
             self.to_crawl.put(url)
->>>>>>> 895b74792a836a05c7368ac8f280811618ef2e12
-            return
+        return
 
     def run_scraper(self):
         while True:
@@ -144,22 +134,7 @@ class MultiThreadScraper:
                     with open("success.txt", 'w') as f:
                         f.write("%s\n" % target_url)
                     # job.add_done_callback(self.post_scrape_callback)
-<<<<<<< HEAD
-            except Empty as e:
-                print("Empty")
-                print(target_url)
-                return
-            except Exception as e:
-                print("run scrapper")
-                print(e)
-                continue
-if __name__ == '__main__':
-    # start = time.time()
-    s = MultiThreadScraper("http://www.google.co.uk")
-    s.run_scraper()
-    # end = time.time()
-    # print(end - start)
-=======
+
             except Exception as e:
                 print("main error: %s" % target_url)
                 continue
@@ -182,4 +157,3 @@ if __name__ == '__main__':
 #     start at 14:51
 
 
->>>>>>> 895b74792a836a05c7368ac8f280811618ef2e12
