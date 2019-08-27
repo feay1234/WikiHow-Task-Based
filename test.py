@@ -69,8 +69,6 @@ def crawl(keyword):
             with open(_path, 'w') as f:
                 for item in start_paa:
                     f.write("%s\n" % item.text)
-        else:
-            pass
 
         # TODO get more queries
         # initialSet = {}
