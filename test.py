@@ -40,7 +40,7 @@ def crawl(keyword):
             'en': True,
             'es': False,
             'query': True}
-    print(args)
+    # print(args)
     MAX_DEPTH = 1
 
     if args['<depth>']:
@@ -138,7 +138,13 @@ class MultiThreadScraper:
     def scrape_page(self, url):
         try:
             crawl(url)
-        except requests.RequestException:
+
+        except Exception as e:
+            # add to file and add to the pool
+            with open("error.txt", 'w') as f:
+                f.write("%s\n" % url)
+            print(e)
+            self.to_crawl.put(url)
             return
 
     def run_scraper(self):
@@ -149,25 +155,24 @@ class MultiThreadScraper:
                     # print(target_url)
                     self.scraped_pages.add(target_url)
                     self.pool.submit(self.scrape_page, target_url)
+                    with open("success.txt", 'w') as f:
+                        f.write("%s\n" % target_url)
                     # job.add_done_callback(self.post_scrape_callback)
-            except Empty:
-                return
             except Exception as e:
-                print(e)
                 continue
 if __name__ == '__main__':
-    # s = MultiThreadScraper("http://www.google.co.uk")
-    # s.run_scraper()
-    import time
+    s = MultiThreadScraper("http://www.google.co.uk")
+    s.run_scraper()
+    # import time
 
-    start = time.time()
-    crawl("how to cook pasta")
-    end = time.time()
-    print(end - start)
-
-    start = time.time()
-    crawl("jarana manotumruksa")
-    end = time.time()
-    print(end - start)
+    # start = time.time()
+    # crawl("how to cook pasta")
+    # end = time.time()
+    # print(end - start)
+    #
+    # start = time.time()
+    # crawl("jarana manotumruksa")
+    # end = time.time()
+    # print(end - start)
 
 
