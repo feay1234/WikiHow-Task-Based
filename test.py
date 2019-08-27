@@ -62,6 +62,7 @@ def crawl(keyword):
             browser = initBrowser()
         query = args['<keyword>']
         start_paa = newSearch(browser, query, lang)
+        print(start_paa)
 
         if len(start_paa) > 0:
             _path = 'csv/' + prettyOutputName(query, 'csv')
@@ -109,7 +110,7 @@ class MultiThreadScraper:
 
         self.base_url = base_url
         self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=50)
+        self.pool = ThreadPoolExecutor(max_workers=20)
         self.scraped_pages = set([])
         self.to_crawl = Queue()
         df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
@@ -141,8 +142,9 @@ class MultiThreadScraper:
 
         except Exception as e:
             # add to file and add to the pool
-            with open("error.txt", 'a+') as f:
-                f.write("%s\n" % url)
+            # with open("error.txt", 'a+') as f:
+            #     f.write("%s\n" % url)
+            print("error: %s" % url)
             self.to_crawl.put(url)
             return
 
@@ -158,14 +160,15 @@ class MultiThreadScraper:
                         f.write("%s\n" % target_url)
                     # job.add_done_callback(self.post_scrape_callback)
             except Exception as e:
+                print("main error: %s" % target_url)
                 continue
 if __name__ == '__main__':
-    s = MultiThreadScraper("http://www.google.co.uk")
-    s.run_scraper()
+    # s = MultiThreadScraper("http://www.google.co.uk")
+    # s.run_scraper()
     # import time
 
     # start = time.time()
-    # crawl("how to cook pasta")
+    crawl("how to clean house")
     # end = time.time()
     # print(end - start)
     #
@@ -175,6 +178,6 @@ if __name__ == '__main__':
     # print(end - start)
 
 
-#     start at 14:42
+#     start at 14:51
 
 
