@@ -37,7 +37,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
-
+from selenium.webdriver.remote.remote_connection import LOGGER
+LOGGER.setLevel(logging.WARNING)
 '''
 Visualizza una barra di caricamento per mostrare l'attesa
 '''
@@ -67,6 +68,12 @@ def initBrowser(headless=False):
         chrome_path = "driver/chromedriver"
     chrome_options = Options()
     chrome_options.add_argument("--disable-features=NetworkService")
+    chrome_options.add_argument("--log-level=3")
+    chrome_options.add_argument("--disable-infobars")
+    chrome_options.add_argument("--disable-logging")
+    chrome_options.add_argument("--disable-login-animations")
+    chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_argument("--disable-default-apps")
     if headless:
         chrome_options.add_argument('headless')
     return webdriver.Chrome(options=chrome_options, executable_path=chrome_path)
@@ -346,7 +353,7 @@ def crawl(keyword):
             'en': True,
             'es': False,
             'query': True}
-    print(args)
+    # print(args)
     MAX_DEPTH = 1
 
     if args['<depth>']:

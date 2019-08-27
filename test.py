@@ -1,31 +1,8 @@
-import requests
-import pandas as pd
-# from bs4 import BeautifulSoup
 from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urljoin, urlparse
-
-import os
-import re
 import sys
-import json
-import time
-import datetime
-import platform
-from docopt import docopt
-from tqdm import tqdm
-from time import sleep
 import pandas as pd
-from pandas.io.json import json_normalize
-import logging
-from jinja2 import Environment, FileSystemLoader
-
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
-
 from gquestions import initBrowser, newSearch, crawlQuestions, prettyOutputName, flatten_csv
 
 
@@ -40,7 +17,7 @@ def crawl(keyword):
             'en': True,
             'es': False,
             'query': True}
-    print(args)
+    # print(args)
     MAX_DEPTH = 1
 
     if args['<depth>']:
@@ -84,10 +61,10 @@ def crawl(keyword):
         #         treeData=treeData,
         #     ))
 
-    # if args['--csv']:
-    #     if paa_list[0]['children']:
-    #         _path = 'csv/' + prettyOutputName(query, 'csv')
-    #         flatten_csv(paa_list, depth, _path)
+    if args['--csv']:
+        if paa_list[0]['children']:
+            _path = 'tmp/' + prettyOutputName(query, 'csv')
+            flatten_csv(paa_list, depth, _path)
 
     browser.close()
 
@@ -97,10 +74,10 @@ class MultiThreadScraper:
 
         self.base_url = base_url
         self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=50)
+        self.pool = ThreadPoolExecutor(max_workers=2)
         self.scraped_pages = set([])
         self.to_crawl = Queue()
-        df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
+        df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()[:10]
         for i in df:
             self.to_crawl.put(i[0])
 
@@ -126,7 +103,9 @@ class MultiThreadScraper:
     def scrape_page(self, url):
         try:
             crawl(url)
-        except requests.RequestException:
+        except Exception as e:
+            print("Scrape page")
+            print(e)
             return
 
     def run_scraper(self):
@@ -138,13 +117,17 @@ class MultiThreadScraper:
                     self.scraped_pages.add(target_url)
                     self.pool.submit(self.scrape_page, target_url)
                     # job.add_done_callback(self.post_scrape_callback)
-            except Empty:
+            except Empty as e:
+                print("Empty")
+                print(target_url)
                 return
             except Exception as e:
+                print("run scrapper")
                 print(e)
                 continue
 if __name__ == '__main__':
+    # start = time.time()
     s = MultiThreadScraper("http://www.google.co.uk")
     s.run_scraper()
-
-
+    # end = time.time()
+    # print(end - start)
