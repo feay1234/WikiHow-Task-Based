@@ -6,6 +6,7 @@ pip install -r requirements.txt
 ```
 
 download data from https://github.com/mahnazkoupaee/WikiHow-Dataset
+dowload AOL data from http://www.cim.mcgill.ca/~dudek/206/Logs/AOL-user-ct-collection/
 
 ## 🔍 Usage:
 

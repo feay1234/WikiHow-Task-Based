@@ -93,7 +93,8 @@ def newSearch(browser, query, lang="en"):
         searchbox = browser.find_element_by_xpath("//input[@aria-label='Buscar']")
 
     searchbox.send_keys(query)
-    sleepBar(2)
+    sleep(2)
+    # sleepBar(2)
     tabNTimes(browser)
     if lang == "en":
         searchbtn = browser.find_elements_by_xpath("//input[@aria-label='Google Search']")
@@ -103,7 +104,8 @@ def newSearch(browser, query, lang="en"):
         searchbtn[-1].click()
     except:
         searchbtn[0].click()
-    sleepBar(2)
+    sleep(2)
+    # sleepBar(2)
     paa = browser.find_elements_by_xpath(
         "//span/following-sibling::div[contains(@class,'match-mod-horizontal-padding')]")
     hideGBar(browser)
@@ -405,6 +407,6 @@ def crawl(keyword):
     browser.close()
 
 # if __name__ == "__main__":
-    # global lang
-    # lang = "en"
-    # call()
+#     global lang
+#     lang = "en"
+#     call()
