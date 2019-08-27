@@ -63,10 +63,11 @@ def crawl(keyword):
         query = args['<keyword>']
         start_paa = newSearch(browser, query, lang)
 
-        _path = 'csv/' + prettyOutputName(query, 'csv')
-        with open(_path, 'w') as f:
-            for item in start_paa:
-                f.write("%s\n" % item.text)
+        if len(start_paa) > 0:
+            _path = 'csv/' + prettyOutputName(query, 'csv')
+            with open(_path, 'w') as f:
+                for item in start_paa:
+                    f.write("%s\n" % item.text)
 
         # TODO get more queries
         # initialSet = {}
@@ -151,6 +152,6 @@ if __name__ == '__main__':
     # s = MultiThreadScraper("http://www.google.co.uk")
     # s.run_scraper()
 
-    crawl("how to cook paster")
+    crawl("jarana manotumruksa")
 
 
