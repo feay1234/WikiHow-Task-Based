@@ -63,15 +63,19 @@ def crawl(keyword):
         query = args['<keyword>']
         start_paa = newSearch(browser, query, lang)
 
-        initialSet = {}
-        cnt = 0
-        for q in start_paa:
-            initialSet.update({cnt: q})
-            cnt += 1
+        _path = 'csv/' + prettyOutputName(query, 'csv')
+        with open(_path, 'w') as f:
+            for item in start_paa:
+                f.write("%s\n" % item.text)
 
-        paa_list = []
-
-        crawlQuestions(start_paa, paa_list, initialSet, query, browser, depth)
+        # TODO get more queries
+        # initialSet = {}
+        # cnt = 0
+        # for q in start_paa:
+        #     initialSet.update({cnt: q})
+        #     cnt += 1
+        # paa_list = []
+        # crawlQuestions(start_paa, paa_list, initialSet, query, browser, depth)
         # treeData = 'var treeData = ' + json.dumps(paa_list) + ';'
         # if paa_list[0]['children']:
         # root = os.path.dirname(os.path.abspath(__file__))
@@ -97,7 +101,7 @@ class MultiThreadScraper:
 
         self.base_url = base_url
         self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=50)
+        self.pool = ThreadPoolExecutor(max_workers=1)
         self.scraped_pages = set([])
         self.to_crawl = Queue()
         df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
@@ -144,7 +148,9 @@ class MultiThreadScraper:
                 print(e)
                 continue
 if __name__ == '__main__':
-    s = MultiThreadScraper("http://www.google.co.uk")
-    s.run_scraper()
+    # s = MultiThreadScraper("http://www.google.co.uk")
+    # s.run_scraper()
+
+    crawl("how to cook paster")
 
 
