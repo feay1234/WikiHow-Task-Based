@@ -68,6 +68,8 @@ def crawl(keyword):
             with open(_path, 'w') as f:
                 for item in start_paa:
                     f.write("%s\n" % item.text)
+        else:
+            pass
 
         # TODO get more queries
         # initialSet = {}
@@ -77,17 +79,22 @@ def crawl(keyword):
         #     cnt += 1
         # paa_list = []
         # crawlQuestions(start_paa, paa_list, initialSet, query, browser, depth)
+
+
+
+
+        # do not need this one
         # treeData = 'var treeData = ' + json.dumps(paa_list) + ';'
         # if paa_list[0]['children']:
-        # root = os.path.dirname(os.path.abspath(__file__))
-        # templates_dir = os.path.join(root, 'templates')
-        # env = Environment(loader=FileSystemLoader(templates_dir))
-        # template = env.get_template('index.html')
-        # filename = os.path.join(root, 'html', prettyOutputName())
-        # with open(filename, 'w') as fh:
-        #     fh.write(template.render(
-        #         treeData=treeData,
-        #     ))
+        #     root = os.path.dirname(os.path.abspath(__file__))
+        #     templates_dir = os.path.join(root, 'templates')
+        #     env = Environment(loader=FileSystemLoader(templates_dir))
+        #     template = env.get_template('index.html')
+        #     filename = os.path.join(root, 'html', prettyOutputName())
+        #     with open(filename, 'w') as fh:
+        #         fh.write(template.render(
+        #             treeData=treeData,
+        #         ))
 
     # if args['--csv']:
     #     if paa_list[0]['children']:
@@ -151,7 +158,16 @@ class MultiThreadScraper:
 if __name__ == '__main__':
     # s = MultiThreadScraper("http://www.google.co.uk")
     # s.run_scraper()
+    import time
 
+    start = time.time()
+    crawl("how to cook pasta")
+    end = time.time()
+    print(end - start)
+
+    start = time.time()
     crawl("jarana manotumruksa")
+    end = time.time()
+    print(end - start)
 
 
