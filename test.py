@@ -109,7 +109,7 @@ class MultiThreadScraper:
 
         self.base_url = base_url
         self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=1)
+        self.pool = ThreadPoolExecutor(max_workers=50)
         self.scraped_pages = set([])
         self.to_crawl = Queue()
         df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
@@ -141,9 +141,8 @@ class MultiThreadScraper:
 
         except Exception as e:
             # add to file and add to the pool
-            with open("error.txt", 'w') as f:
+            with open("error.txt", 'a+') as f:
                 f.write("%s\n" % url)
-            print(e)
             self.to_crawl.put(url)
             return
 
@@ -174,5 +173,8 @@ if __name__ == '__main__':
     # crawl("jarana manotumruksa")
     # end = time.time()
     # print(end - start)
+
+
+#     start at 14:42
 
 
