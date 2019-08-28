@@ -39,7 +39,7 @@ def crawl(keyword):
             browser = initBrowser()
         query = args['<keyword>']
         start_paa = newSearch(browser, query, lang)
-        print(start_paa)
+        # print(start_paa)
 
         if len(start_paa) > 0:
             _path = 'csv/' + prettyOutputName(query, 'csv')
@@ -85,7 +85,7 @@ class MultiThreadScraper:
 
         self.base_url = base_url
         self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=20)
+        self.pool = ThreadPoolExecutor(max_workers=10)
         self.scraped_pages = set([])
         self.to_crawl = Queue()
         df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()[:10]
@@ -139,12 +139,13 @@ class MultiThreadScraper:
                 print("main error: %s" % target_url)
                 continue
 if __name__ == '__main__':
-    # s = MultiThreadScraper("http://www.google.co.uk")
-    # s.run_scraper()
+    s = MultiThreadScraper("http://www.google.co.uk")
+    s.run_scraper()
+    
+    #
     # import time
-
     # start = time.time()
-    crawl("how to clean house")
+    # crawl("how to clean house")
     # end = time.time()
     # print(end - start)
     #
