@@ -58,7 +58,7 @@ def prettyOutputName(query, filetype='html', ):
     #    prettyname += "_" + st + "." + filetype
     # else:
     #    prettyname += "_" + st + "." + filetype
-    return prettyname
+    return prettyname + "." + filetype
 
 
 def initBrowser(headless=False):

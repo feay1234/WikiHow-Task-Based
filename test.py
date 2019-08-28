@@ -4,6 +4,8 @@ from urllib.parse import urljoin, urlparse
 import sys
 import pandas as pd
 from gquestions import initBrowser, newSearch, crawlQuestions, prettyOutputName, flatten_csv
+from time import sleep
+import re
 
 
 def crawl(keyword):
@@ -41,13 +43,13 @@ def crawl(keyword):
         start_paa = newSearch(browser, query, lang)
         # print(start_paa)
 
-        if len(start_paa) > 0:
-            _path = 'csv/' + prettyOutputName(query, 'csv')
-            with open(_path, 'w') as f:
-                for item in start_paa:
-                    f.write("%s\n" % item.text)
+        # if len(start_paa) > 0:
+        _path = 'csv/' + prettyOutputName(query, 'txt')
+        with open(_path, 'w') as f:
+            for item in start_paa:
+                f.write("%s\n" % item.text)
 
-        # TODO get more queries
+        # get more queries
         # initialSet = {}
         # cnt = 0
         # for q in start_paa:
@@ -88,9 +90,17 @@ class MultiThreadScraper:
         self.pool = ThreadPoolExecutor(max_workers=10)
         self.scraped_pages = set([])
         self.to_crawl = Queue()
-        df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()[:10]
+        regex = re.compile('[^a-zA-Z]')
+        df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
+        unique_set = set([])
         for i in df:
-            self.to_crawl.put(i[0])
+            _ = regex.sub(' ', i[0])
+            unique_set.add(_)
+        for i in unique_set:
+            self.to_crawl.put(i)
+        # self.to_crawl.put("how to cook pasta")
+
+
 
     def parse_links(self, html):
         # soup = BeautifulSoup(html, 'html.parser')
@@ -114,6 +124,7 @@ class MultiThreadScraper:
     def scrape_page(self, url):
         try:
             crawl(url)
+            # sleep(5)
 
         except Exception as e:
             # add to file and add to the pool
@@ -127,21 +138,28 @@ class MultiThreadScraper:
         while True:
             try:
                 target_url = self.to_crawl.get(timeout=10)
+                # sleep(4)
+                # print(self.to_crawl.qsize())
                 if target_url not in self.scraped_pages:
                     # print(target_url)
                     self.scraped_pages.add(target_url)
                     self.pool.submit(self.scrape_page, target_url)
-                    with open("success.txt", 'w') as f:
-                        f.write("%s\n" % target_url)
+                    # with open("success.txt", 'w') as f:
+                    #     f.write("%s\n" % target_url)
                     # job.add_done_callback(self.post_scrape_callback)
 
+            except Empty:
+                break
+
             except Exception as e:
+                print(e)
                 print("main error: %s" % target_url)
                 continue
+                # break
 if __name__ == '__main__':
     s = MultiThreadScraper("http://www.google.co.uk")
     s.run_scraper()
-    
+
     #
     # import time
     # start = time.time()
