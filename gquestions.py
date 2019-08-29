@@ -37,7 +37,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
-
+from selenium.webdriver.remote.remote_connection import LOGGER
+LOGGER.setLevel(logging.WARNING)
 '''
 Visualizza una barra di caricamento per mostrare l'attesa
 '''
@@ -57,7 +58,7 @@ def prettyOutputName(query, filetype='html', ):
     #    prettyname += "_" + st + "." + filetype
     # else:
     #    prettyname += "_" + st + "." + filetype
-    return prettyname
+    return prettyname + "." + filetype
 
 
 def initBrowser(headless=False):
@@ -67,6 +68,12 @@ def initBrowser(headless=False):
         chrome_path = "driver/chromedriver"
     chrome_options = Options()
     chrome_options.add_argument("--disable-features=NetworkService")
+    chrome_options.add_argument("--log-level=3")
+    chrome_options.add_argument("--disable-infobars")
+    chrome_options.add_argument("--disable-logging")
+    chrome_options.add_argument("--disable-login-animations")
+    chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_argument("--disable-default-apps")
     if headless:
         chrome_options.add_argument('headless')
     return webdriver.Chrome(options=chrome_options, executable_path=chrome_path)
@@ -86,7 +93,7 @@ def newSearch(browser, query, lang="en"):
         searchbox = browser.find_element_by_xpath("//input[@aria-label='Buscar']")
 
     searchbox.send_keys(query)
-    sleep(2)
+    # sleep(3)
     # sleepBar(2)
     tabNTimes(browser)
     if lang == "en":
@@ -97,7 +104,7 @@ def newSearch(browser, query, lang="en"):
         searchbtn[-1].click()
     except:
         searchbtn[0].click()
-    sleep(2)
+    # sleep(3)
     # sleepBar(2)
     paa = browser.find_elements_by_xpath(
         "//span/following-sibling::div[contains(@class,'match-mod-horizontal-padding')]")
