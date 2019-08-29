@@ -157,13 +157,13 @@ class MultiThreadScraper:
                 continue
                 # break
 if __name__ == '__main__':
-    s = MultiThreadScraper("http://www.google.co.uk")
-    s.run_scraper()
+    # s = MultiThreadScraper("http://www.google.co.uk")
+    # s.run_scraper()
 
     #
     # import time
     # start = time.time()
-    # crawl("how to clean house")
+    crawl("how to clean house")
     # end = time.time()
     # print(end - start)
     #
