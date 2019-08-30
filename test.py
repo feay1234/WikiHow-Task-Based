@@ -159,6 +159,7 @@ class MultiThreadScraper:
 if __name__ == '__main__':
     # s = MultiThreadScraper("http://www.google.co.uk")
     # s.run_scraper()
+    # run on 12:08
 
     #
     # import time
