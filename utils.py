@@ -1,11 +1,18 @@
+from keras import Input, Model
+from keras.layers import Bidirectional, LSTM, Dense, TimeDistributed
+
+path = "/Users/jarana/workspace/WikiHow-Task-Based/"
+
 import numpy as np
 import os
-
+from random import shuffle
+import random
 from keras.initializers import Constant
 from keras.layers import Embedding
 from keras.preprocessing.text import Tokenizer
 from keras_preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
+from keras.utils import to_categorical
 
 
 def get_pretrain_embeddings(path, MAX_NUM_WORDS, word_index, EMBEDDING_DIM=300):
@@ -51,11 +58,14 @@ def get_pretrain_embeddings(path, MAX_NUM_WORDS, word_index, EMBEDDING_DIM=300):
     return embedding_layer
 
 
-def tagger(decoder_input_sentence, tag):
-    if tag == "<EOS>":
-        final_target = [text + tag for text in decoder_input_sentence]
-    elif tag == "<SOS>":
+def tagger(decoder_input_sentence, tag="none"):
+    if tag == "<SOS>":
         final_target = [tag + text for text in decoder_input_sentence]
+    elif tag == "<EOS>":
+        final_target = [text + tag for text in decoder_input_sentence]
+    else:
+        final_target = ["<SOS>" + text + "<EOS>" for text in decoder_input_sentence]
+
     return final_target
 
 
@@ -66,7 +76,6 @@ def save2file(path, output):
 
 
 def getAOL(dir="data/tmp/", MAX_NUM_WORDS=70000, MAX_SEQUENCE_LENGTH=50):
-
     encoder_inputs, decoder_inputs = [], []
     for i in os.listdir(dir)[:100]:
         f = open("%s%s" % (dir, i), "r")
@@ -76,10 +85,10 @@ def getAOL(dir="data/tmp/", MAX_NUM_WORDS=70000, MAX_SEQUENCE_LENGTH=50):
             decoder_inputs.append(q[i + 1])
 
     # add EOS and SOS into decoder
-    decoder_inputs = tagger(decoder_inputs)
-    print(decoder_inputs)
+    decoder_inputs = tagger(decoder_inputs, "<SOS>")
+    decoder_outputs = tagger(decoder_inputs, "<EOS>")
 
-    corpus = encoder_inputs + decoder_inputs
+    corpus = encoder_inputs + tagger(decoder_inputs)
 
     # finally, vectorize the text samples into a 2D integer tensor
     tokenizer = Tokenizer(num_words=MAX_NUM_WORDS)
@@ -87,22 +96,20 @@ def getAOL(dir="data/tmp/", MAX_NUM_WORDS=70000, MAX_SEQUENCE_LENGTH=50):
 
     word_index = tokenizer.word_index
     print('Found %s unique tokens.' % len(word_index))
-
+    MAX_NUM_WORDS = len(word_index) + 1
     # Update max length
     print(np.max([len(i) for i in corpus]))
-    MAX_SEQUENCE_LENGTH = min(np.max([len(i) for i in corpus]), MAX_SEQUENCE_LENGTH)
+    #     MAX_SEQUENCE_LENGTH = min(np.max([len(i) for i in corpus]), MAX_SEQUENCE_LENGTH)
+    MAX_SEQUENCE_LENGTH = np.max([len(i) for i in corpus])
     print("Updated maxlen: %d" % MAX_SEQUENCE_LENGTH)
 
     encoder_inputs = pad_sequences(tokenizer.texts_to_sequences(encoder_inputs), maxlen=MAX_SEQUENCE_LENGTH)
     decoder_inputs = pad_sequences(tokenizer.texts_to_sequences(decoder_inputs), maxlen=MAX_SEQUENCE_LENGTH)
+    decoder_outputs = pad_sequences(tokenizer.texts_to_sequences(decoder_outputs), maxlen=MAX_SEQUENCE_LENGTH)
+    print(decoder_outputs)
+    decoder_outputs = to_categorical(decoder_outputs, num_classes=MAX_NUM_WORDS)
+    #     x_train, x_test, y_train, y_test = train_test_split([encoder_inputs, decoder_inputs], decoder_outputs, test_size=0.33, random_state=2019)
+    #     return x_train, x_test, y_train, y_test, word_index, len(word_index), MAX_SEQUENCE_LENGTH
+    return encoder_inputs, decoder_inputs, decoder_outputs, word_index, MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH
 
-    x_train, x_test, y_train, y_test = train_test_split(encoder_inputs, decoder_inputs, test_size=0.33, random_state=2019)
 
-    # decoder_input_data =
-
-
-    return x_train, x_test, y_train, y_test, word_index, len(word_index), MAX_SEQUENCE_LENGTH
-
-# data = getAOL()
-# print(data[0])
-# print(data[2])
