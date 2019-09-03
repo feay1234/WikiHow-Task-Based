@@ -26,7 +26,7 @@ def get_pretrain_embeddings(path, MAX_NUM_WORDS, word_index, EMBEDDING_DIM=300):
             word, coefs = line.split(maxsplit=1)
             coefs = np.fromstring(coefs, 'f', sep=' ')
             embeddings_index[word] = coefs
-            break
+            # break
     #
 
     print('Found %s word vectors.' % len(embeddings_index))
@@ -88,7 +88,7 @@ def getAOL(path, dir="data/tmp/", MAX_NUM_WORDS=70000, MAX_SEQUENCE_LENGTH=50):
     encoder_inputs, decoder_inputs = [], []
     with open('%sdata/howto.csv' % path) as f:
         lines = f.readlines()
-    for i in lines[:100]:
+    for i in lines:
         query = i.strip().split("\t")
         encoder_inputs.append(query[0])
         decoder_inputs.append(query[1])
