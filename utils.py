@@ -84,12 +84,12 @@ def generate_pair_data(dir="data/tmp/", output="data/all.csv"):
                 the_file.write("%s\t%s\n" % (q[i], q[i + 1]))
 
 
-def getAOL(path, dir="data/tmp/", MAX_NUM_WORDS=20000, MAX_SEQUENCE_LENGTH=50):
+def getAOL(path, dir="data/tmp/", MAX_NUM_WORDS=70000, MAX_SEQUENCE_LENGTH=50):
     encoder_inputs, decoder_inputs = [], []
     with open('%sdata/howto.csv' % path) as f:
         lines = f.readlines()
 
-    for i in lines[:10000]:
+    for i in lines[:100000]:
         query = i.strip().split("\t")
         encoder_inputs.append(query[0])
         decoder_inputs.append(query[1])
