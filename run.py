@@ -14,7 +14,7 @@ if __name__ == '__main__':
     args = parse_args()
     path = args.path
 
-    encoder_inputs, decoder_inputs, decoder_outputs, word_index, max_words, maxlen = getAOL()
+    encoder_inputs, decoder_inputs, decoder_outputs, word_index, max_words, maxlen = getAOL(path)
     embedding_layer = get_pretrain_embeddings(path, max_words, word_index)
 
     # maxlen = 10
