@@ -88,7 +88,8 @@ def getAOL(path, dir="data/tmp/", MAX_NUM_WORDS=20000, MAX_SEQUENCE_LENGTH=50):
     encoder_inputs, decoder_inputs = [], []
     with open('%sdata/howto.csv' % path) as f:
         lines = f.readlines()
-    for i in lines:
+
+    for i in lines[:10000]:
         query = i.strip().split("\t")
         encoder_inputs.append(query[0])
         decoder_inputs.append(query[1])
@@ -107,7 +108,6 @@ def getAOL(path, dir="data/tmp/", MAX_NUM_WORDS=20000, MAX_SEQUENCE_LENGTH=50):
     print('Found %s unique tokens.' % len(word_index))
     MAX_NUM_WORDS = len(word_index) + 1
     # Update max length
-    print(np.max([len(i) for i in corpus]))
     #     MAX_SEQUENCE_LENGTH = min(np.max([len(i) for i in corpus]), MAX_SEQUENCE_LENGTH)
     MAX_SEQUENCE_LENGTH = np.max([len(i) for i in corpus])
     print("Updated maxlen: %d" % MAX_SEQUENCE_LENGTH)
@@ -115,7 +115,6 @@ def getAOL(path, dir="data/tmp/", MAX_NUM_WORDS=20000, MAX_SEQUENCE_LENGTH=50):
     encoder_inputs = pad_sequences(tokenizer.texts_to_sequences(encoder_inputs), maxlen=MAX_SEQUENCE_LENGTH)
     decoder_inputs = pad_sequences(tokenizer.texts_to_sequences(decoder_inputs), maxlen=MAX_SEQUENCE_LENGTH)
     decoder_outputs = pad_sequences(tokenizer.texts_to_sequences(decoder_outputs), maxlen=MAX_SEQUENCE_LENGTH)
-    print(decoder_outputs)
     decoder_outputs = to_categorical(decoder_outputs, num_classes=MAX_NUM_WORDS)
     #     x_train, x_test, y_train, y_test = train_test_split([encoder_inputs, decoder_inputs], decoder_outputs, test_size=0.33, random_state=2019)
     #     return x_train, x_test, y_train, y_test, word_index, len(word_index), MAX_SEQUENCE_LENGTH
