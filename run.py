@@ -60,4 +60,4 @@ if __name__ == '__main__':
     model = seq2seq_model_builder(embedding_layer, maxlen, max_words)
     model.compile(loss="categorical_crossentropy", optimizer='adam', metrics=["acc"])
 
-    model.fit([encoder_inputs, decoder_inputs], decoder_outputs)
+    model.fit([encoder_inputs, decoder_inputs], decoder_outputs, validation_split=0.3, epochs=10)

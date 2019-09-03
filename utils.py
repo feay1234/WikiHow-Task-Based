@@ -75,14 +75,23 @@ def save2file(path, output):
     print(output)
 
 
-def getAOL(dir="data/tmp/", MAX_NUM_WORDS=70000, MAX_SEQUENCE_LENGTH=50):
-    encoder_inputs, decoder_inputs = [], []
-    for i in os.listdir(dir)[:100]:
+def generate_pair_data(dir="data/tmp/", output="data/all.csv"):
+    for i in os.listdir(dir):
         f = open("%s%s" % (dir, i), "r")
         q = f.readline().strip().split("\t")
         for i in range(len(q) - 1):
-            encoder_inputs.append(q[i])
-            decoder_inputs.append(q[i + 1])
+            with open(output, 'a+') as the_file:
+                the_file.write("%s\t%s\n" % (q[i], q[i + 1]))
+
+
+def getAOL(dir="data/tmp/", MAX_NUM_WORDS=70000, MAX_SEQUENCE_LENGTH=50):
+    encoder_inputs, decoder_inputs = [], []
+    with open('data/howto.csv') as f:
+        lines = f.readlines()
+    for i in lines[:100]:
+        query = i.strip().split("\t")
+        encoder_inputs.append(query[0])
+        decoder_inputs.append(query[1])
 
     # add EOS and SOS into decoder
     decoder_inputs = tagger(decoder_inputs, "<SOS>")
