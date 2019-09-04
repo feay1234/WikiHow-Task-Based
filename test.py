@@ -49,6 +49,8 @@ def crawl(keyword):
             for item in start_paa:
                 f.write("%s\n" % item.text)
 
+        return start_paa
+
         # get more queries
         # initialSet = {}
         # cnt = 0
@@ -87,7 +89,7 @@ class MultiThreadScraper:
 
         self.base_url = base_url
         self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=10)
+        self.pool = ThreadPoolExecutor(max_workers=1)
         self.scraped_pages = set([])
         self.to_crawl = Queue()
         regex = re.compile('[^a-zA-Z]')
@@ -139,14 +141,11 @@ class MultiThreadScraper:
             try:
                 target_url = self.to_crawl.get(timeout=10)
                 # sleep(4)
-                # print(self.to_crawl.qsize())
-                if target_url not in self.scraped_pages:
-                    # print(target_url)
-                    self.scraped_pages.add(target_url)
-                    self.pool.submit(self.scrape_page, target_url)
-                    # with open("success.txt", 'w') as f:
-                    #     f.write("%s\n" % target_url)
-                    # job.add_done_callback(self.post_scrape_callback)
+                print(self.to_crawl.qsize())
+                break
+                # if target_url not in self.scraped_pages:
+                    # self.scraped_pages.add(target_url)
+                    # self.pool.submit(self.scrape_page, target_url)
 
             except Empty:
                 break
@@ -159,21 +158,36 @@ class MultiThreadScraper:
 if __name__ == '__main__':
     # s = MultiThreadScraper("http://www.google.co.uk")
     # s.run_scraper()
-    # run on 12:08
+    # run on 15:37
 
     #
     # import time
     # start = time.time()
-    crawl("how to clean house")
-    # end = time.time()
-    # print(end - start)
-    #
-    # start = time.time()
-    # crawl("jarana manotumruksa")
+    # crawl("jaramana")
     # end = time.time()
     # print(end - start)
 
+    regex = re.compile('[^a-zA-Z]')
+    df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
+    unique_set = set([])
+    for i in df:
+        _ = regex.sub(' ', i[0])
+        unique_set.add(_)
+    toCrawl = list(unique_set)
+    # toCrawl = ["how to cook pasta"]
 
-#     start at 14:51
+    count = 0
+    # TODO skip already crawled articles
+    for i in range(len(toCrawl)):
+        print(i, toCrawl[i])
+        res = crawl(toCrawl[i])
+
+        if len(res) == 0:
+            count += 1
+        else:
+            count = 0
+
+        if count == 5:
+            break
 
 
