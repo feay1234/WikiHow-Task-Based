@@ -49,6 +49,8 @@ def crawl(keyword):
             for item in start_paa:
                 f.write("%s\n" % item.text)
 
+        browser.close()
+
         return start_paa
 
         # get more queries
@@ -81,7 +83,6 @@ def crawl(keyword):
     #         _path = 'tmp/' + prettyOutputName(query, 'csv')
     #         flatten_csv(paa_list, depth, _path)
 
-    browser.close()
 
 class MultiThreadScraper:
 
