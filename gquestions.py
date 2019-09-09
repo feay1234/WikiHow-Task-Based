@@ -101,7 +101,7 @@ def newSearch(browser, query, lang="en"):
         searchbox = browser.find_element_by_xpath("//input[@aria-label='Buscar']")
 
     searchbox.send_keys(query)
-    # sleep(3)
+    sleep(2)
     # sleepBar(2)
     tabNTimes(browser)
     if lang == "en":
@@ -112,7 +112,7 @@ def newSearch(browser, query, lang="en"):
         searchbtn[-1].click()
     except:
         searchbtn[0].click()
-    # sleep(3)
+    sleep(2)
     # sleepBar(2)
     paa = browser.find_elements_by_xpath(
         "//span/following-sibling::div[contains(@class,'match-mod-horizontal-padding')]")
