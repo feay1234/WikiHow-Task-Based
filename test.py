@@ -3,6 +3,8 @@ from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urljoin, urlparse
 import sys
 import pandas as pd
+from selenium.webdriver.chrome import webdriver
+
 from gquestions import initBrowser, newSearch, crawlQuestions, prettyOutputName, flatten_csv
 from time import sleep
 import re
@@ -11,7 +13,7 @@ import re
 def crawl(keyword):
     # args = docopt(usage)
     args = {'--csv': True,
-            '--headless': True,
+            '--headless': False,
             '--help': False,
             '<depth>': None,
             '<keyword>': keyword,
@@ -41,7 +43,7 @@ def crawl(keyword):
             browser = initBrowser()
         query = args['<keyword>']
         start_paa = newSearch(browser, query, lang)
-        # print(start_paa)
+        print(start_paa)
 
         # if len(start_paa) > 0:
         _path = 'csv/' + prettyOutputName(query, 'txt')
@@ -79,7 +81,7 @@ def crawl(keyword):
     #         _path = 'tmp/' + prettyOutputName(query, 'csv')
     #         flatten_csv(paa_list, depth, _path)
 
-    browser.close()
+    # browser.close()
 
 class MultiThreadScraper:
 
@@ -157,13 +159,13 @@ class MultiThreadScraper:
                 continue
                 # break
 if __name__ == '__main__':
-    s = MultiThreadScraper("http://www.google.co.uk")
-    s.run_scraper()
+    # s = MultiThreadScraper("http://www.google.co.uk")
+    # s.run_scraper()
 
     #
     # import time
     # start = time.time()
-    # crawl("how to clean house")
+    crawl("how to clean house")
     # end = time.time()
     # print(end - start)
     #
@@ -176,3 +178,5 @@ if __name__ == '__main__':
 #     start at 14:51
 
 
+    # browser = initBrowser()
+    # browser.get("https://www.google.com?hl=en")
