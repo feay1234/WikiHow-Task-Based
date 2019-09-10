@@ -1,3 +1,5 @@
+from fake_useragent import UserAgent
+
 usage = '''
 ❓❔👾 Gquestions CLI Usage ❔❓
 
@@ -74,6 +76,12 @@ def initBrowser(headless=False):
     chrome_options.add_argument("--disable-login-animations")
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--disable-default-apps")
+    # ua = UserAgent()
+    # userAgent = ua.random
+    # print(userAgent)
+    # chrome_options.add_argument('user-agent={userAgent}')
+    chrome_options.add_argument('--user-agent="Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 640 XL LTE) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Mobile Safari/537.36 Edge/12.10166"')
+
     if headless:
         chrome_options.add_argument('headless')
     return webdriver.Chrome(options=chrome_options, executable_path=chrome_path)

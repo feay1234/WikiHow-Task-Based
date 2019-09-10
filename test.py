@@ -3,6 +3,8 @@ from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urljoin, urlparse
 import sys
 import pandas as pd
+from selenium.webdriver.chrome import webdriver
+
 from gquestions import initBrowser, newSearch, crawlQuestions, prettyOutputName, flatten_csv
 from time import sleep
 import re
@@ -11,7 +13,7 @@ import re
 def crawl(keyword):
     # args = docopt(usage)
     args = {'--csv': True,
-            '--headless': True,
+            '--headless': False,
             '--help': False,
             '<depth>': None,
             '<keyword>': keyword,
@@ -41,7 +43,7 @@ def crawl(keyword):
             browser = initBrowser()
         query = args['<keyword>']
         start_paa = newSearch(browser, query, lang)
-        # print(start_paa)
+        print(start_paa)
 
         # if len(start_paa) > 0:
         _path = 'csv/' + prettyOutputName(query, 'txt')
@@ -83,6 +85,10 @@ def crawl(keyword):
     #         _path = 'tmp/' + prettyOutputName(query, 'csv')
     #         flatten_csv(paa_list, depth, _path)
 
+<<<<<<< HEAD
+    # browser.close()
+=======
+>>>>>>> 011118b412e99cd446d0d509751adae37bc2c56b
 
 class MultiThreadScraper:
 
@@ -159,12 +165,24 @@ class MultiThreadScraper:
 if __name__ == '__main__':
     # s = MultiThreadScraper("http://www.google.co.uk")
     # s.run_scraper()
+<<<<<<< HEAD
+=======
     # run on 15:37
+>>>>>>> 011118b412e99cd446d0d509751adae37bc2c56b
 
     #
     # import time
     # start = time.time()
+<<<<<<< HEAD
+    crawl("how to clean house")
+    # end = time.time()
+    # print(end - start)
+    #
+    # start = time.time()
+    # crawl("jarana manotumruksa")
+=======
     # crawl("jaramana")
+>>>>>>> 011118b412e99cd446d0d509751adae37bc2c56b
     # end = time.time()
     # print(end - start)
 
@@ -193,3 +211,5 @@ if __name__ == '__main__':
     #         break
 
 
+    # browser = initBrowser()
+    # browser.get("https://www.google.com?hl=en")

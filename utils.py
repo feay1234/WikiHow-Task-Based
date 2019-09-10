@@ -15,7 +15,8 @@ from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
 
 
-def get_pretrain_embeddings(path, MAX_NUM_WORDS, word_index, EMBEDDING_DIM=300):
+def get_pretrain_embeddings(path, word_index, EMBEDDING_DIM=300):
+    MAX_NUM_WORDS = len(word_index)
     BASE_DIR = path + 'data/'
     GLOVE_DIR = os.path.join(BASE_DIR, 'w2v')
     print('Indexing word vectors.')
@@ -27,7 +28,6 @@ def get_pretrain_embeddings(path, MAX_NUM_WORDS, word_index, EMBEDDING_DIM=300):
             coefs = np.fromstring(coefs, 'f', sep=' ')
             embeddings_index[word] = coefs
             # break
-    #
 
     print('Found %s word vectors.' % len(embeddings_index))
 
