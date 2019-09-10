@@ -176,19 +176,20 @@ if __name__ == '__main__':
         unique_set.add(_)
     toCrawl = list(unique_set)
     # toCrawl = ["how to cook pasta"]
+    # print(crawl("how to cook pasta"))
 
     count = 0
     # TODO skip already crawled articles
-    for i in range(len(toCrawl)):
-        print(i, toCrawl[i])
-        res = crawl(toCrawl[i])
-
-        if len(res) == 0:
-            count += 1
-        else:
-            count = 0
-
-        if count == 5:
-            break
+    # for i in range(len(toCrawl)):
+    #     print(i, toCrawl[i])
+    #     res = crawl(toCrawl[i])
+    #
+    #     if len(res) == 0:
+    #         count += 1
+    #     else:
+    #         count = 0
+    #
+    #     if count == 5:
+    #         break
 
 
