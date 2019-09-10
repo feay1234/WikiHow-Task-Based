@@ -26,11 +26,11 @@ if __name__ == '__main__':
     MAX_NUM_WORDS = 100000
 
 
-    data = pd.read_csv(path+"data/query_task_prediction.csv", sep="\t", names=["step", "step_desc", "task", "label"])
+    data = pd.read_csv(path+"data/step_task_prediction.csv", sep="\t", names=["step", "step_desc", "task", "label"])
 
     # corpus = howto.Query.tolist() + df.Query.tolist()
     corpus = list(set(data.step.tolist() + data.step_desc.tolist() + data.task.tolist()))
-    corpus = [str(i) for i in corpus]
+    # corpus = [str(i) for i in corpus]
     # finally, vectorize the text samples into a 2D integer tensor
     tokenizer = Tokenizer(num_words=MAX_NUM_WORDS)
     tokenizer.fit_on_texts(corpus)
