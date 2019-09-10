@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     # corpus = howto.Query.tolist() + df.Query.tolist()
     corpus = list(set(data.step.tolist() + data.step_desc.tolist() + data.task.tolist()))
-
+    corpus = [str(i) for i in corpus]
     # finally, vectorize the text samples into a 2D integer tensor
     tokenizer = Tokenizer(num_words=MAX_NUM_WORDS)
     tokenizer.fit_on_texts(corpus)
