@@ -46,7 +46,7 @@ if __name__ == '__main__':
     MAX_SEQUENCE_LENGTH = max([len(i.split()) for i in corpus])
     x_query = pad_sequences(tokenizer.texts_to_sequences(data["query"].tolist()), maxlen=MAX_SEQUENCE_LENGTH)
     x_task = pad_sequences(tokenizer.texts_to_sequences(data["task"].tolist()), maxlen=MAX_SEQUENCE_LENGTH)
-    y = data.lavel.values
+    y = data.label.values
 
 
     model = getDSSM(embedding_layer, MAX_SEQUENCE_LENGTH)
