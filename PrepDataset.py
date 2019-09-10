@@ -15,8 +15,6 @@ for idx, row in df[df.Source == "google"].iterrows():
 
     pos_article = df[(df.Task == pos_task) & (df.Source == "wikihow")].sample(1).Query.values[0]
     neg_article = df[(df.Task == neg_task) & (df.Source == "wikihow")].sample(1).Query.values[0]
-    #     print(pos_article.Query.values[0])
-    #     print(neg_article.Query.values[0])
 
     with open('data/query_task_prediction2.csv', 'a') as the_file:
         the_file.write('%s' % row.Query.strip() + "\t" + pos_article + "\t1\n")

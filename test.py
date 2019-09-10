@@ -165,24 +165,17 @@ class MultiThreadScraper:
 if __name__ == '__main__':
     # s = MultiThreadScraper("http://www.google.co.uk")
     # s.run_scraper()
-<<<<<<< HEAD
-=======
-    # run on 15:37
->>>>>>> 011118b412e99cd446d0d509751adae37bc2c56b
 
     #
     # import time
     # start = time.time()
-<<<<<<< HEAD
     crawl("how to clean house")
     # end = time.time()
     # print(end - start)
     #
     # start = time.time()
     # crawl("jarana manotumruksa")
-=======
     # crawl("jaramana")
->>>>>>> 011118b412e99cd446d0d509751adae37bc2c56b
     # end = time.time()
     # print(end - start)
 
