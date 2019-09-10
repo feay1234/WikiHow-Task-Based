@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
 
 
-    MAX_SEQUENCE_LENGTH = max([len(i.split()) for i in corpus])
+    MAX_SEQUENCE_LENGTH = min(max([len(i.split()) for i in corpus]), 200)
     x_step = pad_sequences(tokenizer.texts_to_sequences(data["step"].tolist()), maxlen=MAX_SEQUENCE_LENGTH)
     x_task = pad_sequences(tokenizer.texts_to_sequences(data["task"].tolist()), maxlen=MAX_SEQUENCE_LENGTH)
     y = data.label.values
