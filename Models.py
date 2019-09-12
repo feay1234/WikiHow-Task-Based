@@ -31,7 +31,7 @@ def getRanker(embedding_layer, MAX_SEQUENCE_LENGTH):
     s1_emb = lstm(embedding_layer(step1_inp))
     s2_emb = lstm(embedding_layer(step2_inp))
     dense = Dense(2)
-    concat = Concatenate(axis=1)([t_emb, s1_emb, s2_emb])
+    concat = Concatenate(axis=-1)([t_emb, s1_emb, s2_emb])
     pred = dense(concat)
     model = Model([task_inp, step1_inp, step2_inp], pred)
 
