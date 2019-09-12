@@ -68,8 +68,4 @@ if __name__ == '__main__':
 
     model = getRanker(embedding_layer, MAX_SEQUENCE_LENGTH)
 
-<<<<<<< HEAD
-    model.fit([x_task, x_step1, x_step2], y, batch_size=128, validation_split=0.3, epochs=10, verbose=2)
-=======
     model.fit([x_task, x_step1, x_step2], label, batch_size=128, validation_split=0.3, epochs=10, verbose=2)
->>>>>>> c332c4a27a589db7030088fdc4ce3194f7594093
