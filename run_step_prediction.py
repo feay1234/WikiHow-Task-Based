@@ -26,7 +26,7 @@ if __name__ == '__main__':
     MAX_NUM_WORDS = 100000
 
 
-    data = pd.read_csv(path+"data/step_prediction.csv", nrows=10000, sep="\t", names=["s1", "s2", "s1_text", "s2_text", "task"])
+    data = pd.read_csv(path+"data/step_prediction.csv", sep="\t", names=["s1", "s2", "s1_text", "s2_text", "task"])
 
     # corpus = howto.Query.tolist() + df.Query.tolist()
     corpus = list(set(data.s1.tolist() + data.s2.tolist() + data.task.tolist()))
