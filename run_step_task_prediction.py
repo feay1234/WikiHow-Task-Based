@@ -52,4 +52,4 @@ if __name__ == '__main__':
 
     model = getDSSM(embedding_layer, MAX_SEQUENCE_LENGTH)
 
-    model.fit([x_step, x_task], y, batch_size=128, validation_split=0.4, epochs=10)
+    model.fit([x_step, x_task], y, batch_size=128, validation_split=0.3, epochs=10, verbose=2)
