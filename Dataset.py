@@ -10,10 +10,6 @@ from time import sleep
 import re
 
 
-def crawl(keyword):
-    pass
-
-
 class MultiThread:
 
     def __init__(self, jobs, df):
@@ -57,9 +53,11 @@ class MultiThread:
                 print(e)
                 continue
 if __name__ == '__main__':
-    s = MultiThread()
-    s.run_scraper()
+    pass
+    # s = MultiThread()
+    # s.run_scraper()
     # run on 12:08
+
 
     #
     # import time

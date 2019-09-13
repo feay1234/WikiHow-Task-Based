@@ -1,5 +1,3 @@
-from fake_useragent import UserAgent
-
 usage = '''
 ❓❔👾 Gquestions CLI Usage ❔❓
 
@@ -39,9 +37,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
-from selenium.webdriver.remote.remote_connection import LOGGER
-LOGGER.setLevel(logging.WARNING)
-'''
+
+''' 
 Visualizza una barra di caricamento per mostrare l'attesa
 '''
 
@@ -51,16 +48,12 @@ def sleepBar(seconds):
         sleep(1)
 
 
-def prettyOutputName(query, filetype='html', ):
+def prettyOutputName(query, filetype='html'):
     _query = re.sub('\s|\"|\/|\:|\.', '_', query.rstrip())
     prettyname = _query
-    # ts = time.time()
-    # st = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y_%H-%M-%S-%f')
-    # if filetype != 'html':
-    #    prettyname += "_" + st + "." + filetype
-    # else:
-    #    prettyname += "_" + st + "." + filetype
-    return prettyname + "." + filetype
+    ts = time.time()
+    prettyname += "." + filetype
+    return prettyname
 
 
 def initBrowser(headless=False):
@@ -70,18 +63,6 @@ def initBrowser(headless=False):
         chrome_path = "driver/chromedriver"
     chrome_options = Options()
     chrome_options.add_argument("--disable-features=NetworkService")
-    chrome_options.add_argument("--log-level=3")
-    chrome_options.add_argument("--disable-infobars")
-    chrome_options.add_argument("--disable-logging")
-    chrome_options.add_argument("--disable-login-animations")
-    chrome_options.add_argument("--disable-notifications")
-    chrome_options.add_argument("--disable-default-apps")
-    # ua = UserAgent()
-    # userAgent = ua.random
-    # print(userAgent)
-    # chrome_options.add_argument('user-agent={userAgent}')
-    chrome_options.add_argument('--user-agent="Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 640 XL LTE) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Mobile Safari/537.36 Edge/12.10166"')
-
     if headless:
         chrome_options.add_argument('headless')
     return webdriver.Chrome(options=chrome_options, executable_path=chrome_path)
@@ -92,7 +73,7 @@ Search on Google and returns the list of PAA questions in SERP.
 """
 
 
-def newSearch(browser, query, lang="en"):
+def newSearch(browser, query, lang):
     if lang == "en":
         browser.get("https://www.google.com?hl=en")
         searchbox = browser.find_element_by_xpath("//input[@aria-label='Search']")
@@ -101,9 +82,8 @@ def newSearch(browser, query, lang="en"):
         searchbox = browser.find_element_by_xpath("//input[@aria-label='Buscar']")
 
     searchbox.send_keys(query)
-    sleep(2)
-    # sleepBar(2)
-    tabNTimes(browser)
+    sleepBar(2)
+    # tabNTimes()
     if lang == "en":
         searchbtn = browser.find_elements_by_xpath("//input[@aria-label='Google Search']")
     else:
@@ -112,11 +92,10 @@ def newSearch(browser, query, lang="en"):
         searchbtn[-1].click()
     except:
         searchbtn[0].click()
-    sleep(2)
-    # sleepBar(2)
+    sleepBar(2)
     paa = browser.find_elements_by_xpath(
         "//span/following-sibling::div[contains(@class,'match-mod-horizontal-padding')]")
-    hideGBar(browser)
+    hideGBar()
     return paa
 
 
@@ -125,7 +104,7 @@ Helper function that scroll into view the PAA questions element.
 """
 
 
-def scrollToFeedback(browser, lang="en"):
+def scrollToFeedback():
     if lang == "en":
         el = browser.find_element_by_xpath("//div[@class='kno-ftr']//div/following-sibling::a[text()='Feedback']")
     else:
@@ -144,7 +123,7 @@ Accessibility helper: press TAB N times (default 2)
 """
 
 
-def tabNTimes(browser, N=2):
+def tabNTimes(N=2):
     actions = ActionChains(browser)
     for _ in range(N):
         actions = actions.send_keys(Keys.TAB)
@@ -156,12 +135,12 @@ Click on questions N times
 """
 
 
-def clickNTimes(el, browser, n=1):
+def clickNTimes(el, n=1):
     for i in range(n):
         el.click()
         logging.info(f"clicking on ... {el.text}")
         sleepBar(1)
-        scrollToFeedback(browser)
+        scrollToFeedback()
         try:
             el.find_element_by_xpath("//*[@aria-expanded='true']").click()
         except:
@@ -174,7 +153,7 @@ Hide Google Bar to prevent ClickInterceptionError
 """
 
 
-def hideGBar(browser):
+def hideGBar():
     try:
         browser.execute_script('document.getElementById("searchform").style.display = "none";')
     except:
@@ -186,12 +165,12 @@ Where the magic happens
 """
 
 
-def crawlQuestions(start_paa, paa_list, initialSet, query, browser, depth=0, lang="en"):
+def crawlQuestions(start_paa, paa_list, initialSet, depth=0):
     _tmp = createNode(paa_lst=paa_list, name=query, children=True)
 
     outer_cnt = 0
     for q in start_paa:
-        scrollToFeedback(browser, lang)
+        scrollToFeedback()
         if "Dictionary" in q.text:
             continue
         test = createNode(paa_lst=paa_list, n=0,
@@ -199,8 +178,8 @@ def crawlQuestions(start_paa, paa_list, initialSet, query, browser, depth=0, lan
                           parent=paa_list[0]["name"],
                           children=True)
 
-        clickNTimes(q, browser)
-        new_q = showNewQuestions(initialSet, browser)
+        clickNTimes(q)
+        new_q = showNewQuestions(initialSet)
         for l, value in new_q.items():
             sleepBar(1)
             logging.info(f"{l}, {value.text}")
@@ -209,7 +188,7 @@ def crawlQuestions(start_paa, paa_list, initialSet, query, browser, depth=0, lan
                                parent=test[0]["children"][outer_cnt]["name"],
                                children=True)
 
-        initialSet = getCurrentSERP(browser)
+        initialSet = getCurrentSERP()
         logging.info(f"Current count: {outer_cnt}")
         outer_cnt += 1
         if depth == 1:
@@ -240,19 +219,19 @@ def crawlQuestions(start_paa, paa_list, initialSet, query, browser, depth=0, lan
                                     continue
                                 j['children'].append({"name": value.text, "parent": parent})
 
-                            initialSet = getCurrentSERP(browser)
+                            initialSet = getCurrentSERP()
 
 
 """
 Get the current Result Page.
 
-Returns:
+Returns: 
     A list with newest questions.
 
 """
 
 
-def getCurrentSERP(browser):
+def getCurrentSERP():
     _tmpset = {}
     new_paa = browser.find_elements_by_xpath(
         "//span/following-sibling::div[contains(@class,'match-mod-horizontal-padding')]")
@@ -274,8 +253,8 @@ Returns:
 """
 
 
-def showNewQuestions(initialSet, browser):
-    tmp = getCurrentSERP(browser)
+def showNewQuestions(initialSet):
+    tmp = getCurrentSERP()
     deletelist = [k for k, v in initialSet.items() if k in tmp and tmp[k] == v]
     _tst = dict.copy(tmp)
     for i, value in tmp.items():
@@ -351,19 +330,10 @@ def flatten_csv(data, depth, prettyname):
         logging.warning(f"{e}")
 
 
-def crawl(keyword):
+if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    # args = docopt(usage)
-    args = {'--csv': True,
-            '--headless': True,
-            '--help': False,
-            '<depth>': None,
-            '<keyword>': keyword,
-            'depth': False,
-            'en': True,
-            'es': False,
-            'query': True}
-    # print(args)
+    args = docopt(usage)
+    print(args)
     MAX_DEPTH = 1
 
     if args['<depth>']:
@@ -394,27 +364,23 @@ def crawl(keyword):
 
         paa_list = []
 
-        crawlQuestions(start_paa, paa_list, initialSet, query, browser, depth)
-        # treeData = 'var treeData = ' + json.dumps(paa_list) + ';'
-        # if paa_list[0]['children']:
-        # root = os.path.dirname(os.path.abspath(__file__))
-        # templates_dir = os.path.join(root, 'templates')
-        # env = Environment(loader=FileSystemLoader(templates_dir))
-        # template = env.get_template('index.html')
-        # filename = os.path.join(root, 'html', prettyOutputName())
-        # with open(filename, 'w') as fh:
-        #     fh.write(template.render(
-        #         treeData=treeData,
-        #     ))
+        crawlQuestions(start_paa, paa_list, initialSet, depth)
+        treeData = 'var treeData = ' + json.dumps(paa_list) + ';'
+
+        if paa_list[0]['children']:
+            root = os.path.dirname(os.path.abspath(__file__))
+            templates_dir = os.path.join(root, 'templates')
+            env = Environment(loader=FileSystemLoader(templates_dir))
+            template = env.get_template('index.html')
+            filename = os.path.join(root, 'html', prettyOutputName())
+            with open(filename, 'w') as fh:
+                fh.write(template.render(
+                    treeData=treeData,
+                ))
 
     if args['--csv']:
         if paa_list[0]['children']:
-            _path = 'csv/' + prettyOutputName(query, 'csv')
+            _path = 'csv/' + prettyOutputName('csv')
             flatten_csv(paa_list, depth, _path)
 
     browser.close()
-
-# if __name__ == "__main__":
-#     global lang
-#     lang = "en"
-#     call()

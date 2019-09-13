@@ -9,7 +9,6 @@ from gquestions import initBrowser, newSearch, crawlQuestions, prettyOutputName,
 from time import sleep
 import re
 
-
 def crawl(keyword):
     # args = docopt(usage)
     args = {'--csv': True,
@@ -43,7 +42,6 @@ def crawl(keyword):
             browser = initBrowser()
         query = args['<keyword>']
         start_paa = newSearch(browser, query, lang)
-        print(start_paa)
 
         # if len(start_paa) > 0:
         _path = 'csv/' + prettyOutputName(query, 'txt')
@@ -85,29 +83,26 @@ def crawl(keyword):
     #         _path = 'tmp/' + prettyOutputName(query, 'csv')
     #         flatten_csv(paa_list, depth, _path)
 
-<<<<<<< HEAD
-    # browser.close()
-=======
->>>>>>> 011118b412e99cd446d0d509751adae37bc2c56b
-
 class MultiThreadScraper:
 
-    def __init__(self, base_url):
+    def __init__(self, to_crawl):
 
-        self.base_url = base_url
-        self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=1)
+        # self.base_url = base_url
+        # self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
+        self.pool = ThreadPoolExecutor(max_workers=20)
         self.scraped_pages = set([])
-        self.to_crawl = Queue()
-        regex = re.compile('[^a-zA-Z]')
-        df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
-        unique_set = set([])
-        for i in df:
-            _ = regex.sub(' ', i[0])
-            unique_set.add(_)
-        for i in unique_set:
-            self.to_crawl.put(i)
-        # self.to_crawl.put("how to cook pasta")
+        self.to_crawl = to_crawl
+
+
+        # regex = re.compile('[^a-zA-Z]')
+        # df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
+        # unique_set = set([])
+        # for i in df:
+        #     _ = regex.sub(' ', i[0])
+        #     unique_set.add(_)
+        # for i in unique_set:
+        #     self.to_crawl.put(i)
+        # # self.to_crawl.put("how to cook pasta")
 
 
 
@@ -139,20 +134,18 @@ class MultiThreadScraper:
             # add to file and add to the pool
             # with open("error.txt", 'a+') as f:
             #     f.write("%s\n" % url)
+            print(e)
             print("error: %s" % url)
-            self.to_crawl.put(url)
+            # self.to_crawl.put(url)
         return
 
     def run_scraper(self):
         while True:
             try:
                 target_url = self.to_crawl.get(timeout=10)
-                # sleep(4)
-                print(self.to_crawl.qsize())
-                break
-                # if target_url not in self.scraped_pages:
-                    # self.scraped_pages.add(target_url)
-                    # self.pool.submit(self.scrape_page, target_url)
+                if target_url not in self.scraped_pages:
+                    self.scraped_pages.add(target_url)
+                    self.pool.submit(self.scrape_page, target_url)
 
             except Empty:
                 break
@@ -163,46 +156,22 @@ class MultiThreadScraper:
                 continue
                 # break
 if __name__ == '__main__':
-    # s = MultiThreadScraper("http://www.google.co.uk")
+    crawl("how to write hotel reviews")
+
+    # df = pd.read_csv("data/wikihowSep.csv")
+    #
+    # wikiCat = pd.read_csv("data/cate.csv", sep=",", error_bad_lines=False, names=["title", "category"])
+    #
+    # wikiCat['title'] = wikiCat['title'].str.replace("https://www.wikihow.com/", "").str.replace("%22","").str.replace("-", " ").str.lower()
+    # wikiCat['title'] = ["how to " + i for i in wikiCat['title'].tolist()]
+    # wikiCat['category'] = wikiCat['category'].str.lower()
+    # travel = wikiCat[wikiCat.category.str.contains("travel")].title.tolist()
+    #
+    # to_crawl = Queue()
+    # for t in travel[200:]:
+    #     to_crawl.put(t)
+    #
+    # print(len(travel))
+
+    # s = MultiThreadScraper(to_crawl)
     # s.run_scraper()
-
-    #
-    # import time
-    # start = time.time()
-    crawl("how to clean house")
-    # end = time.time()
-    # print(end - start)
-    #
-    # start = time.time()
-    # crawl("jarana manotumruksa")
-    # crawl("jaramana")
-    # end = time.time()
-    # print(end - start)
-
-    regex = re.compile('[^a-zA-Z]')
-    df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
-    unique_set = set([])
-    for i in df:
-        _ = regex.sub(' ', i[0])
-        unique_set.add(_)
-    toCrawl = list(unique_set)
-    # toCrawl = ["how to cook pasta"]
-    # print(crawl("how to cook pasta"))
-
-    count = 0
-    # TODO skip already crawled articles
-    # for i in range(len(toCrawl)):
-    #     print(i, toCrawl[i])
-    #     res = crawl(toCrawl[i])
-    #
-    #     if len(res) == 0:
-    #         count += 1
-    #     else:
-    #         count = 0
-    #
-    #     if count == 5:
-    #         break
-
-
-    # browser = initBrowser()
-    # browser.get("https://www.google.com?hl=en")
