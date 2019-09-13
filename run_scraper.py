@@ -4,6 +4,7 @@ from urllib.parse import urljoin, urlparse
 import sys
 import pandas as pd
 from selenium.webdriver.chrome import webdriver
+import os
 
 from gquestions import initBrowser, newSearch, crawlQuestions, prettyOutputName, flatten_csv
 from time import sleep
@@ -12,7 +13,7 @@ import re
 def crawl(keyword):
     # args = docopt(usage)
     args = {'--csv': True,
-            '--headless': False,
+            '--headless': True,
             '--help': False,
             '<depth>': None,
             '<keyword>': keyword,
@@ -89,7 +90,7 @@ class MultiThreadScraper:
 
         # self.base_url = base_url
         # self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=20)
+        self.pool = ThreadPoolExecutor(max_workers=10)
         self.scraped_pages = set([])
         self.to_crawl = to_crawl
 
@@ -156,7 +157,19 @@ class MultiThreadScraper:
                 continue
                 # break
 if __name__ == '__main__':
-    crawl("how to write hotel reviews")
+
+    # repeat
+    todo = []
+    for file in os.listdir("csv/"):
+        if os.stat("csv/" + file).st_size == 0:
+            todo.append(file.split(".txt")[0].replace("_", " "))
+
+    to_crawl = Queue()
+    for t in todo:
+        to_crawl.put(t)
+
+    s = MultiThreadScraper(to_crawl)
+    s.run_scraper()
 
     # df = pd.read_csv("data/wikihowSep.csv")
     #
