@@ -2,7 +2,11 @@ from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urljoin, urlparse
 import sys
+import json
+
+import time
 import pandas as pd
+from jinja2 import Environment, FileSystemLoader
 from selenium.webdriver.chrome import webdriver
 import os
 
@@ -44,12 +48,38 @@ def crawl(keyword):
         query = args['<keyword>']
         start_paa = newSearch(browser, query, lang)
 
-        # if len(start_paa) > 0:
-        _path = 'csv/' + prettyOutputName(query, 'txt')
-        with open(_path, 'w') as f:
-            for item in start_paa:
-                f.write("%s\n" % item.text)
+        initialSet = {}
+        cnt = 0
+        for q in start_paa:
+            initialSet.update({cnt: q})
+            cnt += 1
 
+        paa_list = []
+
+        crawlQuestions(query, lang, browser, start_paa, paa_list, initialSet, depth)
+        treeData = 'var treeData = ' + json.dumps(paa_list) + ';'
+
+        if paa_list[0]['children']:
+            root = os.path.dirname(os.path.abspath(__file__))
+            templates_dir = os.path.join(root, 'templates')
+            env = Environment(loader=FileSystemLoader(templates_dir))
+            # template = env.get_template('index.html')
+            # filename = os.path.join(root, 'html', prettyOutputName(query))
+            # with open(filename, 'w') as fh:
+            #     fh.write(template.render(
+            #         treeData=treeData,
+            #     ))
+
+        if paa_list[0]['children']:
+            _path = 'csv/' + prettyOutputName(query, 'csv')
+            flatten_csv(paa_list, depth, _path)
+
+        # if len(start_paa) > 0:
+        # _path = 'csv/' + prettyOutputName(query, 'txt')
+        # with open(_path, 'w') as f:
+        #     for item in start_paa:
+        #         f.write("%s\n" % item.text)
+        #
         browser.close()
 
         return start_paa
@@ -158,18 +188,24 @@ class MultiThreadScraper:
                 # break
 if __name__ == '__main__':
 
+    print(time.time())
+    start_time = time.time()
+    crawl("how to cook pasta")
+    e = int(time.time() - start_time)
+    print('{:02d}:{:02d}:{:02d}'.format(e // 3600, (e % 3600 // 60), e % 60))
+
     # repeat
-    todo = []
-    for file in os.listdir("csv/"):
-        if os.stat("csv/" + file).st_size == 0:
-            todo.append(file.split(".txt")[0].replace("_", " "))
-
-    to_crawl = Queue()
-    for t in todo:
-        to_crawl.put(t)
-
-    s = MultiThreadScraper(to_crawl)
-    s.run_scraper()
+    # todo = []
+    # for file in os.listdir("csv/"):
+    #     if os.stat("csv/" + file).st_size == 0:
+    #         todo.append(file.split(".txt")[0].replace("_", " "))
+    #
+    # to_crawl = Queue()
+    # for t in todo:
+    #     to_crawl.put(t)
+    #
+    # s = MultiThreadScraper(to_crawl)
+    # s.run_scraper()
 
     # df = pd.read_csv("data/wikihowSep.csv")
     #

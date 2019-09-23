@@ -82,7 +82,7 @@ def newSearch(browser, query, lang):
         searchbox = browser.find_element_by_xpath("//input[@aria-label='Buscar']")
 
     searchbox.send_keys(query)
-    sleepBar(5)
+    sleep(1)
     # tabNTimes()
     if lang == "en":
         searchbtn = browser.find_elements_by_xpath("//input[@aria-label='Google Search']")
@@ -92,7 +92,7 @@ def newSearch(browser, query, lang):
         searchbtn[-1].click()
     except:
         searchbtn[0].click()
-    sleepBar(5)
+    sleep(1)
     paa = browser.find_elements_by_xpath(
         "//span/following-sibling::div[contains(@class,'match-mod-horizontal-padding')]")
     hideGBar()
@@ -104,7 +104,7 @@ Helper function that scroll into view the PAA questions element.
 """
 
 
-def scrollToFeedback():
+def scrollToFeedback(lang, browser):
     if lang == "en":
         el = browser.find_element_by_xpath("//div[@class='kno-ftr']//div/following-sibling::a[text()='Feedback']")
     else:
@@ -115,7 +115,7 @@ def scrollToFeedback():
     actions.move_to_element(el).perform()
     browser.execute_script("arguments[0].scrollIntoView();", el)
     actions.send_keys(Keys.PAGE_UP).perform()
-    sleepBar(1)
+    sleep(1)
 
 
 """
@@ -135,17 +135,17 @@ Click on questions N times
 """
 
 
-def clickNTimes(el, n=1):
+def clickNTimes(lang, browser, el, n=1):
     for i in range(n):
         el.click()
         logging.info(f"clicking on ... {el.text}")
-        sleepBar(1)
-        scrollToFeedback()
+        sleep(1)
+        scrollToFeedback(lang, browser)
         try:
             el.find_element_by_xpath("//*[@aria-expanded='true']").click()
         except:
             pass
-        sleepBar(1)
+        sleep(1)
 
 
 """
@@ -165,12 +165,12 @@ Where the magic happens
 """
 
 
-def crawlQuestions(start_paa, paa_list, initialSet, depth=0):
+def crawlQuestions(query, lang, browser, start_paa, paa_list, initialSet, depth=0):
     _tmp = createNode(paa_lst=paa_list, name=query, children=True)
 
     outer_cnt = 0
     for q in start_paa:
-        scrollToFeedback()
+        scrollToFeedback(lang, browser)
         if "Dictionary" in q.text:
             continue
         test = createNode(paa_lst=paa_list, n=0,
@@ -178,17 +178,17 @@ def crawlQuestions(start_paa, paa_list, initialSet, depth=0):
                           parent=paa_list[0]["name"],
                           children=True)
 
-        clickNTimes(q)
-        new_q = showNewQuestions(initialSet)
+        clickNTimes(lang, browser, q)
+        new_q = showNewQuestions(initialSet, browser)
         for l, value in new_q.items():
-            sleepBar(1)
+            sleep(1)
             logging.info(f"{l}, {value.text}")
             test1 = createNode(paa_lst=test[0]["children"][outer_cnt]["children"],
                                name=value.text,
                                parent=test[0]["children"][outer_cnt]["name"],
                                children=True)
 
-        initialSet = getCurrentSERP()
+        initialSet = getCurrentSERP(browser)
         logging.info(f"Current count: {outer_cnt}")
         outer_cnt += 1
         if depth == 1:
@@ -211,7 +211,7 @@ def crawlQuestions(start_paa, paa_list, initialSet, depth=0):
                             except NoSuchElementException:
                                 continue
                             scrollToFeedback()
-                            sleepBar(1)
+                            sleep(1)
                             clickNTimes(question)
                             new_q = showNewQuestions(initialSet)
                             for l, value in new_q.items():
@@ -231,7 +231,7 @@ Returns:
 """
 
 
-def getCurrentSERP():
+def getCurrentSERP(browser):
     _tmpset = {}
     new_paa = browser.find_elements_by_xpath(
         "//span/following-sibling::div[contains(@class,'match-mod-horizontal-padding')]")
@@ -253,8 +253,8 @@ Returns:
 """
 
 
-def showNewQuestions(initialSet):
-    tmp = getCurrentSERP()
+def showNewQuestions(initialSet, browser):
+    tmp = getCurrentSERP(browser)
     deletelist = [k for k, v in initialSet.items() if k in tmp and tmp[k] == v]
     _tst = dict.copy(tmp)
     for i, value in tmp.items():
