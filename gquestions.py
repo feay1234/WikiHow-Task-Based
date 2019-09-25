@@ -313,7 +313,7 @@ def flatten_csv(data, depth, prettyname):
             _.drop(columns=['children', 'inner.children', 'inner.parent'], inplace=True)
             columnTitle = ['parent', 'name', 'inner.name']
             _ = _.reindex(columns=columnTitle)
-            _.to_csv(prettyname, sep=";", encoding='utf-8')
+            _[['name', 'inner.name']].to_csv(prettyname, sep=";", encoding='utf-8', index=False)
         elif depth == 1:
             df = json_normalize(data[0]["children"], meta=['name', 'children', 'parent'], record_path="children",
                                 record_prefix='inner.')

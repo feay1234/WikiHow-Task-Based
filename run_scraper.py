@@ -187,7 +187,7 @@ class MultiThreadScraper:
                 # break
 if __name__ == '__main__':
 
-    crawl("how to cook pasta")
+    # crawl("how to cook pasta")
 
     finish = []
     for file in os.listdir("csv/"):
@@ -195,26 +195,38 @@ if __name__ == '__main__':
             finish.append(file.split(".csv")[0].replace("_", " "))
 
     df = pd.read_csv("data/wikihowSep.csv")
+    df = df[df.sectionLabel != "Steps"]
+    df["title"] = df["title"].str.lower()
+    df["sectionLabel"] = df["sectionLabel"].str.lower()
+
     wikiCat = pd.read_csv("data/cate.csv", sep=",", error_bad_lines=False, names=["title", "category"])
     wikiCat['title'] = wikiCat['title'].str.replace("https://www.wikihow.com/", "").str.replace("%22","").str.replace("-", " ").str.lower()
     wikiCat['title'] = ["how to " + i for i in wikiCat['title'].tolist()]
     wikiCat['category'] = wikiCat['category'].str.lower()
-    travel = wikiCat[wikiCat.category.str.contains("travel")].title.tolist()
 
-    df["headline"] = df["headline"].str.lower().str.replace("\n", "").str.replace(".","")
-    df["title"] = df["title"].str.lower()
+    tasks = wikiCat[wikiCat.category.str.contains("health")].title.tolist()
 
-    tmp = df[df.title.isin(travel)]
-    travel = tmp.headline.tolist()
+    # df["headline"] = df["headline"].str.lower().str.replace("\n", "").str.replace(".","")
+    # df["title"] = df["title"].str.lower()
+    # print(tasks)
+
+    queries = []
+    for name, row in df[df.title.isin(tasks)].drop_duplicates(["sectionLabel"]).groupby("title"):
+        queries.append(name)
+        queries.extend(row.sectionLabel.tolist())
+
+    # print(queries)
+    # tmp = df[df.title.isin(travel)]
+    # travel = tmp.headline.tolist()
     # # #
     to_crawl = Queue()
-    for t in travel:
-        t = re.sub('\s|\"|\/|\:|\.', ' ', t.rstrip())
+    for t in queries:
+        # t = re.sub('\s|\"|\/|\:|\.', ' ', t.rstrip())
         if t not in finish:
             to_crawl.put(t)
 
-    # print(len(travel), to_crawl.qsize())
+
     s = MultiThreadScraper(to_crawl)
     s.run_scraper()
 
-    # 12:25 67
+    # 19:22 - health
