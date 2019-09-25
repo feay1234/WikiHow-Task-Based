@@ -59,10 +59,10 @@ def crawl(keyword):
         crawlQuestions(query, lang, browser, start_paa, paa_list, initialSet, depth)
         treeData = 'var treeData = ' + json.dumps(paa_list) + ';'
 
-        if paa_list[0]['children']:
-            root = os.path.dirname(os.path.abspath(__file__))
-            templates_dir = os.path.join(root, 'templates')
-            env = Environment(loader=FileSystemLoader(templates_dir))
+        # if paa_list[0]['children']:
+        #     root = os.path.dirname(os.path.abspath(__file__))
+        #     templates_dir = os.path.join(root, 'templates')
+        #     env = Environment(loader=FileSystemLoader(templates_dir))
             # template = env.get_template('index.html')
             # filename = os.path.join(root, 'html', prettyOutputName(query))
             # with open(filename, 'w') as fh:
@@ -120,7 +120,7 @@ class MultiThreadScraper:
 
         # self.base_url = base_url
         # self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=10)
+        self.pool = ThreadPoolExecutor(max_workers=5)
         self.scraped_pages = set([])
         self.to_crawl = to_crawl
 
@@ -159,14 +159,12 @@ class MultiThreadScraper:
     def scrape_page(self, url):
         try:
             crawl(url)
-            # sleep(5)
-
         except Exception as e:
             # add to file and add to the pool
             # with open("error.txt", 'a+') as f:
             #     f.write("%s\n" % url)
             print(e)
-            print("error: %s" % url)
+            # print("error: %s" % url)
             # self.to_crawl.put(url)
         return
 
@@ -174,6 +172,7 @@ class MultiThreadScraper:
         while True:
             try:
                 target_url = self.to_crawl.get(timeout=10)
+                sleep(5)
                 if target_url not in self.scraped_pages:
                     self.scraped_pages.add(target_url)
                     self.pool.submit(self.scrape_page, target_url)
@@ -188,39 +187,34 @@ class MultiThreadScraper:
                 # break
 if __name__ == '__main__':
 
-    print(time.time())
-    start_time = time.time()
     crawl("how to cook pasta")
-    e = int(time.time() - start_time)
-    print('{:02d}:{:02d}:{:02d}'.format(e // 3600, (e % 3600 // 60), e % 60))
 
-    # repeat
-    # todo = []
-    # for file in os.listdir("csv/"):
-    #     if os.stat("csv/" + file).st_size == 0:
-    #         todo.append(file.split(".txt")[0].replace("_", " "))
-    #
-    # to_crawl = Queue()
-    # for t in todo:
-    #     to_crawl.put(t)
-    #
-    # s = MultiThreadScraper(to_crawl)
-    # s.run_scraper()
+    finish = []
+    for file in os.listdir("csv/"):
+        if os.stat("csv/" + file).st_size > 0:
+            finish.append(file.split(".csv")[0].replace("_", " "))
 
-    # df = pd.read_csv("data/wikihowSep.csv")
-    #
-    # wikiCat = pd.read_csv("data/cate.csv", sep=",", error_bad_lines=False, names=["title", "category"])
-    #
-    # wikiCat['title'] = wikiCat['title'].str.replace("https://www.wikihow.com/", "").str.replace("%22","").str.replace("-", " ").str.lower()
-    # wikiCat['title'] = ["how to " + i for i in wikiCat['title'].tolist()]
-    # wikiCat['category'] = wikiCat['category'].str.lower()
-    # travel = wikiCat[wikiCat.category.str.contains("travel")].title.tolist()
-    #
-    # to_crawl = Queue()
-    # for t in travel[200:]:
-    #     to_crawl.put(t)
-    #
-    # print(len(travel))
+    df = pd.read_csv("data/wikihowSep.csv")
+    wikiCat = pd.read_csv("data/cate.csv", sep=",", error_bad_lines=False, names=["title", "category"])
+    wikiCat['title'] = wikiCat['title'].str.replace("https://www.wikihow.com/", "").str.replace("%22","").str.replace("-", " ").str.lower()
+    wikiCat['title'] = ["how to " + i for i in wikiCat['title'].tolist()]
+    wikiCat['category'] = wikiCat['category'].str.lower()
+    travel = wikiCat[wikiCat.category.str.contains("travel")].title.tolist()
 
-    # s = MultiThreadScraper(to_crawl)
-    # s.run_scraper()
+    df["headline"] = df["headline"].str.lower().str.replace("\n", "").str.replace(".","")
+    df["title"] = df["title"].str.lower()
+
+    tmp = df[df.title.isin(travel)]
+    travel = tmp.headline.tolist()
+    # # #
+    to_crawl = Queue()
+    for t in travel:
+        t = re.sub('\s|\"|\/|\:|\.', ' ', t.rstrip())
+        if t not in finish:
+            to_crawl.put(t)
+
+    # print(len(travel), to_crawl.qsize())
+    s = MultiThreadScraper(to_crawl)
+    s.run_scraper()
+
+    # 12:25 67
