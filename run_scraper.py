@@ -196,6 +196,17 @@ if __name__ == '__main__':
     for i in done:
         all_categories.remove(i)
 
+    df = pd.read_csv("data/wikihowSep.csv")
+    df = df[df.sectionLabel != "Steps"]
+    df["title"] = df["title"].str.lower()
+    df["sectionLabel"] = df["sectionLabel"].str.lower()
+
+    wikiCat = pd.read_csv("data/cate.csv", sep=",", error_bad_lines=False, names=["title", "category"])
+    wikiCat['title'] = wikiCat['title'].str.replace("https://www.wikihow.com/", "").str.replace("%22", "").str.replace(
+        "-", " ").str.lower()
+    wikiCat['title'] = ["how to " + i for i in wikiCat['title'].tolist()]
+    wikiCat['category'] = wikiCat['category'].str.lower()
+
     for cat in all_categories:
 
         folder = "csv/%s/" % (cat.replace(" ", "_"))
@@ -207,15 +218,6 @@ if __name__ == '__main__':
             if os.stat(folder + file).st_size > 0:
                 finish.append(file.split(".csv")[0].replace("_", " "))
 
-        df = pd.read_csv("data/wikihowSep.csv")
-        df = df[df.sectionLabel != "Steps"]
-        df["title"] = df["title"].str.lower()
-        df["sectionLabel"] = df["sectionLabel"].str.lower()
-
-        wikiCat = pd.read_csv("data/cate.csv", sep=",", error_bad_lines=False, names=["title", "category"])
-        wikiCat['title'] = wikiCat['title'].str.replace("https://www.wikihow.com/", "").str.replace("%22","").str.replace("-", " ").str.lower()
-        wikiCat['title'] = ["how to " + i for i in wikiCat['title'].tolist()]
-        wikiCat['category'] = wikiCat['category'].str.lower()
 
         tasks = wikiCat[wikiCat.category.str.contains(cat)].title.tolist()
 
