@@ -14,7 +14,7 @@ from gquestions import initBrowser, newSearch, crawlQuestions, prettyOutputName,
 from time import sleep
 import re
 
-def crawl(keyword):
+def crawl(keyword, folder):
     # args = docopt(usage)
     args = {'--csv': True,
             '--headless': True,
@@ -71,7 +71,7 @@ def crawl(keyword):
             #     ))
 
         if paa_list[0]['children']:
-            _path = 'csv/education/' + prettyOutputName(query, 'csv')
+            _path = folder + prettyOutputName(query, 'csv')
             flatten_csv(paa_list, depth, _path)
 
         # if len(start_paa) > 0:
@@ -116,14 +116,14 @@ def crawl(keyword):
 
 class MultiThreadScraper:
 
-    def __init__(self, to_crawl):
+    def __init__(self, to_crawl, folder):
 
         # self.base_url = base_url
         # self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
         self.pool = ThreadPoolExecutor(max_workers=20)
         self.scraped_pages = set([])
         self.to_crawl = to_crawl
-
+        self.folder = folder
 
         # regex = re.compile('[^a-zA-Z]')
         # df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
@@ -158,7 +158,7 @@ class MultiThreadScraper:
 
     def scrape_page(self, url):
         try:
-            crawl(url)
+            crawl(url, self.folder)
         except Exception as e:
             # add to file and add to the pool
             # with open("error.txt", 'a+') as f:
@@ -172,7 +172,7 @@ class MultiThreadScraper:
         while True:
             try:
                 target_url = self.to_crawl.get(timeout=10)
-                sleep(5)
+                sleep(10)
                 if target_url not in self.scraped_pages:
                     self.scraped_pages.add(target_url)
                     self.pool.submit(self.scrape_page, target_url)
@@ -187,12 +187,14 @@ class MultiThreadScraper:
                 # break
 if __name__ == '__main__':
 
-    # crawl("how to cook pasta")
+    # crawl("how to cook pasta", "csv/")
 
-    finish = []
-    for file in os.listdir("csv/education/"):
-        if os.stat("csv/education/" + file).st_size > 0:
-            finish.append(file.split(".csv")[0].replace("_", " "))
+    all_categories = "Arts and Entertainment·Cars & Other Vehicles·Computers and Electronics·Education and Communications·Family Life·Finance and Business·Food and Entertaining·Health·Hobbies and Crafts·Holidays and Traditions·Home and Garden·Personal Care and Style·Pets and Animals·Philosophy and Religion·Relationships·Sports and Fitness·Travel·Work World·Youth"
+    all_categories = all_categories.lower()
+    all_categories = all_categories.split("·")
+    done = ['sports and fitness', 'health', 'education and communications']
+    for i in done:
+        all_categories.remove(i)
 
     df = pd.read_csv("data/wikihowSep.csv")
     df = df[df.sectionLabel != "Steps"]
@@ -200,36 +202,48 @@ if __name__ == '__main__':
     df["sectionLabel"] = df["sectionLabel"].str.lower()
 
     wikiCat = pd.read_csv("data/cate.csv", sep=",", error_bad_lines=False, names=["title", "category"])
-    wikiCat['title'] = wikiCat['title'].str.replace("https://www.wikihow.com/", "").str.replace("%22","").str.replace("-", " ").str.lower()
+    wikiCat['title'] = wikiCat['title'].str.replace("https://www.wikihow.com/", "").str.replace("%22", "").str.replace(
+        "-", " ").str.lower()
     wikiCat['title'] = ["how to " + i for i in wikiCat['title'].tolist()]
     wikiCat['category'] = wikiCat['category'].str.lower()
 
-    tasks = wikiCat[wikiCat.category.str.contains("education")].title.tolist()
+    for cat in all_categories:
+        print(cat)
 
-    # df["headline"] = df["headline"].str.lower().str.replace("\n", "").str.replace(".","")
-    # df["title"] = df["title"].str.lower()
-    # print(tasks)
+        folder = "csv/%s/" % (cat.replace(" ", "_"))
+        if not os.path.exists(folder):
+            os.makedirs(folder)
 
-    queries = []
-    for name, row in df[df.title.isin(tasks)].drop_duplicates(["sectionLabel"]).groupby("title"):
-        queries.append(name)
-        queries.extend(row.sectionLabel.tolist())
-
-    # print(queries)
-    # tmp = df[df.title.isin(travel)]
-    # travel = tmp.headline.tolist()
-    # # #
-    to_crawl = Queue()
-    for t in queries[::-1]:
-        # t = re.sub('\s|\"|\/|\:|\.', ' ', t.rstrip())
-        if t not in finish:
-            to_crawl.put(t)
-
-    print(to_crawl.qsize(), len(finish), len(queries))
+        finish = []
+        for file in os.listdir(folder):
+            if os.stat(folder + file).st_size > 0:
+                finish.append(file.split(".csv")[0].replace("_", " "))
 
 
-    s = MultiThreadScraper(to_crawl)
-    s.run_scraper()
+        tasks = wikiCat[wikiCat.category.str.contains(cat)].title.tolist()
 
-#     TODO home and garden
 
+        # df["headline"] = df["headline"].str.lower().str.replace("\n", "").str.replace(".","")
+        # df["title"] = df["title"].str.lower()
+        # print(tasks)
+
+        queries = []
+        for name, row in df[df.title.isin(tasks)].drop_duplicates(["sectionLabel"]).groupby("title"):
+            queries.append(name)
+            queries.extend(row.sectionLabel.tolist())
+
+        # print(queries)
+        # tmp = df[df.title.isin(travel)]
+        # travel = tmp.headline.tolist()
+        # # #
+        to_crawl = Queue()
+        for t in queries:
+            # t = re.sub('\s|\"|\/|\:|\.', ' ', t.rstrip())
+            if t not in finish:
+                to_crawl.put(t)
+            # break
+
+        print(len(finish), to_crawl.qsize())
+        # s = MultiThreadScraper(to_crawl, folder)
+        # s.run_scraper()
+        break
