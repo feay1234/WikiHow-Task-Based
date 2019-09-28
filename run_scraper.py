@@ -172,7 +172,7 @@ class MultiThreadScraper:
         while True:
             try:
                 target_url = self.to_crawl.get(timeout=10)
-                sleep(10)
+                sleep(5)
                 if target_url not in self.scraped_pages:
                     self.scraped_pages.add(target_url)
                     self.pool.submit(self.scrape_page, target_url)
@@ -235,11 +235,15 @@ if __name__ == '__main__':
         # travel = tmp.headline.tolist()
         # # #
         to_crawl = Queue()
-        for t in queries:
+        for t in queries[::-1]:
             # t = re.sub('\s|\"|\/|\:|\.', ' ', t.rstrip())
             if t not in finish:
                 to_crawl.put(t)
             # break
+
+        # TODO save none queries and include with finsih
+
+
 
         print(len(finish), to_crawl.qsize())
         s = MultiThreadScraper(to_crawl, folder)
