@@ -71,7 +71,7 @@ def crawl(keyword):
             #     ))
 
         if paa_list[0]['children']:
-            _path = 'csv/' + prettyOutputName(query, 'csv')
+            _path = 'csv/education/' + prettyOutputName(query, 'csv')
             flatten_csv(paa_list, depth, _path)
 
         # if len(start_paa) > 0:
@@ -120,7 +120,7 @@ class MultiThreadScraper:
 
         # self.base_url = base_url
         # self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=5)
+        self.pool = ThreadPoolExecutor(max_workers=20)
         self.scraped_pages = set([])
         self.to_crawl = to_crawl
 
@@ -190,8 +190,8 @@ if __name__ == '__main__':
     # crawl("how to cook pasta")
 
     finish = []
-    for file in os.listdir("csv/"):
-        if os.stat("csv/" + file).st_size > 0:
+    for file in os.listdir("csv/education/"):
+        if os.stat("csv/education/" + file).st_size > 0:
             finish.append(file.split(".csv")[0].replace("_", " "))
 
     df = pd.read_csv("data/wikihowSep.csv")
@@ -204,7 +204,7 @@ if __name__ == '__main__':
     wikiCat['title'] = ["how to " + i for i in wikiCat['title'].tolist()]
     wikiCat['category'] = wikiCat['category'].str.lower()
 
-    tasks = wikiCat[wikiCat.category.str.contains("health")].title.tolist()
+    tasks = wikiCat[wikiCat.category.str.contains("education")].title.tolist()
 
     # df["headline"] = df["headline"].str.lower().str.replace("\n", "").str.replace(".","")
     # df["title"] = df["title"].str.lower()
@@ -220,13 +220,16 @@ if __name__ == '__main__':
     # travel = tmp.headline.tolist()
     # # #
     to_crawl = Queue()
-    for t in queries:
+    for t in queries[::-1]:
         # t = re.sub('\s|\"|\/|\:|\.', ' ', t.rstrip())
         if t not in finish:
             to_crawl.put(t)
+
+    print(to_crawl.qsize(), len(finish), len(queries))
 
 
     s = MultiThreadScraper(to_crawl)
     s.run_scraper()
 
-    # 19:22 - health
+#     TODO home and garden
+
