@@ -10,11 +10,13 @@ from jinja2 import Environment, FileSystemLoader
 from selenium.webdriver.chrome import webdriver
 import os
 
+from tqdm import tqdm
+
 from gquestions import initBrowser, newSearch, crawlQuestions, prettyOutputName, flatten_csv
 from time import sleep
 import re
 
-def crawl(keyword, folder):
+def crawl(keyword, folder, cat):
     # args = docopt(usage)
     args = {'--csv': True,
             '--headless': True,
@@ -57,29 +59,14 @@ def crawl(keyword, folder):
         paa_list = []
 
         crawlQuestions(query, lang, browser, start_paa, paa_list, initialSet, depth)
-        treeData = 'var treeData = ' + json.dumps(paa_list) + ';'
-
-        # if paa_list[0]['children']:
-        #     root = os.path.dirname(os.path.abspath(__file__))
-        #     templates_dir = os.path.join(root, 'templates')
-        #     env = Environment(loader=FileSystemLoader(templates_dir))
-            # template = env.get_template('index.html')
-            # filename = os.path.join(root, 'html', prettyOutputName(query))
-            # with open(filename, 'w') as fh:
-            #     fh.write(template.render(
-            #         treeData=treeData,
-            #     ))
 
         if paa_list[0]['children']:
             _path = folder + prettyOutputName(query, 'csv')
             flatten_csv(paa_list, depth, _path)
+        else:
+            with open(folder+cat, 'a') as the_file:
+                the_file.write(query+'\n')
 
-        # if len(start_paa) > 0:
-        # _path = 'csv/' + prettyOutputName(query, 'txt')
-        # with open(_path, 'w') as f:
-        #     for item in start_paa:
-        #         f.write("%s\n" % item.text)
-        #
         browser.close()
 
         return start_paa
@@ -116,7 +103,7 @@ def crawl(keyword, folder):
 
 class MultiThreadScraper:
 
-    def __init__(self, to_crawl, folder):
+    def __init__(self, to_crawl, folder, cat):
 
         # self.base_url = base_url
         # self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
@@ -124,6 +111,7 @@ class MultiThreadScraper:
         self.scraped_pages = set([])
         self.to_crawl = to_crawl
         self.folder = folder
+        self.cat = cat
 
         # regex = re.compile('[^a-zA-Z]')
         # df = pd.read_csv("data/articles.txt", error_bad_lines=False).values.tolist()
@@ -137,54 +125,40 @@ class MultiThreadScraper:
 
 
 
-    def parse_links(self, html):
-        # soup = BeautifulSoup(html, 'html.parser')
-        # links = soup.find_all('a', href=True)
-        # for link in links:
-        #     url = link['href']
-        #     if url.startswith('/') or url.startswith(self.root_url):
-        #         url = urljoin(self.root_url, url)
-        #         if url not in self.scraped_pages:
-        self.to_crawl.put("www.google.com")
-
-    def scrape_info(self, html):
-        return
-
-    def post_scrape_callback(self, res):
-        result = res.result()
-        if result and result.status_code == 200:
-            self.parse_links(result.text)
-            self.scrape_info(result.text)
+    # def parse_links(self, html):
+    #     self.to_crawl.put("www.google.com")
+    #
+    # def scrape_info(self, html):
+    #     return
+    #
+    # def post_scrape_callback(self, res):
+    #     result = res.result()
+    #     if result and result.status_code == 200:
+    #         self.parse_links(result.text)
+    #         self.scrape_info(result.text)
 
     def scrape_page(self, url):
         try:
-            crawl(url, self.folder)
+            crawl(url, self.folder, self.cat)
         except Exception as e:
-            # add to file and add to the pool
-            # with open("error.txt", 'a+') as f:
-            #     f.write("%s\n" % url)
-            print(e)
-            # print("error: %s" % url)
-            # self.to_crawl.put(url)
+
+            with open(folder+cat, 'a') as the_file:
+                the_file.write(url+'\n')
+
         return
 
     def run_scraper(self):
-        while True:
-            try:
-                target_url = self.to_crawl.get(timeout=10)
-                sleep(5)
-                if target_url not in self.scraped_pages:
-                    self.scraped_pages.add(target_url)
-                    self.pool.submit(self.scrape_page, target_url)
 
-            except Empty:
-                break
+        for i in tqdm(range(len(self.to_crawl))):
+            try:
+                target_url = self.to_crawl[i]
+                self.pool.submit(self.scrape_page, target_url)
+                sleep(10)
 
             except Exception as e:
                 print(e)
-                print("main error: %s" % target_url)
                 continue
-                # break
+
 if __name__ == '__main__':
 
     # crawl("how to cook pasta", "csv/")
@@ -192,7 +166,7 @@ if __name__ == '__main__':
     all_categories = "Arts and Entertainment·Cars & Other Vehicles·Computers and Electronics·Education and Communications·Family Life·Finance and Business·Food and Entertaining·Health·Hobbies and Crafts·Holidays and Traditions·Home and Garden·Personal Care and Style·Pets and Animals·Philosophy and Religion·Relationships·Sports and Fitness·Travel·Work World·Youth"
     all_categories = all_categories.lower()
     all_categories = all_categories.split("·")
-    done = ['sports and fitness', 'health', 'education and communications']
+    done = ['sports and fitness', 'health', 'education and communications', 'arts and entertainment']
     for i in done:
         all_categories.remove(i)
 
@@ -209,17 +183,24 @@ if __name__ == '__main__':
 
     for cat in all_categories:
 
-        folder = "csv/%s/" % (cat.replace(" ", "_"))
+        tasks = wikiCat[wikiCat.category.str.contains(cat)].title.tolist()
+
+        cat = cat.replace(" ", "_")
+
+        folder = "csv/%s/" % (cat)
         if not os.path.exists(folder):
             os.makedirs(folder)
 
         finish = []
         for file in os.listdir(folder):
             if os.stat(folder + file).st_size > 0:
-                finish.append(file.split(".csv")[0].replace("_", " "))
+                if ".csv" in file:
+                    finish.append(file.split(".csv")[0].replace("_", " "))
+
+        if os.path.exists(folder+cat):
+            finish.extend([line.rstrip('\n') for line in open(folder+cat)])
 
 
-        tasks = wikiCat[wikiCat.category.str.contains(cat)].title.tolist()
 
         # df["headline"] = df["headline"].str.lower().str.replace("\n", "").str.replace(".","")
         # df["title"] = df["title"].str.lower()
@@ -230,22 +211,14 @@ if __name__ == '__main__':
             queries.append(name)
             queries.extend(row.sectionLabel.tolist())
 
-        # print(queries)
-        # tmp = df[df.title.isin(travel)]
-        # travel = tmp.headline.tolist()
-        # # #
-        to_crawl = Queue()
-        for t in queries[::-1]:
-            # t = re.sub('\s|\"|\/|\:|\.', ' ', t.rstrip())
+        to_crawl = []
+        for t in queries:
             if t not in finish:
-                to_crawl.put(t)
-            # break
-
-        # TODO save none queries and include with finsih
+                to_crawl.append(t)
 
 
-
-        print(len(finish), to_crawl.qsize())
-        s = MultiThreadScraper(to_crawl, folder)
-        s.run_scraper()
-        break
+        print("Finished: %d To crawl: %d" % (len(finish), len(to_crawl)))
+        if len(to_crawl) > 0:
+            s = MultiThreadScraper(to_crawl, folder, cat)
+            s.run_scraper()
+        # break
