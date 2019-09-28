@@ -181,8 +181,8 @@ if __name__ == '__main__':
     wikiCat['title'] = ["how to " + i for i in wikiCat['title'].tolist()]
     wikiCat['category'] = wikiCat['category'].str.lower()
 
-    for cat in all_categories:
-
+    for cat in all_categories[::-1]:
+        print(cat)
         tasks = wikiCat[wikiCat.category.str.contains(cat)].title.tolist()
 
         cat = cat.replace(" ", "_")
