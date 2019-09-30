@@ -197,9 +197,10 @@ if __name__ == '__main__':
                 if ".csv" in file:
                     finish.append(file.split(".csv")[0].replace("_", " "))
 
+        error = []
         if os.path.exists(folder+cat):
-            finish.extend([line.rstrip('\n') for line in open(folder+cat)])
-
+            error.extend([line.rstrip('\n') for line in open(folder+cat)])
+        finish.extend(error)
 
 
         # df["headline"] = df["headline"].str.lower().str.replace("\n", "").str.replace(".","")
@@ -217,8 +218,10 @@ if __name__ == '__main__':
                 to_crawl.append(t)
 
 
-        print("Finished: %d To crawl: %d" % (len(finish), len(to_crawl)))
+        print("Finished: %d, Error: %d, To crawl: %d" % (len(finish), len(error), len(to_crawl)))
+        if len(to_crawl) < 100:
+            continue
+
         if len(to_crawl) > 0:
             s = MultiThreadScraper(to_crawl, folder, cat)
             s.run_scraper()
-        # break
