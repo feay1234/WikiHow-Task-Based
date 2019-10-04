@@ -181,7 +181,7 @@ if __name__ == '__main__':
     wikiCat['title'] = ["how to " + i for i in wikiCat['title'].tolist()]
     wikiCat['category'] = wikiCat['category'].str.lower()
 
-    for cat in all_categories[::-1]:
+    for cat in all_categories:
         print(cat)
         tasks = wikiCat[wikiCat.category.str.contains(cat)].title.tolist()
 
@@ -219,7 +219,7 @@ if __name__ == '__main__':
 
 
         print("Finished: %d, Error: %d, To crawl: %d" % (len(finish), len(error), len(to_crawl)))
-        if len(to_crawl) < 100:
+        if len(to_crawl) < 200:
             continue
 
         if len(to_crawl) > 0:
