@@ -63,4 +63,4 @@ if __name__ == '__main__':
 
         csv_logger = CSVLogger(path+'log/query_task_prediction/same_task/%s.out' % category)
 
-        model.fit([x_query, x_task], y, batch_size=128, validation_split=0.4, epoc=5, callbacks=[csv_logger])
+        model.fit([x_query, x_task], y, batch_size=128, validation_split=0.4, epochs=5, callbacks=[csv_logger])
