@@ -4,7 +4,6 @@ import random
 from string import digits
 import re
 
-
 def query_task_prediction():
     df = pd.read_csv("data/d1_session.csv")
     task_nb = df.Task.unique()
@@ -22,7 +21,6 @@ def query_task_prediction():
         with open('data/aol_query_task_prediction.csv', 'a') as the_file:
             the_file.write('%s' % row.Query.strip() + "\t" + pos_article + "\t1\n")
             the_file.write('%s' % row.Query.strip() + "\t" + neg_article + "\t0\n")
-
 
 
 def step_prediction():
