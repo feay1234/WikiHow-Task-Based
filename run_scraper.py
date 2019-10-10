@@ -166,9 +166,9 @@ if __name__ == '__main__':
     all_categories = "Arts and Entertainment·Cars & Other Vehicles·Computers and Electronics·Education and Communications·Family Life·Finance and Business·Food and Entertaining·Health·Hobbies and Crafts·Holidays and Traditions·Home and Garden·Personal Care and Style·Pets and Animals·Philosophy and Religion·Relationships·Sports and Fitness·Travel·Work World·Youth"
     all_categories = all_categories.lower()
     all_categories = all_categories.split("·")
-    done = ['sports and fitness', 'health', 'education and communications', 'arts and entertainment']
-    for i in done:
-        all_categories.remove(i)
+    all_categories = ['sports and fitness']
+    # for i in done:
+    #     all_categories.remove(i)
 
     df = pd.read_csv("data/wikihowSep.csv")
     df = df[df.sectionLabel != "Steps"]
