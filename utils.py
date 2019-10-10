@@ -27,7 +27,6 @@ def get_pretrain_embeddings(path, word_index, EMBEDDING_DIM=300):
             word, coefs = line.split(maxsplit=1)
             coefs = np.fromstring(coefs, 'f', sep=' ')
             embeddings_index[word] = coefs
-            break
 
     print('Found %s word vectors.' % len(embeddings_index))
 
