@@ -1,77 +1,66 @@
-from queue import Queue, Empty
-from concurrent.futures import ThreadPoolExecutor
-import threading
-
-from urllib.parse import urljoin, urlparse
-import sys
 import pandas as pd
-from gquestions import initBrowser, newSearch, crawlQuestions, prettyOutputName, flatten_csv
-from time import sleep
-import re
-
-
-class MultiThread:
-
-    def __init__(self, jobs, df):
-
-        self.df = df
-        self.pool = ThreadPoolExecutor(max_workers=10)
-        self.finished_jobs = set([])
-        self.to_do = jobs
-        self.lock = threading.Lock()
-
-    def write(self, job):
-
-        id = job[0]
-        start_time = job[1]
-        end_time = job[2]
-
-        tmp = self.df[self.df.AnonID == id]
-        ses = '\t'.join(tmp[tmp['QueryTime'].between(start_time, end_time)]['Query'].tolist())
-        #
-        #
-        self.lock.acquire()
-        with open('data/test.csv', 'a+') as the_file:
-            the_file.write('%s\n' % ses)
-        self.lock.release()
-        return
-
-    def run_scraper(self):
-        while True:
-            try:
-                job = self.to_do.get(timeout=10)
-                # sleep(4)
-                # print(self.to_do.qsize())
-                if job not in self.finished_jobs:
-                    # print(target_url)
-                    self.finished_jobs.add(job)
-                    self.pool.submit(self.write, job)
-            except Empty:
-                break
-
-            except Exception as e:
-                print(e)
-                continue
+import os
 if __name__ == '__main__':
-    pass
-    # s = MultiThread()
-    # s.run_scraper()
-    # run on 12:08
+
+    # crawl("how to cook pasta", "csv/")
+
+    all_categories = "Arts and Entertainment·Cars & Other Vehicles·Computers and Electronics·Education and Communications·Family Life·Finance and Business·Food and Entertaining·Health·Hobbies and Crafts·Holidays and Traditions·Home and Garden·Personal Care and Style·Pets and Animals·Philosophy and Religion·Relationships·Sports and Fitness·Travel·Work World·Youth"
+    all_categories = all_categories.lower()
+    all_categories = all_categories.split("·")
+    all_categories = ['sports and fitness']
+
+    df = pd.read_csv("data/wikihowSep.csv")
+    df = df[df.sectionLabel != "Steps"]
+    df["title"] = df["title"].str.lower()
+    df["sectionLabel"] = df["sectionLabel"].str.lower()
+
+    wikiCat = pd.read_csv("data/cate.csv", sep=",", error_bad_lines=False, names=["title", "category"])
+    wikiCat['title'] = wikiCat['title'].str.replace("https://www.wikihow.com/", "").str.replace("%22", "").str.replace(
+        "-", " ").str.lower()
+    wikiCat['title'] = ["how to " + i for i in wikiCat['title'].tolist()]
+    wikiCat['category'] = wikiCat['category'].str.lower()
+
+    for cat in all_categories[::-1]:
+        print(cat)
+        tasks = wikiCat[wikiCat.category.str.contains(cat)].title.tolist()
+
+        cat = cat.replace(" ", "_")
+
+        for d in ["csv", "csv2"]:
+
+            print(d)
+            folder = "%s/%s/" % (d, cat)
+            if not os.path.exists(folder):
+                continue
+                # os.makedirs(folder)
+
+            finish = []
+            for file in os.listdir(folder):
+                if os.stat(folder + file).st_size > 0:
+                    if ".csv" in file:
+                        finish.append(file.split(".csv")[0].replace("_", " "))
+
+            error = []
+            if os.path.exists(folder+cat):
+                error.extend([line.rstrip('\n') for line in open(folder+cat)])
+            finish.extend(error)
 
 
-    #
-    # import time
-    # start = time.time()
-    # crawl("how to clean house")
-    # end = time.time()
-    # print(end - start)
-    #
-    # start = time.time()
-    # crawl("jarana manotumruksa")
-    # end = time.time()
-    # print(end - start)
+            # df["headline"] = df["headline"].str.lower().str.replace("\n", "").str.replace(".","")
+            # df["title"] = df["title"].str.lower()
+            # print(tasks)
+
+            queries = []
+            for name, row in df[df.title.isin(tasks)].drop_duplicates(["sectionLabel"]).groupby("title"):
+                queries.append(name)
+                queries.extend(row.sectionLabel.tolist())
+
+            to_crawl = []
+            for t in queries:
+                if t not in finish:
+                    to_crawl.append(t)
 
 
-#     start at 14:51
+            print("Finished: %d, Error: %d, To crawl: %d" % (len(finish), len(error), len(to_crawl)))
 
 

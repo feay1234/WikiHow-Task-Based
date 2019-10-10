@@ -1,9 +1,9 @@
 import argparse
 
 import pandas as pd
-import numpy as np
-import random
+from keras.callbacks import CSVLogger
 
+csv_logger = CSVLogger('log.csv', append=True, separator=';')
 from Models import getDSSM
 from utils import *
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     MAX_NUM_WORDS = 100000
 
 
-    data = pd.read_csv(path+"data/step_task_prediction.csv", sep="\t", names=["step", "step_desc", "task", "label"])
+    data = pd.read_csv(path+"data/step_task_prediction.csv", nrows=10, sep="\t", names=["step", "step_desc", "task", "label"])
 
     # corpus = howto.Query.tolist() + df.Query.tolist()
     corpus = list(set(data.step.tolist() + data.step_desc.tolist() + data.task.tolist()))
@@ -52,4 +52,7 @@ if __name__ == '__main__':
 
     model = getDSSM(embedding_layer, MAX_SEQUENCE_LENGTH)
 
-    model.fit([x_step, x_task], y, batch_size=128, validation_split=0.3, epochs=10, verbose=2)
+    csv_logger = CSVLogger(path+'log/log.csv', append=True, separator=';')
+    model.fit([x_step, x_task], y, batch_size=128, validation_split=0.3, epochs=10, verbose=2, callbacks=[csv_logger])
+
+
