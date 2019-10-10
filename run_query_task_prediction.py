@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import random
 
+from keras.callbacks import CSVLogger
+
 from Models import getDSSM
 from utils import *
 
@@ -25,9 +27,9 @@ if __name__ == '__main__':
 
     MAX_NUM_WORDS = 100000
 
-    df = pd.read_csv(path+"data/d3_wikihow.csv")
-    # corpus = howto.Query.tolist() + df.Query.tolist()
-    corpus = df.Query.tolist()
+    category = "sports_and_fitness"
+    data = pd.read_csv(path+"data/query_task_prediction/%s.csv" % category, names=["t", "q", "label"])
+    corpus = data.t.unique().tolist() + data.q.unique().tolist()
 
     # finally, vectorize the text samples into a 2D integer tensor
     tokenizer = Tokenizer(num_words=MAX_NUM_WORDS)
@@ -40,15 +42,13 @@ if __name__ == '__main__':
     max_words = len(word_index)
     embedding_layer = get_pretrain_embeddings(path, word_index)
 
-
-    data = pd.read_csv(path+"data/query_task_prediction.csv", sep="\t", names=["query", "task", "label"])
-
     MAX_SEQUENCE_LENGTH = max([len(i.split()) for i in corpus])
-    x_query = pad_sequences(tokenizer.texts_to_sequences(data["query"].tolist()), maxlen=MAX_SEQUENCE_LENGTH)
-    x_task = pad_sequences(tokenizer.texts_to_sequences(data["task"].tolist()), maxlen=MAX_SEQUENCE_LENGTH)
+    x_task = pad_sequences(tokenizer.texts_to_sequences(data["t"].tolist()), maxlen=MAX_SEQUENCE_LENGTH)
+    x_query = pad_sequences(tokenizer.texts_to_sequences(data["q"].tolist()), maxlen=MAX_SEQUENCE_LENGTH)
     y = data.label.values
-
 
     model = getDSSM(embedding_layer, MAX_SEQUENCE_LENGTH)
 
-    model.fit([x_query, x_task], y, batch_size=128, validation_split=0.4, epochs=10)
+    csv_logger = CSVLogger(path+'log/query_task_prediction/%s.out' % category)
+
+    model.fit([x_query, x_task], y, batch_size=128, validation_split=0.4, epochs=5, callbacks=[csv_logger])
