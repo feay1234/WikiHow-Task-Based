@@ -34,7 +34,7 @@ if __name__ == '__main__':
         MAX_NUM_WORDS = 100000
 
         try:
-            data = pd.read_csv(path+"data/query_task_prediction/%s.csv" % category, names=["t", "q", "label"])
+            data = pd.read_csv(path+"data/query_task_prediction/same_task/%s.csv" % category, names=["t", "q", "label"])
         except:
             continue
 
@@ -61,6 +61,6 @@ if __name__ == '__main__':
 
         model = getDSSM(embedding_layer, MAX_SEQUENCE_LENGTH)
 
-        csv_logger = CSVLogger(path+'log/query_task_prediction/%s.out' % category)
+        csv_logger = CSVLogger(path+'log/query_task_prediction/same_task/%s.out' % category)
 
-        model.fit([x_query, x_task], y, batch_size=128, validation_split=0.4, epochs=5, callbacks=[csv_logger])
+        model.fit([x_query, x_task], y, batch_size=128, validation_split=0.4, epoc=5, callbacks=[csv_logger])
