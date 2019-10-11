@@ -16,10 +16,10 @@ from gquestions import initBrowser, newSearch, crawlQuestions, prettyOutputName,
 from time import sleep
 import re
 
-def crawl(keyword, folder, cat):
+def crawl(keyword, folder, cat, headless=True):
     # args = docopt(usage)
     args = {'--csv': True,
-            '--headless': True,
+            '--headless': headless,
             '--help': False,
             '<depth>': None,
             '<keyword>': keyword,
