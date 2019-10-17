@@ -30,13 +30,14 @@ def getRanker(embedding_layer, MAX_SEQUENCE_LENGTH):
     t_emb = lstm(embedding_layer(task_inp))
     s1_emb = lstm(embedding_layer(step1_inp))
     s2_emb = lstm(embedding_layer(step2_inp))
+    relu = Dense(100, activation='relu')
     dense = Dense(2, activation='softmax')
 
     # pred1 = Dot(-1, normalize=True)([t_emb, s1_emb])
     # pred2 = Dot(-1, normalize=True)([t_emb, s2_emb])
     # concat = Concatenate(axis=-1)([pred1, pred2])
     concat = Concatenate(axis=-1)([t_emb, s1_emb, s2_emb])
-    pred = dense(concat)
+    pred = dense(relu(concat))
     model = Model([task_inp, step1_inp, step2_inp], pred)
 
     model.compile(loss='categorical_crossentropy',
