@@ -17,7 +17,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Run Task Prediction Experiments")
 
     parser.add_argument('--path', type=str, help='Path to data', default="/Users/jarana/workspace/WikiHow-Task-Based/")
-    parser.add_argument('--type', type=str, help='Subtasks or Questions', default="subtasks")
+    parser.add_argument('--type', type=str, help='Subtasks or Questions', default="questions")
 
     return parser.parse_args()
 
