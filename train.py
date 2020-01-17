@@ -3,7 +3,7 @@ import argparse
 import subprocess
 import pandas as pd
 import numpy as np
-import random
+import random ,pickle
 from tqdm import tqdm
 import torch
 import modeling
@@ -25,7 +25,7 @@ MODEL_MAP = {
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qrelDict):
+def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qrelDict, qidInWiki):
     LR = 0.001
     BERT_LR = 2e-5
     MAX_EPOCH = 100
@@ -38,9 +38,9 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
     epoch = 0
     top_valid_score = None
     for epoch in range(MAX_EPOCH):
-        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
-        print(f'train epoch={epoch} loss={loss}')
-        results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir)
+        # loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
+        # print(f'train epoch={epoch} loss={loss}')
+        results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki)
         # print(results)
         valid_score = np.mean(results["ndcg@15"])
         print(f'validation epoch={epoch} score={valid_score}')
@@ -77,15 +77,15 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels):
                 return total_loss
 
 
-def validate(model, dataset, run, qrel, epoch, model_out_dir):
+def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki):
     VALIDATION_METRIC = 'P.20'
     runf = os.path.join(model_out_dir, f'{epoch}.run')
-    return run_model(model, dataset, run, runf, qrel)
+    return run_model(model, dataset, run, runf, qrel, qidInWiki)
     # return 0
     # return trec_eval(qrelf, runf)
 
 
-def run_model(model, dataset, run, runf, qrels, desc='valid'):
+def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
     BATCH_SIZE = 16
     rerank_run = {}
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
@@ -108,6 +108,8 @@ def run_model(model, dataset, run, runf, qrels, desc='valid'):
 
     res = {"%s@%d" %( i,j): [] for i in ["p", "r", "ndcg"] for j in [5, 10 ,15]}
     for qid in rerank_run:
+        if int(qid) not in qidInWiki:
+            continue
         ranked_list = [i[0] for i in sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)]
         result = eval(qrels[qid], ranked_list)
         # print(result)
@@ -151,9 +153,9 @@ def eval(qrels, ranked_list):
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
-    parser.add_argument('--datafiles', type=argparse.FileType('rt'), nargs='+', default="data/cedr/queries.tsv")
+    parser.add_argument('--datafiles', type=argparse.FileType('rt'), nargs='+', default="data/cedr/query-docs.tsv")
     parser.add_argument('--datafiles2', type=argparse.FileType('rt'), nargs='+', default="data/cedr/docs.tsv")
-    parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrels")
+    parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrels_all_pos")
     parser.add_argument('--train_pairs', type=argparse.FileType('rt'), default="data/cedr/train.pairs")
     parser.add_argument('--valid_run', type=argparse.FileType('rt'), default="data/cedr/test.run")
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
@@ -175,8 +177,9 @@ def main_cli():
     for qid, prop, label in df[['qid', 'pid', 'rele_label']].values:
         qrelDict[str(qid)][str(prop)] = int(label)
 
+    qidInWiki = pickle.load(open("qidInWiki", "rb"))
 
-    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict)
+    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, qidInWiki)
 
 
 if __name__ == '__main__':
