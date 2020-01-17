@@ -1,3 +1,6 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
 import argparse
 
 import pandas as pd
@@ -64,6 +67,11 @@ if __name__ == '__main__':
         x_query1 = pad_sequences(tokenizer.texts_to_sequences(data["q1"].tolist()), maxlen=MAX_SEQUENCE_LENGTH)
         x_query2 = pad_sequences(tokenizer.texts_to_sequences(data["q2"].tolist()), maxlen=MAX_SEQUENCE_LENGTH)
         y = np.array([[i,j] for i,j in zip(data.label1.values, data.label2.values)])
+
+        print(x_task)
+        print(x_query1)
+        print(x_query2)
+        print(y)
 
 
         model = getRanker(embedding_layer, MAX_SEQUENCE_LENGTH)
