@@ -38,8 +38,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
     epoch = 0
     top_valid_score = None
     for epoch in range(MAX_EPOCH):
-        # loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
-        # print(f'train epoch={epoch} loss={loss}')
+        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
+        print(f'train epoch={epoch} loss={loss}')
         results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki)
         # print(results)
         valid_score = np.mean(results["ndcg@15"])
@@ -108,8 +108,8 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
 
     res = {"%s@%d" %( i,j): [] for i in ["p", "r", "ndcg"] for j in [5, 10 ,15]}
     for qid in rerank_run:
-        if int(qid) not in qidInWiki:
-            continue
+        # if int(qid) not in qidInWiki:
+        #     continue
         ranked_list = [i[0] for i in sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)]
         result = eval(qrels[qid], ranked_list)
         # print(result)
@@ -180,7 +180,7 @@ def main_cli():
 
     qidInWiki = pickle.load(open("qidInWiki", "rb"))
 
-    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, qidInWiki, device)
+    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, qidInWiki)
 
 
 if __name__ == '__main__':
