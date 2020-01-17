@@ -25,7 +25,7 @@ MODEL_MAP = {
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qrelDict, qidInWiki):
+def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qrelDict):
     LR = 0.001
     BERT_LR = 2e-5
     MAX_EPOCH = 100
@@ -40,7 +40,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
     for epoch in range(MAX_EPOCH):
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
         print(f'train epoch={epoch} loss={loss}')
-        results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki)
+        results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir)
         # print(results)
         valid_score = np.mean(results["ndcg@15"])
         print(f'validation epoch={epoch} score={valid_score}')
@@ -178,9 +178,9 @@ def main_cli():
     for qid, prop, label in df[['qid', 'pid', 'rele_label']].values:
         qrelDict[str(qid)][str(prop)] = int(label)
 
-    qidInWiki = pickle.load(open("qidInWiki", "rb"))
+    # qidInWiki = pickle.load(open("qidInWiki", "rb"))
 
-    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, qidInWiki)
+    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict)
 
 
 if __name__ == '__main__':
