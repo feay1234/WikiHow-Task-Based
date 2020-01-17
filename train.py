@@ -151,6 +151,7 @@ def eval(qrels, ranked_list):
 
 
 def main_cli():
+
     parser = argparse.ArgumentParser('CEDR model training and validation')
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
     parser.add_argument('--datafiles', type=argparse.FileType('rt'), nargs='+', default="data/cedr/query-docs.tsv")
@@ -161,8 +162,8 @@ def main_cli():
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
     parser.add_argument('--model_out_dir', default="models/vbert")
     args = parser.parse_args()
-    #model = MODEL_MAP[args.model]().cuda()
-    model = MODEL_MAP[args.model]()
+
+    model = MODEL_MAP[args.model]().cuda() if data.device.type == 'cuda' else MODEL_MAP[args.model]()
     dataset = data.read_datafiles(args.datafiles, args.datafiles2)
     qrels = data.read_qrels_dict(args.qrels)
     train_pairs = data.read_pairs_dict(args.train_pairs)
@@ -179,7 +180,7 @@ def main_cli():
 
     qidInWiki = pickle.load(open("qidInWiki", "rb"))
 
-    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, qidInWiki)
+    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, qidInWiki, device)
 
 
 if __name__ == '__main__':

@@ -2,6 +2,8 @@ import random
 from tqdm import tqdm
 import torch
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 def read_datafiles(file1, file2):
     queries = {}
@@ -154,8 +156,7 @@ def _pad_crop(items, l):
         if len(item) > l:
             item = item[:l]
         result.append(item)
-    # return torch.tensor(result).long().cuda()
-    return torch.tensor(result).long()
+    return torch.tensor(result).long().cuda() if device.type == 'cuda' else torch.tensor(result).long()
 
 
 def _mask(items, l):
@@ -169,4 +170,4 @@ def _mask(items, l):
             mask = [1. for _ in item[:l]]
         result.append(mask)
     # return torch.tensor(result).float().cuda()
-    return torch.tensor(result).float()
+    return torch.tensor(result).float().cuda if device.type == 'cuda' else torch.tensor(result).float()
