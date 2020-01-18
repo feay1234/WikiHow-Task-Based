@@ -161,9 +161,9 @@ def eval(qrels, ranked_list):
 def main_cli():
 
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
-    parser.add_argument('--datafiles', type=argparse.FileType('rt'), nargs='+', default="data/cedr/queries.tsv")
-    parser.add_argument('--datafiles2', type=argparse.FileType('rt'), nargs='+', default="data/cedr/docs.tsv")
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_knrm')
+    parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-docs.tsv")
+    parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/docs.tsv")
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrels")
     parser.add_argument('--train_pairs', type=argparse.FileType('rt'), default="data/cedr/train.pairs")
     parser.add_argument('--valid_run', type=argparse.FileType('rt'), default="data/cedr/test.run")
