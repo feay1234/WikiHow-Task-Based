@@ -9,9 +9,7 @@ def read_datafiles(file1, file2):
     queries = {}
     docs = {}
     # for file in files:
-    print(file1)
     for line in tqdm(file1, desc='loading datafile (by line)', leave=False):
-        print(line)
         cols = line.rstrip().split('\t')
         if len(cols) != 3:
             tqdm.write(f'skipping line: `{line.rstrip()}`')
