@@ -28,7 +28,7 @@ MODEL_MAP = {
 def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qrelDict):
     LR = 0.001
     BERT_LR = 2e-5
-    MAX_EPOCH = 100
+    MAX_EPOCH = 20
 
     params = [(k, v) for k, v in model.named_parameters() if v.requires_grad]
     non_bert_params = {'params': [v for k, v in params if not k.startswith('bert.')]}
@@ -102,6 +102,7 @@ def run_model(model, dataset, run, runf, qrels, desc='valid'):
             for qid, did, score in zip(records['query_id'], records['doc_id'], scores):
                 rerank_run.setdefault(qid, {})[did] = score.item()
             pbar.update(len(records['query_id']))
+            # break
     # with open(runf, 'wt') as runfile:
     #     for qid in rerank_run:
             # scores = list(sorted(rerank_run[qid].items(), key=lambda x: (x[1], x[0]), reverse=True))
@@ -118,12 +119,14 @@ def run_model(model, dataset, run, runf, qrels, desc='valid'):
         # if int(qid) not in qidInWiki:
         #     continue
         ranked_list = [i[0] for i in sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)]
+        # print(ranked_list)
         result = eval(qrels[qid], ranked_list)
         # print(result)
         # print(result)
         # print()
         for key in res:
             res[key].append(result[key])
+        # break
     return res
 
 
@@ -164,7 +167,7 @@ def main_cli():
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
     parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/queries.tsv")
     parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/docs.tsv")
-    parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrels")
+    parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrels_all_pos")
     parser.add_argument('--train_pairs', type=argparse.FileType('rt'), default="data/cedr/train.pairs")
     parser.add_argument('--valid_run', type=argparse.FileType('rt'), default="data/cedr/test.run")
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
@@ -180,13 +183,15 @@ def main_cli():
         model.load(args.initial_bert_weights.name)
     os.makedirs(args.model_out_dir, exist_ok=True)
 
-    df = pd.read_csv("data/cedr/qrels", sep="\t", names=["qid", "empty", "pid", "rele_label"])
+    df = pd.read_csv("data/cedr/qrels_all_pos", sep="\t", names=["qid", "empty", "pid", "rele_label"])
     import collections
     qrelDict = collections.defaultdict(dict)
     for qid, prop, label in df[['qid', 'pid', 'rele_label']].values:
         qrelDict[str(qid)][str(prop)] = int(label)
 
-    # qidInWiki = pickle.load(open("qidInWiki", "rb"))
+    # print(qrelDict)
+
+    qidInWiki = pickle.load(open("qidInWiki", "rb"))
 
     main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict)
 
