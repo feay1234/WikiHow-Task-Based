@@ -41,7 +41,6 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
         print(f'train epoch={epoch} loss={loss}')
         results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir)
-        # print(results)
         valid_score = np.mean(results["ndcg@15"])
         print(f'validation epoch={epoch} score={valid_score}')
         if top_valid_score is None or valid_score > top_valid_score:
@@ -49,7 +48,6 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
             print('new top validation score, saving weights')
             model.save(os.path.join(model_out_dir, 'weights.p'))
             keys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg"] for j in [5, 10, 15]}
-            # print(results)
             print()
             for k in keys:
                 print(np.mean(results[k]), end="\t")
@@ -163,7 +161,7 @@ def eval(qrels, ranked_list):
 def main_cli():
 
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
     parser.add_argument('--datafiles', type=argparse.FileType('rt'), nargs='+', default="data/cedr/queries.tsv")
     parser.add_argument('--datafiles2', type=argparse.FileType('rt'), nargs='+', default="data/cedr/docs.tsv")
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrels")
