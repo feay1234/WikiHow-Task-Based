@@ -81,11 +81,10 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels):
             if len(pos_ids) == 0:
                 continue
             pos_id = random.choice(pos_ids)
-            pos_ids_lookup = set(pos_ids)
-            pos_ids = set(pos_ids)
             neg_ids = [did for did in train_pairs[qid] if qrels.get(qid, {}).get(did, 0) == 0]
 
             if len(neg_ids) == 0:
+                print("No neg instances", qid)
                 continue
             neg_id = random.choice(neg_ids)
             query_tok = model.tokenize(ds_queries[qid])
@@ -95,6 +94,7 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels):
                 tqdm.write(f'missing doc {pos_id}! Skipping')
                 continue
             if neg_doc is None:
+                print("here")
                 tqdm.write(f'missing doc {neg_id}! Skipping')
                 continue
             yield qid, pos_id, query_tok, model.tokenize(pos_doc)

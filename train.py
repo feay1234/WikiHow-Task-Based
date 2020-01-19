@@ -165,11 +165,11 @@ def main_cli():
 
     parser = argparse.ArgumentParser('CEDR model training and validation')
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
-    parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/queries.tsv")
-    parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/docs.tsv")
-    parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrels_all_pos")
-    parser.add_argument('--train_pairs', type=argparse.FileType('rt'), default="data/cedr/train.pairs")
-    parser.add_argument('--valid_run', type=argparse.FileType('rt'), default="data/cedr/test.run")
+    parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
+    parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
+    parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
+    parser.add_argument('--train_pairs', type=argparse.FileType('rt'), default="data/cedr/train.tsv")
+    parser.add_argument('--valid_run', type=argparse.FileType('rt'), default="data/cedr/test.tsv")
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
     parser.add_argument('--model_out_dir', default="models/vbert")
     args = parser.parse_args()
@@ -183,7 +183,7 @@ def main_cli():
         model.load(args.initial_bert_weights.name)
     os.makedirs(args.model_out_dir, exist_ok=True)
 
-    df = pd.read_csv("data/cedr/qrels_all_pos", sep="\t", names=["qid", "empty", "pid", "rele_label"])
+    df = pd.read_csv("data/cedr/qrel.tsv", sep="\t", names=["qid", "empty", "pid", "rele_label"])
     import collections
     qrelDict = collections.defaultdict(dict)
     for qid, prop, label in df[['qid', 'pid', 'rele_label']].values:
