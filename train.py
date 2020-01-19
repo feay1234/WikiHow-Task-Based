@@ -190,8 +190,7 @@ def main_cli():
         qrelDict[str(qid)][str(prop)] = int(label)
 
     # print(qrelDict)
-
-    qidInWiki = pickle.load(open("qidInWiki", "rb"))
+    # qidInWiki = pickle.load(open("qidInWiki", "rb"))
 
     main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict)
 
