@@ -1,6 +1,8 @@
 import os
 import argparse
 import subprocess
+from time import strftime, localtime
+
 import pandas as pd
 import numpy as np
 import random ,pickle
@@ -25,7 +27,7 @@ MODEL_MAP = {
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qrelDict):
+def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qrelDict, modelName):
     LR = 0.001
     BERT_LR = 2e-5
     MAX_EPOCH = 20
@@ -37,6 +39,9 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
 
     epoch = 0
     top_valid_score = None
+    bestResults = {}
+    metricKeys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}
+
     for epoch in range(MAX_EPOCH):
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
         print(f'train epoch={epoch} loss={loss}')
@@ -47,11 +52,18 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
             top_valid_score = valid_score
             print('new top validation score, saving weights')
             model.save(os.path.join(model_out_dir, 'weights.p'))
-            keys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg"] for j in [5, 10, 15]}
             print()
-            for k in keys:
-                print(np.mean(results[k]), end="\t")
+            output = []
+            for k in metricKeys:
+                _res = np.mean(results[k])
+                print(_res, end="\t")
+                output.append(str(_res))
+            write2file("out/", modelName, ".out", " ".join(output))
             print()
+        bestResults = results
+#   save best results to file for t-test
+    for k in metricKeys:
+        prediction2file("ttest/", modelName, "."+k, bestResults[k])
 
 
 def train_iteration(model, optimizer, dataset, train_pairs, qrels):
@@ -102,7 +114,6 @@ def run_model(model, dataset, run, runf, qrels, desc='valid'):
             for qid, did, score in zip(records['query_id'], records['doc_id'], scores):
                 rerank_run.setdefault(qid, {})[did] = score.item()
             pbar.update(len(records['query_id']))
-            # break
     # with open(runf, 'wt') as runfile:
     #     for qid in rerank_run:
             # scores = list(sorted(rerank_run[qid].items(), key=lambda x: (x[1], x[0]), reverse=True))
@@ -111,22 +122,14 @@ def run_model(model, dataset, run, runf, qrels, desc='valid'):
             # for i, (did, score) in enumerate(scores):
             #     runfile.write(f'{qid} 0 {did} {i+1} {score} run\n')
 
-    res = {"%s@%d" %( i,j): [] for i in ["p", "r", "ndcg"] for j in [5, 10 ,15]}
+    res = {"%s@%d" %( i,j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10 ,15, 20]}
     for qid in rerank_run:
-        # print(qid)
-        # print(qrels[qid])
-        # print(rerank_run[qid])
         # if int(qid) not in qidInWiki:
         #     continue
         ranked_list = [i[0] for i in sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)]
-        # print(ranked_list)
         result = eval(qrels[qid], ranked_list)
-        # print(result)
-        # print(result)
-        # print()
         for key in res:
             res[key].append(result[key])
-        # break
     return res
 
 
@@ -142,9 +145,12 @@ def eval(qrels, ranked_list):
     xrelnum = labeler.compute_per_level_doc_num(rel_level_num)
     result = {}
 
-    for i in [5, 10, 15]:
+    for i in [5, 10, 15, 20]:
         metric = MSnDCG(xrelnum, grades, cutoff=i)
         result["ndcg@%d" % i] = metric.compute(labeled_ranked_list)
+
+        nerr = nERR(xrelnum, grades, cutoff=i)
+        result["nerr@%d" % i] = nerr.compute(labeled_ranked_list)
 
         _ranked_list = ranked_list[:i]
         result["p@%d" % i] = len(set.intersection(set(qrels.keys()), set(_ranked_list))) / len(_ranked_list)
@@ -152,19 +158,28 @@ def eval(qrels, ranked_list):
 
     return result
 
-# def trec_eval(qrels, ranked_list):
-#     trec_eval_f = '/Users/jarana/workspace/WikiHow-Task-Based/bin/trec_eval'
-#     output = subprocess.check_output([trec_eval_f, '-m', metric, qrelf, runf]).decode().rstrip()
-#     output = output.replace('\t', ' ').split('\n')
-#     assert len(output) == 1
-#     return float(output[0].split()[2])
+def write2file(path, name, format, output):
+    print(output)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    thefile = open(path+name+format, 'a')
+    thefile.write("%s\n" % output)
+    thefile.close()
 
+def prediction2file(path, name, format, pred):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    thefile = open(path+name+format, 'w')
+    for item in pred:
+        thefile.write("%f\n" % item)
+    thefile.close()
 
 
 def main_cli():
 
     parser = argparse.ArgumentParser('CEDR model training and validation')
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
+    parser.add_argument('--data', default='query')
     parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
     parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
@@ -183,6 +198,10 @@ def main_cli():
         model.load(args.initial_bert_weights.name)
     os.makedirs(args.model_out_dir, exist_ok=True)
 
+    # TODO support 5folds
+    timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
+    modelName = "%s_%s_%s_%s" % (args.model, args.data, "split", timestamp)
+
     df = pd.read_csv("data/cedr/qrel.tsv", sep="\t", names=["qid", "empty", "pid", "rele_label"])
     import collections
     qrelDict = collections.defaultdict(dict)
@@ -192,7 +211,7 @@ def main_cli():
     # print(qrelDict)
     # qidInWiki = pickle.load(open("qidInWiki", "rb"))
 
-    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict)
+    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, modelName)
 
 
 if __name__ == '__main__':
