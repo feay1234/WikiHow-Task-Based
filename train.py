@@ -27,7 +27,7 @@ MODEL_MAP = {
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qrelDict, modelName):
+def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qrelDict, modelName, qidInWiki):
     LR = 0.001
     BERT_LR = 2e-5
     MAX_EPOCH = 20
@@ -45,7 +45,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
     for epoch in range(MAX_EPOCH):
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
         print(f'train epoch={epoch} loss={loss}')
-        results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir)
+        results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki)
         valid_score = np.mean(results["ndcg@15"])
         print(f'validation epoch={epoch} score={valid_score}')
         if top_valid_score is None or valid_score > top_valid_score:
@@ -75,6 +75,9 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels):
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE):
+            # print(record)
+            # for i in record:
+            #     print(i, record[i])
             scores = model(record['query_tok'],
                            record['query_mask'],
                            record['doc_tok'],
@@ -93,15 +96,15 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels):
                 return total_loss
 
 
-def validate(model, dataset, run, qrel, epoch, model_out_dir):
+def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki):
     VALIDATION_METRIC = 'P.20'
     runf = os.path.join(model_out_dir, f'{epoch}.run')
-    return run_model(model, dataset, run, runf, qrel)
+    return run_model(model, dataset, run, runf, qrel, qidInWiki)
     # return 0
     # return trec_eval(qrelf, runf)
 
 
-def run_model(model, dataset, run, runf, qrels, desc='valid'):
+def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
     BATCH_SIZE = 16
     rerank_run = {}
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
@@ -124,8 +127,8 @@ def run_model(model, dataset, run, runf, qrels, desc='valid'):
 
     res = {"%s@%d" %( i,j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10 ,15, 20]}
     for qid in rerank_run:
-        # if int(qid) not in qidInWiki:
-        #     continue
+        if int(qid) not in qidInWiki:
+            continue
         ranked_list = [i[0] for i in sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)]
         result = eval(qrels[qid], ranked_list)
         for key in res:
@@ -178,9 +181,9 @@ def prediction2file(path, name, format, pred):
 def main_cli():
 
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
-    parser.add_argument('--data', default='query')
-    parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
+    parser.add_argument('--data', default='query-wiki-question')
+    parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-wiki.tsv")
     parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
     parser.add_argument('--train_pairs', type=argparse.FileType('rt'), default="data/cedr/train.tsv")
@@ -208,10 +211,16 @@ def main_cli():
     for qid, prop, label in df[['qid', 'pid', 'rele_label']].values:
         qrelDict[str(qid)][str(prop)] = int(label)
 
-    # print(qrelDict)
-    # qidInWiki = pickle.load(open("qidInWiki", "rb"))
+    qidInWiki = pickle.load(open("qidInWiki", "rb"))
+    # print(qidInWiki)
 
-    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, modelName)
+    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, modelName, qidInWiki)
+    # print(dataset)
+    # maxlen = 0
+    # for i in dataset[1]:
+    #     l = len(dataset[1][i].split())
+    #     maxlen = max(maxlen, l)
+    # print(maxlen)
 
 
 if __name__ == '__main__':

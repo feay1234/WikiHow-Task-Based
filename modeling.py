@@ -32,6 +32,8 @@ class BertRanker(torch.nn.Module):
     @memoize_method
     def tokenize(self, text):
         toks = self.tokenizer.tokenize(text)
+        # print(text)
+        # print(toks)
         toks = [self.tokenizer.vocab[t] for t in toks]
         return toks
 

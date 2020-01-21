@@ -94,7 +94,6 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels):
                 tqdm.write(f'missing doc {pos_id}! Skipping')
                 continue
             if neg_doc is None:
-                print("here")
                 tqdm.write(f'missing doc {neg_id}! Skipping')
                 continue
             yield qid, pos_id, query_tok, model.tokenize(pos_doc)
@@ -131,9 +130,13 @@ def _iter_valid_records(model, dataset, run):
 
 
 def _pack_n_ship(batch):
-    QLEN = 20
-    MAX_DLEN = 800
-    DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
+    # QLEN = 20
+    # MAX_DLEN = 800
+    QLEN = 500
+    # MAX_DLEN = 200
+    # DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
+    DLEN = max(len(b) for b in batch['doc_tok'])
+    QLEN = min(QLEN, max(len(b) for b in batch['query_tok']))
     return {
         'query_id': batch['query_id'],
         'doc_id': batch['doc_id'],
