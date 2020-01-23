@@ -77,7 +77,6 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels):
         for record in data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE):
             # print(record)
             # for i in record:
-            #     print(i, record[i])
             scores = model(record['query_tok'],
                            record['query_mask'],
                            record['doc_tok'],
@@ -181,7 +180,7 @@ def prediction2file(path, name, format, pred):
 def main_cli():
 
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_drmm')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
     parser.add_argument('--data', default='query-wiki')
     parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-wiki.tsv")
     parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")

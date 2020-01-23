@@ -42,7 +42,6 @@ class BertRanker(torch.nn.Module):
         DIFF = 3 # = [CLS] and 2x[SEP]
         maxlen = self.bert.config.max_position_embeddings
         MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
-
         doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
         doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)
 
