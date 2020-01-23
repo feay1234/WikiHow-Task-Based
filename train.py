@@ -58,12 +58,12 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
                 _res = np.mean(results[k])
                 print(_res, end="\t")
                 output.append(str(_res))
-            write2file("out/", modelName, ".out", " ".join(output))
+            write2file("out2/", modelName, ".out", " ".join(output))
             print()
         bestResults = results
 #   save best results to file for t-test
     for k in metricKeys:
-        prediction2file("ttest/", modelName, "."+k, bestResults[k])
+        prediction2file("ttest2/", modelName, "."+k, bestResults[k])
 
 
 def train_iteration(model, optimizer, dataset, train_pairs, qrels):
@@ -181,8 +181,8 @@ def prediction2file(path, name, format, pred):
 def main_cli():
 
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
-    parser.add_argument('--data', default='query-wiki-question')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_drmm')
+    parser.add_argument('--data', default='query-wiki')
     parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-wiki.tsv")
     parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
