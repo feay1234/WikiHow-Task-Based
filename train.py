@@ -45,25 +45,25 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
     for epoch in range(MAX_EPOCH):
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
         print(f'train epoch={epoch} loss={loss}')
-#         results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki)
-#         valid_score = np.mean(results["ndcg@15"])
-#         print(f'validation epoch={epoch} score={valid_score}')
-#         if top_valid_score is None or valid_score > top_valid_score:
-#             top_valid_score = valid_score
-#             print('new top validation score, saving weights')
-#             model.save(os.path.join(model_out_dir, 'weights.p'))
-#             print()
-#             output = []
-#             for k in metricKeys:
-#                 _res = np.mean(results[k])
-#                 print(_res, end="\t")
-#                 output.append(str(_res))
-#             write2file("out2/", modelName, ".out", " ".join(output))
-#             print()
-#         bestResults = results
-# #   save best results to file for t-test
-#     for k in metricKeys:
-#         prediction2file("ttest2/", modelName, "."+k, bestResults[k])
+        results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki)
+        valid_score = np.mean(results["ndcg@15"])
+        print(f'validation epoch={epoch} score={valid_score}')
+        if top_valid_score is None or valid_score > top_valid_score:
+            top_valid_score = valid_score
+            print('new top validation score, saving weights')
+            model.save(os.path.join(model_out_dir, 'weights.p'))
+            print()
+            output = []
+            for k in metricKeys:
+                _res = np.mean(results[k])
+                print(_res, end="\t")
+                output.append(str(_res))
+            write2file("out2/", modelName, ".out", " ".join(output))
+            print()
+        bestResults = results
+#   save best results to file for t-test
+    for k in metricKeys:
+        prediction2file("ttest2/", modelName, "."+k, bestResults[k])
 
 
 def train_iteration(model, optimizer, dataset, train_pairs, qrels):
