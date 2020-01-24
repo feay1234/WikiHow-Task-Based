@@ -88,6 +88,7 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels):
                 continue
             neg_id = random.choice(neg_ids)
             query_tok = model.tokenize(ds_queries[qid])
+            # print(len(query_tok))
             pos_doc = ds_docs.get(pos_id)
             neg_doc = ds_docs.get(neg_id)
             if pos_doc is None:
@@ -148,7 +149,7 @@ def _pack_n_ship_original(batch):
 
 def _pack_n_ship(batch):
     QLEN = 20
-    MAX_DLEN = 10000
+    MAX_DLEN = 5120
     DLEN = min(MAX_DLEN, max(len(b) for b in batch['query_tok']))
     return {
         'query_id': batch['query_id'],
