@@ -205,9 +205,12 @@ def main_cli():
     parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
     parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
-    parser.add_argument('--train_pairs', type=argparse.FileType('rt'), default="data/cedr/train0.tsv data/cedr/train1.tsv data/cedr/train2.tsv data/cedr/train3.tsv data/cedr/train4.tsv ", nargs='+')
-    parser.add_argument('--valid_run', type=argparse.FileType('rt'), default="data/cedr/valid0.tsv data/cedr/valid1.tsv data/cedr/valid2.tsv data/cedr/valid3.tsv data/cedr/valid4.tsv", nargs='+')
-    parser.add_argument('--test_run', type=argparse.FileType('rt'), default="data/cedr/test0.tsv data/cedr/test1.tsv data/cedr/test2.tsv data/cedr/test3.tsv data/cedr/test4.tsv", nargs='+')
+    # parser.add_argument('--train_pairs', type=argparse.FileType('rt'), default="data/cedr/train0.tsv data/cedr/train1.tsv data/cedr/train2.tsv data/cedr/train3.tsv data/cedr/train4.tsv", nargs='+')
+    # parser.add_argument('--valid_run', type=argparse.FileType('rt'), default="data/cedr/valid0.tsv data/cedr/valid1.tsv data/cedr/valid2.tsv data/cedr/valid3.tsv data/cedr/valid4.tsv", nargs='+')
+    # parser.add_argument('--test_run', type=argparse.FileType('rt'), default="data/cedr/test0.tsv data/cedr/test1.tsv data/cedr/test2.tsv data/cedr/test3.tsv data/cedr/test4.tsv", nargs='+')
+    parser.add_argument('--train_pairs', default="data/cedr/train")
+    parser.add_argument('--valid_run', default="data/cedr/valid")
+    parser.add_argument('--test_run', default="data/cedr/test")
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
     parser.add_argument('--model_out_dir', default="models/vbert")
     args = parser.parse_args()
@@ -215,20 +218,22 @@ def main_cli():
     model = MODEL_MAP[args.model]().cuda() if data.device.type == 'cuda' else MODEL_MAP[args.model]()
     dataset = data.read_datafiles(args.datafiles, args.datafiles2)
     qrels = data.read_qrels_dict(args.qrels)
+
     train_pairs = []
     valid_run = []
     test_run = []
-    for file in args.train_pairs:
-        train_pairs.append(data.read_pairs_dict(file))
-    for file in args.valid_run:
-        valid_run.append(data.read_run_dict(file))
-    for file in args.test_run:
-        test_run.append(data.read_run_dict(file))
+    for fold in range(5):
+        f = open(args.train_pairs + "%d.tsv" % fold, "r")
+        train_pairs.append(data.read_pairs_dict(f))
+        f = open(args.valid_run + "%d.tsv" % fold, "r")
+        valid_run.append(data.read_run_dict(f))
+        f = open(args.test_run + "%d.tsv" % fold, "r")
+        test_run.append(data.read_run_dict(f))
+
     if args.initial_bert_weights is not None:
         model.load(args.initial_bert_weights.name)
     os.makedirs(args.model_out_dir, exist_ok=True)
 
-    # TODO support 5folds
     timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
     modelName = "%s_%s_%s_%s" % (args.model, args.data, "split", timestamp)
 
@@ -240,7 +245,7 @@ def main_cli():
 
     qidInWiki = pickle.load(open("qidInWiki", "rb"))
 
-    for fold in range(len(args.train_pairs)):
+    for fold in range(len(train_pairs)):
         main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki)
 
 
