@@ -129,7 +129,7 @@ def _iter_valid_records(model, dataset, run):
             doc_tok = model.tokenize(doc)
             yield qid, did, query_tok, doc_tok
 
-
+# Poor BERT
 def _pack_n_ship_original(batch):
     QLEN = 20
     MAX_DLEN = 800

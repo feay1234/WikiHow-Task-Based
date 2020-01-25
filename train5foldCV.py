@@ -27,7 +27,7 @@ MODEL_MAP = {
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold):
+def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys):
     LR = 0.001
     BERT_LR = 2e-5
     MAX_EPOCH = 2
@@ -41,8 +41,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     bestResults = {}
     bestPredictions = []
     bestQids = []
-    metricKeys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}
-    metricKeys["rp"] = []
+
 
     print("Fold: %d" % fold)
 
@@ -54,29 +53,20 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
         print(f'validation epoch={epoch} score={valid_score}')
         if top_valid_score is None or valid_score > top_valid_score:
             top_valid_score = valid_score
-            print('new top validation score, saving weights')
-            model.save(os.path.join(model_out_dir, 'weights.p'))
+            print('new top validation score')
+            # model.save(os.path.join(model_out_dir, 'weights.p'))
             test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch, model_out_dir, qidInWiki, "test")
             bestResults = test_results
             bestPredictions = test_predictions
             bestQids = test_qids
 
-#   save best results to files
-    output = []
-    for k in metricKeys:
-        _res = np.mean(bestResults[k])
-        print(_res, end="\t")
-        output.append(str(_res))
-    write2file("out5/", modelName, ".res", ",".join(output))
+#   save outputs to files
 
-
-    # print(bestResults)
-    # print(bestPredictions)
-    # print()
     for k in metricKeys:
         result2file("out5/", modelName, "."+k, bestResults[k], bestQids, fold)
 
     prediction2file("out5/", modelName, ".out", bestPredictions, fold)
+    return bestResults
 
 def train_iteration(model, optimizer, dataset, train_pairs, qrels):
     BATCH_SIZE = 16
@@ -87,8 +77,6 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels):
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE):
-            # print(record)
-            # for i in record:
             scores = model(record['query_tok'],
                            record['query_mask'],
                            record['doc_tok'],
@@ -108,11 +96,8 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels):
 
 
 def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki, desc):
-    VALIDATION_METRIC = 'P.20'
     runf = os.path.join(model_out_dir, f'{epoch}.run')
     return run_model(model, dataset, run, runf, qrel, qidInWiki, desc)
-    # return 0
-    # return trec_eval(qrelf, runf)
 
 
 def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
@@ -150,9 +135,6 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
 
 
 def eval(qrels, ranked_list):
-    # print(qrels)
-    # print(ranked_list)
-    # print()
     grades = [1, 2, 3, 4]  # a grade for relevance levels 1 and 2 (Note that level 0 is excluded)
     labeler = Labeler(qrels)
     labeled_ranked_list = labeler.label(ranked_list)
@@ -208,9 +190,6 @@ def main_cli():
     parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
     parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
-    # parser.add_argument('--train_pairs', type=argparse.FileType('rt'), default="data/cedr/train0.tsv data/cedr/train1.tsv data/cedr/train2.tsv data/cedr/train3.tsv data/cedr/train4.tsv", nargs='+')
-    # parser.add_argument('--valid_run', type=argparse.FileType('rt'), default="data/cedr/valid0.tsv data/cedr/valid1.tsv data/cedr/valid2.tsv data/cedr/valid3.tsv data/cedr/valid4.tsv", nargs='+')
-    # parser.add_argument('--test_run', type=argparse.FileType('rt'), default="data/cedr/test0.tsv data/cedr/test1.tsv data/cedr/test2.tsv data/cedr/test3.tsv data/cedr/test4.tsv", nargs='+')
     parser.add_argument('--train_pairs', default="data/cedr/train")
     parser.add_argument('--valid_run', default="data/cedr/valid")
     parser.add_argument('--test_run', default="data/cedr/test")
@@ -225,7 +204,9 @@ def main_cli():
     train_pairs = []
     valid_run = []
     test_run = []
-    for fold in range(2):
+
+    foldNum = 2
+    for fold in range(foldNum):
         f = open(args.train_pairs + "%d.tsv" % fold, "r")
         train_pairs.append(data.read_pairs_dict(f))
         f = open(args.valid_run + "%d.tsv" % fold, "r")
@@ -248,8 +229,19 @@ def main_cli():
 
     qidInWiki = pickle.load(open("qidInWiki", "rb"))
 
+    metricKeys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}
+    metricKeys["rp"] = []
+
+    results = []
     for fold in range(len(train_pairs)):
-        main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki, fold)
+        results.append(main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys))
+
+#   average results across 5 folds
+    output = []
+    for k in metricKeys:
+        _res = np.mean([np.mean(results[fold][k]) for fold in range(foldNum)])
+        output.append("%.4f" % _res)
+    write2file("out5/", modelName, ".res", ",".join(output))
 
 
 if __name__ == '__main__':
