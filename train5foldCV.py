@@ -137,9 +137,10 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
     for qid in rerank_run:
         if int(qid) not in qidInWiki:
             continue
-        ranked_list = [i[0] for i in sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)]
-        for pid in ranked_list:
-            predictions.append((qid, pid))
+        ranked_list_scores = sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)
+        ranked_list = [i[0] for i in ranked_list_scores]
+        for (pid, score) in ranked_list_scores:
+            predictions.append((qid, pid, score))
         result = eval(qrels[qid], ranked_list)
         for key in res:
             res[key].append(result[key])
@@ -186,8 +187,8 @@ def prediction2file(path, name, format, preds, fold):
     if not os.path.exists(path):
         os.makedirs(path)
     thefile = open(path+name+format, 'a')
-    for (qid, pid) in preds:
-        thefile.write("%d\t%s\t%s\n" % (fold, qid, pid))
+    for (qid, pid, score) in preds:
+        thefile.write("%d\t%s\t%s\t%f\n" % (fold, qid, pid, score))
     thefile.close()
 
 def result2file(path, name, format, res, qids, fold):
