@@ -27,10 +27,9 @@ MODEL_MAP = {
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys):
+def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH):
     LR = 0.001
     BERT_LR = 2e-5
-    MAX_EPOCH = 2
 
     params = [(k, v) for k, v in model.named_parameters() if v.requires_grad]
     non_bert_params = {'params': [v for k, v in params if not k.startswith('bert.')]}
@@ -195,17 +194,21 @@ def main_cli():
     parser.add_argument('--test_run', default="data/cedr/test")
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
     parser.add_argument('--model_out_dir', default="models/vbert")
+    parser.add_argument('--epoch', type=int, default=20)
+    parser.add_argument('--fold', type=int, default=5)
     args = parser.parse_args()
 
     model = MODEL_MAP[args.model]().cuda() if data.device.type == 'cuda' else MODEL_MAP[args.model]()
     dataset = data.read_datafiles(args.datafiles, args.datafiles2)
     qrels = data.read_qrels_dict(args.qrels)
 
+    MAX_EPOCH = args.epoch
+
     train_pairs = []
     valid_run = []
     test_run = []
 
-    foldNum = 2
+    foldNum = args.fold
     for fold in range(foldNum):
         f = open(args.train_pairs + "%d.tsv" % fold, "r")
         train_pairs.append(data.read_pairs_dict(f))
@@ -234,7 +237,7 @@ def main_cli():
 
     results = []
     for fold in range(len(train_pairs)):
-        results.append(main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys))
+        results.append(main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH))
 
 #   average results across 5 folds
     output = []
