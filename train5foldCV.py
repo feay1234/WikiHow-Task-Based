@@ -30,7 +30,7 @@ MODEL_MAP = {
 def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki):
     LR = 0.001
     BERT_LR = 2e-5
-    MAX_EPOCH = 3
+    MAX_EPOCH = 2
 
     params = [(k, v) for k, v in model.named_parameters() if v.requires_grad]
     non_bert_params = {'params': [v for k, v in params if not k.startswith('bert.')]}
