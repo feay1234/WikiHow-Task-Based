@@ -149,7 +149,8 @@ def _pack_n_ship_original(batch):
 
 def _pack_n_ship(batch):
     QLEN = 20
-    MAX_DLEN = 1280
+    #maximum size for GPU
+    MAX_DLEN = 2000
     DLEN = min(MAX_DLEN, max(len(b) for b in batch['query_tok']))
     return {
         'query_id': batch['query_id'],
