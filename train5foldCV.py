@@ -27,7 +27,7 @@ MODEL_MAP = {
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki):
+def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold):
     LR = 0.001
     BERT_LR = 2e-5
     MAX_EPOCH = 2
@@ -43,6 +43,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     bestQids = []
     metricKeys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}
     metricKeys["rp"] = []
+
+    print("Fold: %d" % fold)
 
     for epoch in range(MAX_EPOCH):
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
@@ -72,9 +74,9 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     # print(bestPredictions)
     # print()
     for k in metricKeys:
-        result2file("out5/", modelName, "."+k, bestResults[k], bestQids)
+        result2file("out5/", modelName, "."+k, bestResults[k], bestQids, fold)
 
-    prediction2file("out5/", modelName, ".out", bestPredictions)
+    prediction2file("out5/", modelName, ".out", bestPredictions, fold)
 
 def train_iteration(model, optimizer, dataset, train_pairs, qrels):
     BATCH_SIZE = 16
@@ -133,8 +135,8 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
     predictions = []
     qids = []
     for qid in rerank_run:
-        # if int(qid) not in qidInWiki:
-        #     continue
+        if int(qid) not in qidInWiki:
+            continue
         ranked_list = [i[0] for i in sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)]
         for pid in ranked_list:
             predictions.append((qid, pid))
@@ -180,20 +182,20 @@ def write2file(path, name, format, output):
     thefile.write("%s\n" % output)
     thefile.close()
 
-def prediction2file(path, name, format, preds):
+def prediction2file(path, name, format, preds, fold):
     if not os.path.exists(path):
         os.makedirs(path)
     thefile = open(path+name+format, 'a')
     for (qid, pid) in preds:
-        thefile.write("%s\t%s\n" % (qid, pid))
+        thefile.write("%d\t%s\t%s\n" % (fold, qid, pid))
     thefile.close()
 
-def result2file(path, name, format, res, qids):
+def result2file(path, name, format, res, qids, fold):
     if not os.path.exists(path):
         os.makedirs(path)
     thefile = open(path+name+format, 'a')
     for q, r in zip(qids, res):
-        thefile.write("%s\t%f\n" % (q, r))
+        thefile.write("%d\t%s\t%f\n" % (fold, q, r))
     thefile.close()
 
 
@@ -222,7 +224,7 @@ def main_cli():
     train_pairs = []
     valid_run = []
     test_run = []
-    for fold in range(5):
+    for fold in range(2):
         f = open(args.train_pairs + "%d.tsv" % fold, "r")
         train_pairs.append(data.read_pairs_dict(f))
         f = open(args.valid_run + "%d.tsv" % fold, "r")
@@ -246,7 +248,7 @@ def main_cli():
     qidInWiki = pickle.load(open("qidInWiki", "rb"))
 
     for fold in range(len(train_pairs)):
-        main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki)
+        main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki, fold)
 
 
 if __name__ == '__main__':
