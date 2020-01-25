@@ -47,14 +47,14 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     for epoch in range(MAX_EPOCH):
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
         print(f'train epoch={epoch} loss={loss}')
-        valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki)
+        valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki, "valid")
         valid_score = np.mean(valid_results["ndcg@15"])
         print(f'validation epoch={epoch} score={valid_score}')
         if top_valid_score is None or valid_score > top_valid_score:
             top_valid_score = valid_score
             print('new top validation score, saving weights')
             model.save(os.path.join(model_out_dir, 'weights.p'))
-            test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch, model_out_dir, qidInWiki)
+            test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch, model_out_dir, qidInWiki, "test")
             bestResults = test_results
             bestPredictions = test_predictions
             bestQids = test_qids
@@ -105,10 +105,10 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels):
                 return total_loss
 
 
-def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki):
+def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki, desc):
     VALIDATION_METRIC = 'P.20'
     runf = os.path.join(model_out_dir, f'{epoch}.run')
-    return run_model(model, dataset, run, runf, qrel, qidInWiki)
+    return run_model(model, dataset, run, runf, qrel, qidInWiki, desc)
     # return 0
     # return trec_eval(qrelf, runf)
 
