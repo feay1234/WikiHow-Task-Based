@@ -183,7 +183,7 @@ def write2file(path, name, format, output):
 def prediction2file(path, name, format, preds):
     if not os.path.exists(path):
         os.makedirs(path)
-    thefile = open(path+name+format, 'w')
+    thefile = open(path+name+format, 'a')
     for (qid, pid) in preds:
         thefile.write("%s\t%s\n" % (qid, pid))
     thefile.close()
@@ -191,7 +191,7 @@ def prediction2file(path, name, format, preds):
 def result2file(path, name, format, res, qids):
     if not os.path.exists(path):
         os.makedirs(path)
-    thefile = open(path+name+format, 'w')
+    thefile = open(path+name+format, 'a')
     for q, r in zip(qids, res):
         thefile.write("%s\t%f\n" % (q, r))
     thefile.close()
