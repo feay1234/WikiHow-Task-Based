@@ -30,7 +30,7 @@ MODEL_MAP = {
 def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki):
     LR = 0.001
     BERT_LR = 2e-5
-    MAX_EPOCH = 1
+    MAX_EPOCH = 3
 
     params = [(k, v) for k, v in model.named_parameters() if v.requires_grad]
     non_bert_params = {'params': [v for k, v in params if not k.startswith('bert.')]}
@@ -45,8 +45,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     metricKeys["rp"] = []
 
     for epoch in range(MAX_EPOCH):
-        # loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
-        # print(f'train epoch={epoch} loss={loss}')
+        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
+        print(f'train epoch={epoch} loss={loss}')
         valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki)
         valid_score = np.mean(valid_results["ndcg@15"])
         print(f'validation epoch={epoch} score={valid_score}')
@@ -133,8 +133,8 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
     predictions = []
     qids = []
     for qid in rerank_run:
-        if int(qid) not in qidInWiki:
-            continue
+        # if int(qid) not in qidInWiki:
+        #     continue
         ranked_list = [i[0] for i in sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)]
         for pid in ranked_list:
             predictions.append((qid, pid))
