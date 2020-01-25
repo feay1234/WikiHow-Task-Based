@@ -65,16 +65,16 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
         _res = np.mean(bestResults[k])
         print(_res, end="\t")
         output.append(str(_res))
-    write2file("out/", modelName, ".res", ",".join(output))
+    write2file("out5/", modelName, ".res", ",".join(output))
 
 
     # print(bestResults)
     # print(bestPredictions)
     # print()
     for k in metricKeys:
-        result2file("out/", modelName, "."+k, bestResults[k], bestQids)
+        result2file("out5/", modelName, "."+k, bestResults[k], bestQids)
 
-    prediction2file("out/", modelName, ".out", bestPredictions)
+    prediction2file("out5/", modelName, ".out", bestPredictions)
 
 def train_iteration(model, optimizer, dataset, train_pairs, qrels):
     BATCH_SIZE = 16
