@@ -27,7 +27,7 @@ MODEL_MAP = {
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qrelDict, modelName, qidInWiki):
+def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qrelDict, modelName, qidInWiki, data):
     LR = 0.001
     BERT_LR = 2e-5
     MAX_EPOCH = 20
@@ -43,7 +43,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
     metricKeys["rp"] = []
 
     for epoch in range(MAX_EPOCH):
-        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
+        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data)
         print(f'train epoch={epoch} loss={loss}')
         results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki)
         valid_score = np.mean(results["ndcg@15"])
@@ -218,7 +218,7 @@ def main_cli():
     qidInWiki = pickle.load(open("qidInWiki", "rb"))
     # print(qidInWiki)
 
-    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, modelName, qidInWiki)
+    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, modelName, qidInWiki, data)
     # print(dataset)
     # maxlen = 0
     # for i in dataset[1]:

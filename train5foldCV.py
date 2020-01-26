@@ -27,7 +27,7 @@ MODEL_MAP = {
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH):
+def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH, data):
     LR = 0.001
     BERT_LR = 2e-5
 
@@ -45,16 +45,16 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     print("Fold: %d" % fold)
 
     for epoch in range(MAX_EPOCH):
-        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
+        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data)
         print(f'train epoch={epoch} loss={loss}')
-        valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki, "valid")
+        valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki, data, "valid")
         valid_score = np.mean(valid_results["ndcg@15"])
         print(f'validation epoch={epoch} score={valid_score}')
         if top_valid_score is None or valid_score > top_valid_score:
             top_valid_score = valid_score
             print('new top validation score')
             # model.save(os.path.join(model_out_dir, 'weights.p'))
-            test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch, model_out_dir, qidInWiki, "test")
+            test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch, model_out_dir, qidInWiki, data, "test")
             bestResults = test_results
             bestPredictions = test_predictions
             bestQids = test_qids
@@ -67,7 +67,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     prediction2file("out5/", modelName, ".out", bestPredictions, fold)
     return bestResults
 
-def train_iteration(model, optimizer, dataset, train_pairs, qrels):
+def train_iteration(model, optimizer, dataset, train_pairs, qrels, data):
     BATCH_SIZE = 16
     BATCHES_PER_EPOCH = 32
     GRAD_ACC_SIZE = 2
@@ -75,7 +75,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels):
     model.train()
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
-        for record in data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE):
+        for record in data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data):
             scores = model(record['query_tok'],
                            record['query_mask'],
                            record['doc_tok'],
@@ -94,17 +94,17 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels):
                 return total_loss
 
 
-def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki, desc):
+def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki, data, desc):
     runf = os.path.join(model_out_dir, f'{epoch}.run')
-    return run_model(model, dataset, run, runf, qrel, qidInWiki, desc)
+    return run_model(model, dataset, run, runf, qrel, qidInWiki, data, desc)
 
 
-def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
+def run_model(model, dataset, run, runf, qrels, qidInWiki, data, desc='valid'):
     BATCH_SIZE = 16
     rerank_run = {}
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
-        for records in data.iter_valid_records(model, dataset, run, BATCH_SIZE):
+        for records in data.iter_valid_records(model, dataset, run, BATCH_SIZE, data):
             scores = model(records['query_tok'],
                            records['query_mask'],
                            records['doc_tok'],
@@ -237,7 +237,7 @@ def main_cli():
 
     results = []
     for fold in range(len(train_pairs)):
-        results.append(main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH))
+        results.append(main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH, data))
 
 #   average results across 5 folds
     output = []

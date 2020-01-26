@@ -58,7 +58,7 @@ def read_pairs_dict(file):
     return result
 
 
-def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size):
+def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data):
     batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': []}
     for qid, did, query_tok, doc_tok in _iter_train_pairs(model, dataset, train_pairs, qrels):
         batch['query_id'].append(qid)
@@ -66,7 +66,7 @@ def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size):
         batch['query_tok'].append(query_tok)
         batch['doc_tok'].append(doc_tok)
         if len(batch['query_id']) // 2 == batch_size:
-            yield _pack_n_ship(batch)
+            yield _pack_n_ship(batch, data)
             batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': []}
 
 
@@ -102,7 +102,7 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels):
         # break
 
 
-def iter_valid_records(model, dataset, run, batch_size):
+def iter_valid_records(model, dataset, run, batch_size, data):
     batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': []}
     for qid, did, query_tok, doc_tok in _iter_valid_records(model, dataset, run):
         batch['query_id'].append(qid)
@@ -110,11 +110,11 @@ def iter_valid_records(model, dataset, run, batch_size):
         batch['query_tok'].append(query_tok)
         batch['doc_tok'].append(doc_tok)
         if len(batch['query_id']) == batch_size:
-            yield _pack_n_ship(batch)
+            yield _pack_n_ship(batch, data)
             batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': []}
     # final batch
     if len(batch['query_id']) > 0:
-        yield _pack_n_ship(batch)
+        yield _pack_n_ship(batch, data)
 
 
 def _iter_valid_records(model, dataset, run):
@@ -147,19 +147,31 @@ def _pack_n_ship_original(batch):
         'doc_mask': _mask(batch['doc_tok'], DLEN),
     }
 
-def _pack_n_ship(batch):
-    QLEN = 20
-    #maximum size for GPU
-    MAX_DLEN = 2000
-    DLEN = min(MAX_DLEN, max(len(b) for b in batch['query_tok']))
-    return {
-        'query_id': batch['query_id'],
-        'doc_id': batch['doc_id'],
-        'query_tok': _pad_crop(batch['doc_tok'], QLEN),
-        'doc_tok': _pad_crop(batch['query_tok'], DLEN),
-        'query_mask': _mask(batch['doc_tok'], QLEN),
-        'doc_mask': _mask(batch['query_tok'], DLEN),
-    }
+def _pack_n_ship(batch, data):
+    QLEN = 20 # fix to match models' dimensions
+    if data == "query":
+        MAX_DLEN = 800
+        DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
+        return {
+            'query_id': batch['query_id'],
+            'doc_id': batch['doc_id'],
+            'query_tok': _pad_crop(batch['query_tok'], QLEN),
+            'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
+            'query_mask': _mask(batch['query_tok'], QLEN),
+            'doc_mask': _mask(batch['doc_tok'], DLEN),
+        }
+    else:
+        #maximum size for GPU
+        MAX_DLEN = 2000
+        DLEN = min(MAX_DLEN, max(len(b) for b in batch['query_tok']))
+        return {
+            'query_id': batch['query_id'],
+            'doc_id': batch['doc_id'],
+            'query_tok': _pad_crop(batch['doc_tok'], QLEN),
+            'doc_tok': _pad_crop(batch['query_tok'], DLEN),
+            'query_mask': _mask(batch['doc_tok'], QLEN),
+            'doc_mask': _mask(batch['query_tok'], DLEN),
+        }
 
 
 def _pad_crop(items, l):
