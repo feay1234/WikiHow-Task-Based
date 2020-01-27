@@ -12,6 +12,7 @@ import modeling
 import data
 from pyNTCIREVAL import Labeler
 from pyNTCIREVAL.metrics import MSnDCG, nERR, nDCG
+import collections
 
 SEED = 42
 torch.manual_seed(SEED)
@@ -27,7 +28,7 @@ MODEL_MAP = {
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH, data):
+def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH, data, args):
     LR = 0.001
     BERT_LR = 2e-5
 
@@ -47,14 +48,14 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     for epoch in range(MAX_EPOCH):
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data)
         print(f'train epoch={epoch} loss={loss}')
-        valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki, data, "valid")
+        valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki, data, args, "valid")
         valid_score = np.mean(valid_results["ndcg@15"])
         print(f'validation epoch={epoch} score={valid_score}')
         if top_valid_score is None or valid_score > top_valid_score:
             top_valid_score = valid_score
             print('new top validation score')
             # model.save(os.path.join(model_out_dir, 'weights.p'))
-            test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch, model_out_dir, qidInWiki, data, "test")
+            test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch, model_out_dir, qidInWiki, data, args, "test")
             bestResults = test_results
             bestPredictions = test_predictions
             bestQids = test_qids
@@ -62,9 +63,9 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
 #   save outputs to files
 
     for k in metricKeys:
-        result2file("out5/", modelName, "."+k, bestResults[k], bestQids, fold)
+        result2file(args.out_dir, modelName, "."+k, bestResults[k], bestQids, fold)
 
-    prediction2file("out5/", modelName, ".out", bestPredictions, fold)
+    prediction2file(args.out_dir, modelName, ".out", bestPredictions, fold)
     return bestResults
 
 def train_iteration(model, optimizer, dataset, train_pairs, qrels, data):
@@ -94,12 +95,12 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data):
                 return total_loss
 
 
-def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki, data, desc):
+def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki, data, args, desc):
     runf = os.path.join(model_out_dir, f'{epoch}.run')
-    return run_model(model, dataset, run, runf, qrel, qidInWiki, data, desc)
+    return run_model(model, dataset, run, runf, qrel, qidInWiki, data, args, desc)
 
 
-def run_model(model, dataset, run, runf, qrels, qidInWiki, data, desc='valid'):
+def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='valid'):
     BATCH_SIZE = 16
     rerank_run = {}
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
@@ -119,7 +120,7 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, desc='valid'):
     predictions = []
     qids = []
     for qid in rerank_run:
-        if int(qid) not in qidInWiki:
+        if args.evalMode != "all" and int(qid) not in qidInWiki:
             continue
         ranked_list_scores = sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)
         ranked_list = [i[0] for i in ranked_list_scores]
@@ -196,6 +197,9 @@ def main_cli():
     parser.add_argument('--model_out_dir', default="models/vbert")
     parser.add_argument('--epoch', type=int, default=20)
     parser.add_argument('--fold', type=int, default=5)
+    parser.add_argument('--out_dir', default="out5/")
+    parser.add_argument('--evalMode', default="all")
+
     args = parser.parse_args()
 
     model = MODEL_MAP[args.model]().cuda() if data.device.type == 'cuda' else MODEL_MAP[args.model]()
@@ -221,11 +225,13 @@ def main_cli():
         model.load(args.initial_bert_weights.name)
     os.makedirs(args.model_out_dir, exist_ok=True)
 
+    if not os.path.exists(args.out_dir):
+        os.makedirs(args.out_dir)
+
     timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
-    modelName = "%s_%s_%s_%s" % (args.model, args.data, "split", timestamp)
+    modelName = "%s_%s_%s_%s" % (args.model, args.data, args.evalMode, timestamp)
 
     df = pd.read_csv("data/cedr/qrel.tsv", sep="\t", names=["qid", "empty", "pid", "rele_label"])
-    import collections
     qrelDict = collections.defaultdict(dict)
     for qid, prop, label in df[['qid', 'pid', 'rele_label']].values:
         qrelDict[str(qid)][str(prop)] = int(label)
@@ -237,14 +243,14 @@ def main_cli():
 
     results = []
     for fold in range(len(train_pairs)):
-        results.append(main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH, data))
+        results.append(main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH, data, args))
 
 #   average results across 5 folds
     output = []
     for k in metricKeys:
         _res = np.mean([np.mean(results[fold][k]) for fold in range(foldNum)])
         output.append("%.4f" % _res)
-    write2file("out5/", modelName, ".res", ",".join(output))
+    write2file(args.out_dir, modelName, ".res", ",".join(output))
 
 
 if __name__ == '__main__':
