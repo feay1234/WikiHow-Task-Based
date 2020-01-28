@@ -197,7 +197,7 @@ def main_cli():
     parser.add_argument('--model_out_dir', default="models/vbert")
     parser.add_argument('--epoch', type=int, default=20)
     parser.add_argument('--fold', type=int, default=5)
-    parser.add_argument('--out_dir', default="out5/")
+    parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
 
     args = parser.parse_args()
@@ -229,7 +229,7 @@ def main_cli():
         os.makedirs(args.out_dir)
 
     timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
-    modelName = "%s_%s_%s_%s" % (args.model, args.data, args.evalMode, timestamp)
+    modelName = "%s_%s_%s_epoch%d%s" % (args.model, args.data, args.evalMode, args.epoch, timestamp)
 
     df = pd.read_csv("data/cedr/qrel.tsv", sep="\t", names=["qid", "empty", "pid", "rele_label"])
     qrelDict = collections.defaultdict(dict)

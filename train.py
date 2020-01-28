@@ -41,17 +41,18 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
     bestResults = {}
     metricKeys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}
     metricKeys["rp"] = []
+    bestPredictions = []
 
     for epoch in range(MAX_EPOCH):
-        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data)
+        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels)
         print(f'train epoch={epoch} loss={loss}')
-        results = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki)
+        results, predictions = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki, data)
         valid_score = np.mean(results["ndcg@15"])
         print(f'validation epoch={epoch} score={valid_score}')
         if top_valid_score is None or valid_score > top_valid_score:
             top_valid_score = valid_score
             print('new top validation score, saving weights')
-            model.save(os.path.join(model_out_dir, 'weights.p'))
+            # model.save(os.path.join(model_out_dir, 'weights.p'))
             print()
             output = []
             for k in metricKeys:
@@ -61,9 +62,12 @@ def main(model, dataset, train_pairs, qrels, valid_run, qrelf, model_out_dir, qr
             write2file("out/", modelName, ".out", ",".join(output))
             print()
             bestResults = results
+            bestPredictions = predictions
 #   save best results to file for t-test
     for k in metricKeys:
-        prediction2file("ttest/", modelName, "."+k, bestResults[k])
+        result2file("out3/", modelName, "."+k, bestResults[k])
+
+    prediction2file("out3/", modelName, ".out", bestPredictions)
 
 
 def train_iteration(model, optimizer, dataset, train_pairs, qrels):
@@ -95,20 +99,20 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels):
                 return total_loss
 
 
-def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki):
+def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki, data):
     VALIDATION_METRIC = 'P.20'
     runf = os.path.join(model_out_dir, f'{epoch}.run')
-    return run_model(model, dataset, run, runf, qrel, qidInWiki)
+    return run_model(model, dataset, run, runf, qrel, qidInWiki, data)
     # return 0
     # return trec_eval(qrelf, runf)
 
 
-def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
+def run_model(model, dataset, run, runf, qrels, qidInWiki, data, desc='valid'):
     BATCH_SIZE = 16
     rerank_run = {}
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
-        for records in data.iter_valid_records(model, dataset, run, BATCH_SIZE):
+        for records in data.iter_valid_records(model, dataset, run, BATCH_SIZE, data):
             scores = model(records['query_tok'],
                            records['query_mask'],
                            records['doc_tok'],
@@ -116,7 +120,7 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
             for qid, did, score in zip(records['query_id'], records['doc_id'], scores):
                 rerank_run.setdefault(qid, {})[did] = score.item()
             pbar.update(len(records['query_id']))
-            break
+            # break
 
     # with open(runf, 'wt') as runfile:
     #     for qid in rerank_run:
@@ -128,14 +132,18 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, desc='valid'):
 
     res = {"%s@%d" %( i,j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10 ,15, 20]}
     res['rp'] = []
+    predictions = []
     for qid in rerank_run:
         if int(qid) not in qidInWiki:
             continue
-        ranked_list = [i[0] for i in sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)]
+        ranked_list_scores = sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)
+        ranked_list = [i[0] for i in ranked_list_scores]
+        for (pid, score) in ranked_list_scores:
+            predictions.append((qid, pid, score))
         result = eval(qrels[qid], ranked_list)
         for key in res:
             res[key].append(result[key])
-    return res
+    return res, predictions
 
 
 
@@ -173,19 +181,29 @@ def write2file(path, name, format, output):
     thefile.write("%s\n" % output)
     thefile.close()
 
-def prediction2file(path, name, format, pred):
+def prediction2file(path, name, format, preds):
     if not os.path.exists(path):
         os.makedirs(path)
-    thefile = open(path+name+format, 'w')
-    for item in pred:
-        thefile.write("%f\n" % item)
+    thefile = open(path+name+format, 'a')
+    for (qid, pid, score) in preds:
+        thefile.write("%s\t%s\t%f\n" % (qid, pid, score))
     thefile.close()
+
+def result2file(path, name, format, res):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    thefile = open(path+name+format, 'a')
+    for r in res:
+        thefile.write("%f\n" % r)
+    thefile.close()
+
+
 
 
 def main_cli():
 
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
     parser.add_argument('--data', default='query')
     parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
     parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
