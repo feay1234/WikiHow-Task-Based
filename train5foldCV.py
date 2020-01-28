@@ -229,7 +229,7 @@ def main_cli():
         os.makedirs(args.out_dir)
 
     timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
-    modelName = "%s_%s_%s_epoch%d%s" % (args.model, args.data, args.evalMode, args.epoch, timestamp)
+    modelName = "%s_%s_%s_e%d_%s" % (args.model, args.data, args.evalMode, args.epoch, timestamp)
 
     df = pd.read_csv("data/cedr/qrel.tsv", sep="\t", names=["qid", "empty", "pid", "rele_label"])
     qrelDict = collections.defaultdict(dict)
