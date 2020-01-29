@@ -153,7 +153,7 @@ def _pack_n_ship(batch, data):
 
     QLEN = min(MAX_DLEN, max(len(b) for b in batch['query_tok']))
     DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
-    print(QLEN, DLEN)
+    # print(QLEN, DLEN)
     return {
         'query_id': batch['query_id'],
         'doc_id': batch['doc_id'],
