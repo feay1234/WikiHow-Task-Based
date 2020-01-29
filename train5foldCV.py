@@ -5,11 +5,11 @@ from time import strftime, localtime
 
 import pandas as pd
 import numpy as np
-import random ,pickle
+import random, pickle
 from tqdm import tqdm
 import torch
 import modeling
-import data
+import Data
 from pyNTCIREVAL import Labeler
 from pyNTCIREVAL.metrics import MSnDCG, nERR, nDCG
 import collections
@@ -19,16 +19,17 @@ torch.manual_seed(SEED)
 torch.cuda.manual_seed_all(SEED)
 random.seed(SEED)
 
-
 MODEL_MAP = {
     'vanilla_bert': modeling.VanillaBertRanker,
+    'pairwise_bert': modeling.VanillaBertPairwiseRanker,
     'cedr_pacrr': modeling.CedrPacrrRanker,
     'cedr_knrm': modeling.CedrKnrmRanker,
     'cedr_drmm': modeling.CedrDrmmRanker
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH, data, args):
+def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold,
+         metricKeys, MAX_EPOCH, data, args):
     LR = 0.001
     BERT_LR = 2e-5
 
@@ -42,31 +43,33 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     bestPredictions = []
     bestQids = []
 
-
     print("Fold: %d" % fold)
 
     for epoch in range(MAX_EPOCH):
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data)
         print(f'train epoch={epoch} loss={loss}')
-        valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch, model_out_dir, qidInWiki, data, args, "valid")
+        valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
+                                                                model_out_dir, qidInWiki, data, args, "valid")
         valid_score = np.mean(valid_results["ndcg@15"])
         print(f'validation epoch={epoch} score={valid_score}')
         if top_valid_score is None or valid_score > top_valid_score:
             top_valid_score = valid_score
             print('new top validation score')
             # model.save(os.path.join(model_out_dir, 'weights.p'))
-            test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch, model_out_dir, qidInWiki, data, args, "test")
+            test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch,
+                                                                 model_out_dir, qidInWiki, data, args, "test")
             bestResults = test_results
             bestPredictions = test_predictions
             bestQids = test_qids
 
-#   save outputs to files
+    #   save outputs to files
 
     for k in metricKeys:
-        result2file(args.out_dir, modelName, "."+k, bestResults[k], bestQids, fold)
+        result2file(args.out_dir, modelName, "." + k, bestResults[k], bestQids, fold)
 
     prediction2file(args.out_dir, modelName, ".out", bestPredictions, fold)
     return bestResults
+
 
 def train_iteration(model, optimizer, dataset, train_pairs, qrels, data):
     BATCH_SIZE = 16
@@ -76,14 +79,24 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data):
     model.train()
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
-        for record in data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data):
-            scores = model(record['query_tok'],
-                           record['query_mask'],
-                           record['doc_tok'],
-                           record['doc_mask'])
+        for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data):
+
+            if isinstance(model, modeling.BertPairwiseRanker):
+                scores = model(record['query_tok'],
+                               record['query_mask'],
+                               record['doc_tok'],
+                               record['doc_mask'],
+                               record['prop_tok'],
+                               record['prop_mask'])
+            else:
+                scores = model(record['query_tok'],
+                               record['query_mask'],
+                               record['doc_tok'],
+                               record['doc_mask'])
+
             count = len(record['query_id']) // 2
             scores = scores.reshape(count, 2)
-            loss = torch.mean(1. - scores.softmax(dim=1)[:, 0]) # pariwse softmax
+            loss = torch.mean(1. - scores.softmax(dim=1)[:, 0])  # pariwse softmax
             loss.backward()
             total_loss += loss.item()
             total += count
@@ -105,7 +118,7 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='val
     rerank_run = {}
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
-        for records in data.iter_valid_records(model, dataset, run, BATCH_SIZE, data):
+        for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data):
             scores = model(records['query_tok'],
                            records['query_mask'],
                            records['doc_tok'],
@@ -115,7 +128,7 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='val
             pbar.update(len(records['query_id']))
             # break
 
-    res = {"%s@%d" %( i,j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10 ,15, 20]}
+    res = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}
     res['rp'] = []
     predictions = []
     qids = []
@@ -131,7 +144,6 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='val
             res[key].append(result[key])
         qids.append(qid)
     return qids, res, predictions
-
 
 
 def eval(qrels, ranked_list):
@@ -157,37 +169,39 @@ def eval(qrels, ranked_list):
 
     return result
 
+
 def write2file(path, name, format, output):
     print(output)
     if not os.path.exists(path):
         os.makedirs(path)
-    thefile = open(path+name+format, 'a')
+    thefile = open(path + name + format, 'a')
     thefile.write("%s\n" % output)
     thefile.close()
+
 
 def prediction2file(path, name, format, preds, fold):
     if not os.path.exists(path):
         os.makedirs(path)
-    thefile = open(path+name+format, 'a')
+    thefile = open(path + name + format, 'a')
     for (qid, pid, score) in preds:
         thefile.write("%d\t%s\t%s\t%f\n" % (fold, qid, pid, score))
     thefile.close()
 
+
 def result2file(path, name, format, res, qids, fold):
     if not os.path.exists(path):
         os.makedirs(path)
-    thefile = open(path+name+format, 'a')
+    thefile = open(path + name + format, 'a')
     for q, r in zip(qids, res):
         thefile.write("%d\t%s\t%f\n" % (fold, q, r))
     thefile.close()
 
 
 def main_cli():
-
     parser = argparse.ArgumentParser('CEDR model training and validation')
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
     parser.add_argument('--data', default='query')
-    parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
+    parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-nostopword.tsv")
     parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
     parser.add_argument('--train_pairs', default="data/cedr/train")
@@ -202,9 +216,9 @@ def main_cli():
 
     args = parser.parse_args()
 
-    model = MODEL_MAP[args.model]().cuda() if data.device.type == 'cuda' else MODEL_MAP[args.model]()
-    dataset = data.read_datafiles(args.datafiles, args.datafiles2)
-    qrels = data.read_qrels_dict(args.qrels)
+    model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
+    dataset = Data.read_datafiles(args.datafiles, args.datafiles2)
+    qrels = Data.read_qrels_dict(args.qrels)
 
     MAX_EPOCH = args.epoch
 
@@ -215,11 +229,11 @@ def main_cli():
     foldNum = args.fold
     for fold in range(foldNum):
         f = open(args.train_pairs + "%d.tsv" % fold, "r")
-        train_pairs.append(data.read_pairs_dict(f))
+        train_pairs.append(Data.read_pairs_dict(f))
         f = open(args.valid_run + "%d.tsv" % fold, "r")
-        valid_run.append(data.read_run_dict(f))
+        valid_run.append(Data.read_run_dict(f))
         f = open(args.test_run + "%d.tsv" % fold, "r")
-        test_run.append(data.read_run_dict(f))
+        test_run.append(Data.read_run_dict(f))
 
     if args.initial_bert_weights is not None:
         model.load(args.initial_bert_weights.name)
@@ -243,9 +257,11 @@ def main_cli():
 
     results = []
     for fold in range(len(train_pairs)):
-        results.append(main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir, qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH, data, args))
+        results.append(
+            main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir,
+                 qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH, Data, args))
 
-#   average results across 5 folds
+    #   average results across 5 folds
     output = []
     for k in metricKeys:
         _res = np.mean([np.mean(results[fold][k]) for fold in range(foldNum)])

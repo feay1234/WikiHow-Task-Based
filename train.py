@@ -9,7 +9,7 @@ import random ,pickle
 from tqdm import tqdm
 import torch
 import modeling
-import data
+import Data
 from pyNTCIREVAL import Labeler
 from pyNTCIREVAL.metrics import MSnDCG, nERR, nDCG
 
@@ -78,7 +78,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels):
     model.train()
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
-        for record in data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE):
+        for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE):
             # print(record)
             # for i in record:
             scores = model(record['query_tok'],
@@ -112,7 +112,7 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, desc='valid'):
     rerank_run = {}
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
-        for records in data.iter_valid_records(model, dataset, run, BATCH_SIZE, data):
+        for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data):
             scores = model(records['query_tok'],
                            records['query_mask'],
                            records['doc_tok'],
@@ -214,11 +214,11 @@ def main_cli():
     parser.add_argument('--model_out_dir', default="models/vbert")
     args = parser.parse_args()
 
-    model = MODEL_MAP[args.model]().cuda() if data.device.type == 'cuda' else MODEL_MAP[args.model]()
-    dataset = data.read_datafiles(args.datafiles, args.datafiles2)
-    qrels = data.read_qrels_dict(args.qrels)
-    train_pairs = data.read_pairs_dict(args.train_pairs)
-    valid_run = data.read_run_dict(args.valid_run)
+    model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
+    dataset = Data.read_datafiles(args.datafiles, args.datafiles2)
+    qrels = Data.read_qrels_dict(args.qrels)
+    train_pairs = Data.read_pairs_dict(args.train_pairs)
+    valid_run = Data.read_run_dict(args.valid_run)
     if args.initial_bert_weights is not None:
         model.load(args.initial_bert_weights.name)
     os.makedirs(args.model_out_dir, exist_ok=True)
@@ -236,7 +236,9 @@ def main_cli():
     qidInWiki = pickle.load(open("qidInWiki", "rb"))
     # print(qidInWiki)
 
-    main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, modelName, qidInWiki, data)
+    print(issubclass(model, modeling.BertPairwiseRanker()))
+
+    # main(model, dataset, train_pairs, qrels, valid_run, args.qrels.name, args.model_out_dir, qrelDict, modelName, qidInWiki, data)
     # print(dataset)
     # maxlen = 0
     # for i in dataset[1]:

@@ -4,6 +4,85 @@ import torch.nn.functional as F
 import pytorch_pretrained_bert
 import modeling_util
 
+class BertPairwiseRanker(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.BERT_MODEL = 'bert-base-uncased'
+        self.CHANNELS = 12 + 1 # from bert-base-uncased
+        self.BERT_SIZE = 768 # from bert-base-uncased
+        self.bert = CustomBertModel.from_pretrained(self.BERT_MODEL)
+        self.tokenizer = pytorch_pretrained_bert.BertTokenizer.from_pretrained(self.BERT_MODEL)
+
+    def forward(self, **inputs):
+        raise NotImplementedError
+
+    def save(self, path):
+        state = self.state_dict(keep_vars=True)
+        for key in list(state):
+            if state[key].requires_grad:
+                state[key] = state[key].data
+            else:
+                del state[key]
+        torch.save(state, path)
+
+    def load(self, path):
+        self.load_state_dict(torch.load(path), strict=False)
+
+    @memoize_method
+    def tokenize(self, text):
+        toks = self.tokenizer.tokenize(text)
+        toks = [self.tokenizer.vocab[t] for t in toks]
+        return toks
+
+    def encode_bert(self, query_tok, query_mask, doc_tok, doc_mask, prop_tok, prop_mask):
+        BATCH, QLEN = query_tok.shape
+        DIFF = 4 # = [CLS] and 3x[SEP]
+        maxlen = self.bert.config.max_position_embeddings
+        MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
+
+        CLSS = torch.full_like(query_tok[:, :1], self.tokenizer.vocab['[CLS]'])
+        SEPS = torch.full_like(query_tok[:, :1], self.tokenizer.vocab['[SEP]'])
+        TWOS = torch.zeros_like(query_mask[:, :1]) + 2
+        ONES = torch.ones_like(query_mask[:, :1])
+        NILS = torch.zeros_like(query_mask[:, :1])
+
+        # build BERT input sequences
+        toks = torch.cat([CLSS, query_tok, SEPS, doc_tok, SEPS, prop_tok, SEPS], dim=1)
+        mask = torch.cat([ONES, query_mask, ONES, doc_mask, ONES, prop_mask, ONES], dim=1)
+        segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_tok.shape[1]) + [TWOS] * (1 + prop_tok.shape[1]), dim=1)
+        toks[toks == -1] = 0 # remove padding (will be masked anyway)
+
+        # execute BERT model
+        result = self.bert(toks, segment_ids.long(), mask)
+
+        # TODO
+        # extract relevant subsequences for query and doc
+        query_results = [r[:BATCH, 1:QLEN+1] for r in result]
+        doc_results = [r[:, QLEN+2:-1] for r in result]
+        doc_results = [modeling_util.un_subbatch(r, doc_tok, MAX_DOC_TOK_LEN) for r in doc_results]
+
+        # build CLS representation
+        cls_results = []
+        for layer in result:
+            cls_output = layer[:, 0]
+            cls_result = []
+            for i in range(cls_output.shape[0] // BATCH):
+                cls_result.append(cls_output[i*BATCH:(i+1)*BATCH])
+            cls_result = torch.stack(cls_result, dim=2).mean(dim=2)
+            cls_results.append(cls_result)
+
+        return cls_results, query_results, doc_results
+
+class VanillaBertPairwiseRanker(BertPairwiseRanker):
+    def __init__(self):
+        super().__init__()
+        self.dropout = torch.nn.Dropout(0.1)
+        self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
+
+    def forward(self, query_tok, query_mask, doc_tok, doc_mask, prop_tok, prop_mask):
+        cls_reps, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask, prop_tok, prop_mask)
+        return self.cls(self.dropout(cls_reps[-1]))
+
 
 class BertRanker(torch.nn.Module):
     def __init__(self):
