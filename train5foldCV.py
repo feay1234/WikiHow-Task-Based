@@ -46,7 +46,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     print("Fold: %d" % fold)
 
     for epoch in range(MAX_EPOCH):
-        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data)
+        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args)
         print(f'train epoch={epoch} loss={loss}')
         valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
                                                                 model_out_dir, qidInWiki, data, args, "valid")
@@ -71,7 +71,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     return bestResults
 
 
-def train_iteration(model, optimizer, dataset, train_pairs, qrels, data):
+def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     BATCH_SIZE = 16
     BATCHES_PER_EPOCH = 32
     GRAD_ACC_SIZE = 2
@@ -79,7 +79,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data):
     model.train()
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
-        for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data):
+        for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
 
             if isinstance(model, modeling.BertPairwiseRanker):
                 scores = model(record['query_tok'],
@@ -118,7 +118,7 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='val
     rerank_run = {}
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
-        for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data):
+        for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data, args):
             scores = model(records['query_tok'],
                            records['query_mask'],
                            records['doc_tok'],
@@ -204,7 +204,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_drmm')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25.tsv")
@@ -224,6 +224,13 @@ def main_cli():
 
     model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
     dataset = Data.read_datafiles(args.datafiles, args.datafiles2)
+
+    # if args.model == modeling.CedrPacrrRanker:
+    args.maxlen = min(500, max([len(model.tokenize(dataset[0][i])) for i in dataset[0]]))
+    # args.maxlen = 20
+    model = MODEL_MAP[args.model](args.maxlen).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args.maxlen)
+
+
     qrels = Data.read_qrels_dict(args.qrels)
 
     MAX_EPOCH = args.epoch

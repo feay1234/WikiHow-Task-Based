@@ -1,7 +1,7 @@
 import random
 from tqdm import tqdm
 import torch
-
+import modeling
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -58,7 +58,7 @@ def read_pairs_dict(file):
     return result
 
 
-def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data):
+def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data, args):
     batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': []}
     for qid, did, query_tok, doc_tok in _iter_train_pairs(model, dataset, train_pairs, qrels):
         batch['query_id'].append(qid)
@@ -66,7 +66,7 @@ def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data):
         batch['query_tok'].append(query_tok)
         batch['doc_tok'].append(doc_tok)
         if len(batch['query_id']) // 2 == batch_size:
-            yield _pack_n_ship(batch, data)
+            yield _pack_n_ship(batch, data, args)
             batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': []}
 
 
@@ -102,7 +102,7 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels):
         # break
 
 
-def iter_valid_records(model, dataset, run, batch_size, data):
+def iter_valid_records(model, dataset, run, batch_size, data, args):
     batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': []}
     for qid, did, query_tok, doc_tok in _iter_valid_records(model, dataset, run):
         batch['query_id'].append(qid)
@@ -110,11 +110,11 @@ def iter_valid_records(model, dataset, run, batch_size, data):
         batch['query_tok'].append(query_tok)
         batch['doc_tok'].append(doc_tok)
         if len(batch['query_id']) == batch_size:
-            yield _pack_n_ship(batch, data)
+            yield _pack_n_ship(batch, data, args)
             batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': []}
     # final batch
     if len(batch['query_id']) > 0:
-        yield _pack_n_ship(batch, data)
+        yield _pack_n_ship(batch, data, args)
 
 
 def _iter_valid_records(model, dataset, run):
@@ -147,7 +147,7 @@ def _pack_n_ship_original(batch):
         'doc_mask': _mask(batch['doc_tok'], DLEN),
     }
 
-def _pack_n_ship(batch, data):
+def _pack_n_ship(batch, data, args):
     QLEN = 20 # fix to match models' dimensions
     MAX_DLEN = 800
 
@@ -157,7 +157,9 @@ def _pack_n_ship(batch, data):
     DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
     # QLEN = min(MAX_QUE_TOK_LEN, max(len(b) for b in batch['query_tok']))
     # QLEN = min(20, max(len(b) for b in batch['query_tok']))
-    QLEN = max(len(b) for b in batch['query_tok'])
+
+    QLEN = max(len(b) for b in batch['query_tok']) if isinstance(args.model, modeling.CedrPacrrRanker) else args.maxlen
+
     return {
         'query_id': batch['query_id'],
         'doc_id': batch['doc_id'],

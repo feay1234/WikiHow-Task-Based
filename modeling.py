@@ -111,8 +111,6 @@ class BertRanker(torch.nn.Module):
     @memoize_method
     def tokenize(self, text):
         toks = self.tokenizer.tokenize(text)
-        # print(text)
-        # print(toks)
         toks = [self.tokenizer.vocab[t] for t in toks]
         return toks
 
@@ -185,10 +183,9 @@ class VanillaBertRanker(BertRanker):
 
 
 class CedrPacrrRanker(BertRanker):
-    def __init__(self):
+    def __init__(self, QLEN=500):
         super().__init__()
-        QLEN = 20
-        # QLEN = 500
+        # QLEN = 20
         KMAX = 2 # Original was 2, which causes unknown bug
         NFILTERS = 32
         MINGRAM = 1
@@ -211,7 +208,6 @@ class CedrPacrrRanker(BertRanker):
         scores = torch.cat(scores, dim=2)
         scores = scores.reshape(scores.shape[0], scores.shape[1] * scores.shape[2])
         scores = torch.cat([scores, cls_reps[-1]], dim=1)
-        print("pr:", scores.shape)
         rel = F.relu(self.linear1(scores))
         rel = F.relu(self.linear2(rel))
         rel = self.linear3(rel)
