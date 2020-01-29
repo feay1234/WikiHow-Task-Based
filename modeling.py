@@ -120,12 +120,20 @@ class BertRanker(torch.nn.Module):
         BATCH, QLEN = query_tok.shape
         DIFF = 3 # = [CLS] and 2x[SEP]
         maxlen = self.bert.config.max_position_embeddings
-        MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
-        doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
-        doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)
+        # MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
+        # doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
+        # doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)
+        #
+        # query_toks = torch.cat([query_tok] * sbcount, dim=0)
+        # query_mask = torch.cat([query_mask] * sbcount, dim=0)
 
-        query_toks = torch.cat([query_tok] * sbcount, dim=0)
-        query_mask = torch.cat([query_mask] * sbcount, dim=0)
+        DLEN = 9 # longest property's lenght
+        MAX_QUE_TOK_LEN = maxlen - DLEN - DIFF
+        query_toks, sbcount = modeling_util.subbatch(query_tok, MAX_QUE_TOK_LEN)
+        query_mask, _ = modeling_util.subbatch(query_mask, MAX_QUE_TOK_LEN)
+
+        doc_toks = torch.cat([doc_tok] * sbcount, dim=0)
+        doc_mask = torch.cat([doc_mask] * sbcount, dim=0)
 
         CLSS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[CLS]'])
         SEPS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[SEP]'])
@@ -141,10 +149,16 @@ class BertRanker(torch.nn.Module):
         # execute BERT model
         result = self.bert(toks, segment_ids.long(), mask)
 
+        # Original
         # extract relevant subsequences for query and doc
-        query_results = [r[:BATCH, 1:QLEN+1] for r in result]
-        doc_results = [r[:, QLEN+2:-1] for r in result]
-        doc_results = [modeling_util.un_subbatch(r, doc_tok, MAX_DOC_TOK_LEN) for r in doc_results]
+        # query_results = [r[:BATCH, 1:QLEN+1] for r in result]
+        # doc_results = [r[:, QLEN+2:-1] for r in result]
+        # doc_results = [modeling_util.un_subbatch(r, doc_tok, MAX_DOC_TOK_LEN) for r in doc_results]
+
+        # Support long queries
+        query_results = [r[:, 1: MAX_QUE_TOK_LEN + 2] for r in result]
+        query_results = [modeling_util.un_subbatch(r, query_tok, MAX_QUE_TOK_LEN) for r in query_results]
+        doc_results = [r[:BATCH, MAX_QUE_TOK_LEN+2:-1] for r in result]
 
         # build CLS representation
         cls_results = []
