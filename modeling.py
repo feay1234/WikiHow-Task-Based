@@ -144,6 +144,7 @@ class BertRanker(torch.nn.Module):
         toks = torch.cat([CLSS, query_toks, SEPS, doc_toks, SEPS], dim=1)
         mask = torch.cat([ONES, query_mask, ONES, doc_mask, ONES], dim=1)
         segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
+        # segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
         toks[toks == -1] = 0 # remove padding (will be masked anyway)
 
         # execute BERT model
