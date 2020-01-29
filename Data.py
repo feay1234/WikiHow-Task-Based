@@ -151,18 +151,13 @@ def _pack_n_ship(batch, data):
     QLEN = 20 # fix to match models' dimensions
     MAX_DLEN = 800
 
-    # MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
-    # doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
-    # doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)
-    #
-    # query_toks = torch.cat([query_tok] * sbcount, dim=0)
-    # query_mask = torch.cat([query_mask] * sbcount, dim=0)
-
     MAX_DLEN = 9  # longest property's lenght
     DIFF = 3
     MAX_QUE_TOK_LEN = 512 - MAX_DLEN - DIFF
     DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
-    QLEN = min(MAX_QUE_TOK_LEN, max(len(b) for b in batch['query_tok']))
+    # QLEN = min(MAX_QUE_TOK_LEN, max(len(b) for b in batch['query_tok']))
+    # QLEN = min(20, max(len(b) for b in batch['query_tok']))
+    QLEN = max(len(b) for b in batch['query_tok'])
     return {
         'query_id': batch['query_id'],
         'doc_id': batch['doc_id'],

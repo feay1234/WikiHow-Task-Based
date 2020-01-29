@@ -71,6 +71,7 @@ class SimmatModule(torch.nn.Module):
 
         for a_emb, b_emb in zip(query_embed, doc_embed):
             BAT, A, B = a_emb.shape[0], a_emb.shape[1], b_emb.shape[1]
+            # print(BAT, A, B)
             # embeddings -- cosine similarity matrix
             a_denom = a_emb.norm(p=2, dim=2).reshape(BAT, A, 1).expand(BAT, A, B) + 1e-9 # avoid 0div
             b_denom = b_emb.norm(p=2, dim=2).reshape(BAT, 1, B).expand(BAT, A, B) + 1e-9 # avoid 0div
@@ -80,6 +81,9 @@ class SimmatModule(torch.nn.Module):
 
             # nullify padding (indicated by -1 by default)
             nul = torch.zeros_like(sim)
+            # print(query_tok.shape)
+            # print(doc_tok.shape)
+            # print()
             sim = torch.where(query_tok.reshape(BAT, A, 1).expand(BAT, A, B) == self.padding, nul, sim)
             sim = torch.where(doc_tok.reshape(BAT, 1, B).expand(BAT, A, B) == self.padding, nul, sim)
 

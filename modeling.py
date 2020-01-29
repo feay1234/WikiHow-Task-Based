@@ -123,15 +123,14 @@ class BertRanker(torch.nn.Module):
         # MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
         # doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
         # doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)
-        #
         # query_toks = torch.cat([query_tok] * sbcount, dim=0)
         # query_mask = torch.cat([query_mask] * sbcount, dim=0)
 
+        # Long query
         DLEN = 9 # longest property's lenght
         MAX_QUE_TOK_LEN = maxlen - DLEN - DIFF
         query_toks, sbcount = modeling_util.subbatch(query_tok, MAX_QUE_TOK_LEN)
         query_mask, _ = modeling_util.subbatch(query_mask, MAX_QUE_TOK_LEN)
-
         doc_toks = torch.cat([doc_tok] * sbcount, dim=0)
         doc_mask = torch.cat([doc_mask] * sbcount, dim=0)
 
@@ -155,11 +154,11 @@ class BertRanker(torch.nn.Module):
         # query_results = [r[:BATCH, 1:QLEN+1] for r in result]
         # doc_results = [r[:, QLEN+2:-1] for r in result]
         # doc_results = [modeling_util.un_subbatch(r, doc_tok, MAX_DOC_TOK_LEN) for r in doc_results]
-
+        #
         # Support long queries
-        query_results = [r[:, 1: MAX_QUE_TOK_LEN + 2] for r in result]
-        query_results = [modeling_util.un_subbatch(r, query_tok, MAX_QUE_TOK_LEN) for r in query_results]
-        doc_results = [r[:BATCH, MAX_QUE_TOK_LEN+2:-1] for r in result]
+        query_results = [r[:, 1: query_tok.shape[-1] + 1] for r in result]
+        query_results = [modeling_util.un_subbatch(r, query_tok, query_tok.shape[-1]) for r in query_results]
+        doc_results = [r[:, query_tok.shape[-1]+2:-1] for r in result]
 
         # build CLS representation
         cls_results = []
@@ -212,6 +211,7 @@ class CedrPacrrRanker(BertRanker):
         scores = torch.cat(scores, dim=2)
         scores = scores.reshape(scores.shape[0], scores.shape[1] * scores.shape[2])
         scores = torch.cat([scores, cls_reps[-1]], dim=1)
+        print("pr:", scores.shape)
         rel = F.relu(self.linear1(scores))
         rel = F.relu(self.linear2(rel))
         rel = self.linear3(rel)
