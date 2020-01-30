@@ -118,6 +118,55 @@ class BertRanker(torch.nn.Module):
         BATCH, QLEN = query_tok.shape
         DIFF = 3 # = [CLS] and 2x[SEP]
         maxlen = self.bert.config.max_position_embeddings
+        MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
+
+        doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
+        doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)
+
+        query_toks = torch.cat([query_tok] * sbcount, dim=0)
+        query_mask = torch.cat([query_mask] * sbcount, dim=0)
+
+        CLSS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[CLS]'])
+        SEPS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[SEP]'])
+        ONES = torch.ones_like(query_mask[:, :1])
+        NILS = torch.zeros_like(query_mask[:, :1])
+
+        # build BERT input sequences
+        toks = torch.cat([CLSS, doc_toks, SEPS, query_toks, SEPS], dim=1)
+        mask = torch.cat([ONES, doc_mask, ONES, query_mask, ONES], dim=1)
+        # segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
+        segment_ids = torch.cat([NILS] * (2 + doc_toks.shape[1]) + [ONES] * (1 + QLEN), dim=1)
+        toks[toks == -1] = 0 # remove padding (will be masked anyway)
+
+        print(MAX_DOC_TOK_LEN, doc_tok.shape)
+
+        # execute BERT model
+        result = self.bert(toks, segment_ids.long(), mask)
+
+        # extract relevant subsequences for query and doc
+        query_results = [r[:BATCH, 1:QLEN+1] for r in result]
+        doc_results = [r[:, QLEN+2:-1] for r in result]
+        doc_results = [modeling_util.un_subbatch(r, doc_tok, MAX_DOC_TOK_LEN) for r in doc_results]
+
+
+        # build CLS representation
+        cls_results = []
+        for layer in result:
+            cls_output = layer[:, 0]
+            cls_result = []
+            for i in range(cls_output.shape[0] // BATCH):
+                cls_result.append(cls_output[i*BATCH:(i+1)*BATCH])
+            cls_result = torch.stack(cls_result, dim=2).mean(dim=2)
+            cls_results.append(cls_result)
+
+        return cls_results, query_results, doc_results
+        # return cls_results, doc_results, query_results
+
+    # confusing one
+    def encode_bert_old(self, query_tok, query_mask, doc_tok, doc_mask):
+        BATCH, QLEN = query_tok.shape
+        DIFF = 3 # = [CLS] and 2x[SEP]
+        maxlen = self.bert.config.max_position_embeddings
         # MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
         # doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
         # doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)

@@ -148,6 +148,22 @@ def _pack_n_ship_original(batch):
     }
 
 def _pack_n_ship(batch, data, args):
+    QLEN = 9
+    # MAX_DLEN = 800
+    # DLEN = min(MAX_DLEN, max(len(b) for b in batch['query_tok']))
+    DLEN = max(len(b) for b in batch['query_tok'])
+    print(DLEN)
+    return {
+        'query_id': batch['query_id'],
+        'doc_id': batch['doc_id'],
+        'query_tok': _pad_crop(batch['doc_tok'], QLEN),
+        'doc_tok': _pad_crop(batch['query_tok'], DLEN),
+        'query_mask': _mask(batch['doc_tok'], QLEN),
+        'doc_mask': _mask(batch['query_tok'], DLEN),
+    }
+
+
+def _pack_n_ship_old(batch, data, args):
     QLEN = 20 # fix to match models' dimensions
     MAX_DLEN = 800
 
@@ -168,30 +184,6 @@ def _pack_n_ship(batch, data, args):
         'query_mask': _mask(batch['query_tok'], QLEN),
         'doc_mask': _mask(batch['doc_tok'], DLEN),
     }
-    #
-    # if data == "query":
-    #     MAX_DLEN = 800
-    #     DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
-    #     return {
-    #         'query_id': batch['query_id'],
-    #         'doc_id': batch['doc_id'],
-    #         'query_tok': _pad_crop(batch['query_tok'], QLEN),
-    #         'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
-    #         'query_mask': _mask(batch['query_tok'], QLEN),
-    #         'doc_mask': _mask(batch['doc_tok'], DLEN),
-    #     }
-    # else:
-    #     #maximum size for GPU
-    #     MAX_DLEN = 2000
-    #     DLEN = min(MAX_DLEN, max(len(b) for b in batch['query_tok']))
-    #     return {
-    #         'query_id': batch['query_id'],
-    #         'doc_id': batch['doc_id'],
-    #         'query_tok': _pad_crop(batch['doc_tok'], QLEN),
-    #         'doc_tok': _pad_crop(batch['query_tok'], DLEN),
-    #         'query_mask': _mask(batch['doc_tok'], QLEN),
-    #         'doc_mask': _mask(batch['query_tok'], DLEN),
-    #     }
 
 
 def _pad_crop(items, l):
