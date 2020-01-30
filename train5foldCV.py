@@ -204,7 +204,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_drmm')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25.tsv")
@@ -226,9 +226,11 @@ def main_cli():
     dataset = Data.read_datafiles(args.datafiles, args.datafiles2)
 
     # if args.model == modeling.CedrPacrrRanker:
-    args.maxlen = min(500, max([len(model.tokenize(dataset[0][i])) for i in dataset[0]]))
-    # args.maxlen = 20
-    model = MODEL_MAP[args.model](args.maxlen).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args.maxlen)
+
+    if isinstance(model, modeling.CedrPacrrRanker):
+        args.maxlen = min(500, max([len(model.tokenize(dataset[0][i])) for i in dataset[0]]))
+            # args.maxlen = 20
+        model = MODEL_MAP[args.model](args.maxlen).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args.maxlen)
 
 
     qrels = Data.read_qrels_dict(args.qrels)
