@@ -1,6 +1,7 @@
 import random
 from tqdm import tqdm
 import torch
+import numpy as np
 import modeling
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -151,8 +152,7 @@ def _pack_n_ship(batch, data, args):
     QLEN = 9
     # MAX_DLEN = 800
     # DLEN = min(MAX_DLEN, max(len(b) for b in batch['query_tok']))
-    DLEN = max(len(b) for b in batch['query_tok'])
-    print(DLEN)
+    DLEN = np.mean([len(b) for b in batch['query_tok']])
     return {
         'query_id': batch['query_id'],
         'doc_id': batch['doc_id'],
