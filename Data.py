@@ -153,6 +153,8 @@ def _pack_n_ship(batch, data, args):
     # MAX_DLEN = 800
     # DLEN = min(MAX_DLEN, max(len(b) for b in batch['query_tok']))
     DLEN = min(2000, int(np.max([len(b) for b in batch['query_tok']])))
+    QLEN = 9 if not args.model == "cedr_pacrr" else args.maxlen
+
     return {
         'query_id': batch['query_id'],
         'doc_id': batch['doc_id'],
