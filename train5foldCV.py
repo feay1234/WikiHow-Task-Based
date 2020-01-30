@@ -232,6 +232,8 @@ def main_cli():
             # args.maxlen = 20
         model = MODEL_MAP[args.model](args.maxlen).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args.maxlen)
 
+    args.model = model
+
 
     qrels = Data.read_qrels_dict(args.qrels)
 

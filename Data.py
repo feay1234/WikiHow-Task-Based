@@ -158,7 +158,7 @@ def _pack_n_ship(batch, data, args):
     # QLEN = min(MAX_QUE_TOK_LEN, max(len(b) for b in batch['query_tok']))
     # QLEN = min(20, max(len(b) for b in batch['query_tok']))
 
-    QLEN = max(len(b) for b in batch['query_tok']) if isinstance(args.model, modeling.CedrPacrrRanker) else args.maxlen
+    QLEN = max(len(b) for b in batch['query_tok']) if not isinstance(args.model, modeling.CedrPacrrRanker) else args.maxlen
 
     return {
         'query_id': batch['query_id'],
