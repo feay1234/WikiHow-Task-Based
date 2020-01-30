@@ -186,7 +186,7 @@ class CedrPacrrRanker(BertRanker):
     def __init__(self, QLEN=500):
         super().__init__()
         # QLEN = 20
-        KMAX = 2 # Original was 2, which causes unknown bug
+        KMAX = 1 # Original was 2, which causes unknown bug
         NFILTERS = 32
         MINGRAM = 1
         MAXGRAM = 3
