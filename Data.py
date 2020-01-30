@@ -152,7 +152,7 @@ def _pack_n_ship(batch, data, args):
     QLEN = 9
     # MAX_DLEN = 800
     # DLEN = min(MAX_DLEN, max(len(b) for b in batch['query_tok']))
-    DLEN = np.mean([len(b) for b in batch['query_tok']])
+    DLEN = int(np.mean([len(b) for b in batch['query_tok']]))
     return {
         'query_id': batch['query_id'],
         'doc_id': batch['doc_id'],
