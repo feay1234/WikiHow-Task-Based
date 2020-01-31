@@ -121,10 +121,21 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='val
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
         for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data, args):
-            scores = model(records['query_tok'],
-                           records['query_mask'],
-                           records['doc_tok'],
-                           records['doc_mask'])
+            if isinstance(model, modeling.BirchRanker):
+                scores = model(records['query_tok'],
+                               records['query_mask'],
+                               records['doc_tok'],
+                               records['doc_mask'],
+                               records['wiki_tok'],
+                               records['wiki_mask'],
+                               records['question_tok'],
+                               records['question_mask'])
+            else:
+                scores = model(records['query_tok'],
+                               records['query_mask'],
+                               records['doc_tok'],
+                               records['doc_mask'])
+
             for qid, did, score in zip(records['query_id'], records['doc_id'], scores):
                 rerank_run.setdefault(qid, {})[did] = score.item()
             pbar.update(len(records['query_id']))
