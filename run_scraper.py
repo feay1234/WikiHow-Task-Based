@@ -140,10 +140,11 @@ class MultiThreadScraper:
     def scrape_page(self, url):
         try:
             crawl(url, self.folder, self.cat)
+            # print("here")
         except Exception as e:
-
-            with open(folder+cat, 'a') as the_file:
-                the_file.write(url+'\n')
+            print(e)
+            # with open(self.folder+self.cat, 'a') as the_file:
+            #     the_file.write(url+'\n')
 
         return
 
@@ -153,7 +154,7 @@ class MultiThreadScraper:
             try:
                 target_url = self.to_crawl[i]
                 self.pool.submit(self.scrape_page, target_url)
-                sleep(10)
+                # sleep(10)
 
             except Exception as e:
                 print(e)
@@ -161,7 +162,7 @@ class MultiThreadScraper:
 
 if __name__ == '__main__':
 
-    crawl("how to make pasta", "akg/", "")
+    # crawl("how to grow tall", "data/questions/", "")
     #
     # all_categories = "Arts and Entertainment·Cars & Other Vehicles·Computers and Electronics·Education and Communications·Family Life·Finance and Business·Food and Entertaining·Health·Hobbies and Crafts·Holidays and Traditions·Home and Garden·Personal Care and Style·Pets and Animals·Philosophy and Religion·Relationships·Sports and Fitness·Travel·Work World·Youth"
     # all_categories = all_categories.lower()
@@ -222,6 +223,5 @@ if __name__ == '__main__':
     #     if len(to_crawl) < 200:
     #         continue
     #
-    #     if len(to_crawl) > 0:
-    #         s = MultiThreadScraper(to_crawl, folder, cat)
-    #         s.run_scraper()
+    s = MultiThreadScraper(["how to become rich", "how to grow tall"], "data/questions/", " ")
+    s.run_scraper()

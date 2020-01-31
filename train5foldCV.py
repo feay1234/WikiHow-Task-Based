@@ -21,7 +21,7 @@ random.seed(SEED)
 
 MODEL_MAP = {
     'vanilla_bert': modeling.VanillaBertRanker,
-    'pairwise_bert': modeling.VanillaBertPairwiseRanker,
+    'vanilla_birch': modeling.VanillaBirchtRanker,
     'cedr_pacrr': modeling.CedrPacrrRanker,
     'cedr_knrm': modeling.CedrKnrmRanker,
     'cedr_drmm': modeling.CedrDrmmRanker
@@ -81,13 +81,15 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
 
-            if isinstance(model, modeling.BertPairwiseRanker):
+            if isinstance(model, modeling.BirchRanker):
                 scores = model(record['query_tok'],
                                record['query_mask'],
                                record['doc_tok'],
                                record['doc_mask'],
-                               record['prop_tok'],
-                               record['prop_mask'])
+                               record['wiki_tok'],
+                               record['wiki_mask'],
+                               record['question_tok'],
+                               record['question_mask'])
             else:
                 scores = model(record['query_tok'],
                                record['query_mask'],
@@ -196,7 +198,6 @@ def result2file(path, name, format, res, qids, fold):
         thefile.write("%d\t%s\t%f\n" % (fold, q, r))
     thefile.close()
 
-
     # 'cedr_pacrr': modeling.CedrPacrrRanker,
     # 'cedr_knrm': modeling.CedrKnrmRanker,
     # 'cedr_drmm': modeling.CedrDrmmRanker
@@ -204,11 +205,14 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_birch')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
-    parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-overview-bm25-tmp.tsv")
-    parser.add_argument('--datafiles2', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
+    parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query-qw-bm25-nostopword.tsv")
+    parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
+    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wiki-overview-bm25.tsv")
+    parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq-bm25.tsv")
+
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
     parser.add_argument('--train_pairs', default="data/cedr/train")
     parser.add_argument('--valid_run', default="data/cedr/valid")
@@ -223,11 +227,13 @@ def main_cli():
     args = parser.parse_args()
 
     model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
-    dataset = Data.read_datafiles(args.datafiles, args.datafiles2)
+    dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile, args.questionfile])
 
     if isinstance(model, modeling.CedrPacrrRanker):
         args.maxlen = min(500, max([len(model.tokenize(dataset[0][i])) for i in dataset[0]]))
-        model = MODEL_MAP[args.model](args.maxlen).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args.maxlen)
+        model = MODEL_MAP[args.model](args.maxlen).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](
+            args.maxlen)
+
 
     qrels = Data.read_qrels_dict(args.qrels)
 

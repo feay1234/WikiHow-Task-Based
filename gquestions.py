@@ -191,35 +191,35 @@ def crawlQuestions(query, lang, browser, start_paa, paa_list, initialSet, depth=
         initialSet = getCurrentSERP(browser)
         logging.info(f"Current count: {outer_cnt}")
         outer_cnt += 1
-        if depth == 1:
-            for i in range(depth):
-                currentQuestions = []
-                for i in initialSet.values():
-                    currentQuestions.append(i.text)
-                for i in paa_list[0]["children"]:
-                    for j in i["children"]:
-                        parent = j['name']
-                        logging.info(parent)
-                        _tmpset = set()
-                        if parent in currentQuestions:
-                            try:
-                                if "'" in parent:
-                                    xpath_compiler = '//div[text()="' + parent + '"]'
-                                else:
-                                    xpath_compiler = "//div[text()='" + parent + "']"
-                                question = browser.find_element_by_xpath(xpath_compiler)
-                            except NoSuchElementException:
-                                continue
-                            scrollToFeedback()
-                            sleep(1)
-                            clickNTimes(question)
-                            new_q = showNewQuestions(initialSet)
-                            for l, value in new_q.items():
-                                if value.text == parent:
-                                    continue
-                                j['children'].append({"name": value.text, "parent": parent})
-
-                            initialSet = getCurrentSERP()
+        # if depth == 1:
+        #     for i in range(depth):
+        #         currentQuestions = []
+        #         for i in initialSet.values():
+        #             currentQuestions.append(i.text)
+        #         for i in paa_list[0]["children"]:
+        #             for j in i["children"]:
+        #                 parent = j['name']
+        #                 logging.info(parent)
+        #                 _tmpset = set()
+        #                 if parent in currentQuestions:
+        #                     try:
+        #                         if "'" in parent:
+        #                             xpath_compiler = '//div[text()="' + parent + '"]'
+        #                         else:
+        #                             xpath_compiler = "//div[text()='" + parent + "']"
+        #                         question = browser.find_element_by_xpath(xpath_compiler)
+        #                     except NoSuchElementException:
+        #                         continue
+        #                     scrollToFeedback()
+        #                     sleep(1)
+        #                     clickNTimes(question)
+        #                     new_q = showNewQuestions(initialSet)
+        #                     for l, value in new_q.items():
+        #                         if value.text == parent:
+        #                             continue
+        #                         j['children'].append({"name": value.text, "parent": parent})
+        #
+        #                     initialSet = getCurrentSERP()
 
 
 """
