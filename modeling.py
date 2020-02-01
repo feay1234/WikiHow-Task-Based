@@ -333,7 +333,7 @@ class VanillaBirchtRanker(BirchRanker):
             size += 1
         if enableQuestion:
             size += 1
-        self.cls = torch.nn.Linear(self.BERT_SIZE * (1 + (size * shareBERT)), 1)
+        self.cls = torch.nn.Linear(self.BERT_SIZE * (1 + size), 1)
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
         cls_reps, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok,
