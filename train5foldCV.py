@@ -234,17 +234,37 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
+    parser.add_argument('--mode', default=1)
 
     args = parser.parse_args()
 
-    model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
+    if args.model == "vanilla_birch":
+        if args.mode == 1:
+            model = MODEL_MAP[args.model](True, False, True).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](True, False, True)
+        elif args.mode == 2:
+            model = MODEL_MAP[args.model](False, True, True).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](False, True, True)
+        elif args.mode == 3:
+            model = MODEL_MAP[args.model](True, False, False).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](True, False, False)
+        elif args.mode == 4:
+            model = MODEL_MAP[args.model](False, True, False).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](False, True, False)
+        elif args.mode == 5:
+            model = MODEL_MAP[args.model](True, True, False).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](True, True, False)
+        elif args.mode == 6:
+            model = MODEL_MAP[args.model](True, True, True).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](True, True, True)
+    else:
+        model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
     dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile, args.questionfile])
 
     if isinstance(model, modeling.CedrPacrrRanker):
         args.maxlen = min(500, max([len(model.tokenize(dataset[0][i])) for i in dataset[0]]))
         model = MODEL_MAP[args.model](args.maxlen).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](
             args.maxlen)
-
 
     qrels = Data.read_qrels_dict(args.qrels)
 
@@ -271,7 +291,7 @@ def main_cli():
         os.makedirs(args.out_dir)
 
     timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
-    modelName = "%s_%s_%s_e%d_%s" % (args.model, args.data, args.evalMode, args.epoch, timestamp)
+    modelName = "%s_m%d_%s_%s_e%d_%s" % (args.model, args.mode, args.data, args.evalMode, args.epoch, timestamp)
 
     df = pd.read_csv("data/cedr/qrel.tsv", sep="\t", names=["qid", "empty", "pid", "rele_label"])
     qrelDict = collections.defaultdict(dict)
