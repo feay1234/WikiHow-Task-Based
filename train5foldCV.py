@@ -292,7 +292,10 @@ def main_cli():
     #   average results across 5 folds
     output = []
     for k in metricKeys:
-        _res = np.mean([np.mean(results[fold][k]) for fold in range(foldNum)])
+        tmp = []
+        for fold in range(foldNum):
+            tmp.extend(results[fold][k])
+        _res = np.mean(tmp)
         output.append("%.4f" % _res)
     write2file(args.out_dir, modelName, ".res", ",".join(output))
 

@@ -234,8 +234,10 @@ class VanillaBertRanker(BertRanker):
         return self.cls(self.dropout(cls_reps[-1]))
 
 class BirchRanker(BertRanker):
-    def __init__(self):
+    def __init__(self, mode):
         super().__init__()
+
+        self.mode = mode
 
         self.bertW = CustomBertModel.from_pretrained(self.BERT_MODEL)
         self.bertQ = CustomBertModel.from_pretrained(self.BERT_MODEL)
