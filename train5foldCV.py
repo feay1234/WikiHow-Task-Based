@@ -216,12 +216,12 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_birch')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
-    parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/wikipedia1.tsv")
+    parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
     parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
-    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wiki-headline-bm25.tsv")
+    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikipedia1-nostopword.tsv")
     parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq-bm25.tsv")
 
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
@@ -236,7 +236,9 @@ def main_cli():
     parser.add_argument('--evalMode', default="all")
     parser.add_argument('--mode', type=int, default=1)
 
+
     args = parser.parse_args()
+
 
     if args.model == "vanilla_birch":
         if args.mode == 1:
@@ -292,9 +294,18 @@ def main_cli():
 
     timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
     if "birch" in args.model:
-        modelName = "%s_m%d_%s_%s_e%d_%s" % (args.model, args.mode, args.data, args.evalMode, args.epoch, timestamp)
+        wikiName = args.wikifile.name.split("/")[-1].replace(".tsv", "")
+        questionName = args.questionfile.name.split("/")[-1].replace(".tsv", "")
+        additionName = []
+        if args.mode in [1, 3, 5, 6]:
+            additionName.append(wikiName)
+        if args.mode in [2, 4, 5, 5]:
+            additionName.append(questionName)
+
+        modelName = "%s_m%d_%s_%s_%s_e%d_%s" % (args.model, args.mode, args.data, "_".join(additionName), args.evalMode, args.epoch, timestamp)
     else:
         modelName = "%s_%s_%s_e%d_%s" % (args.model, args.data, args.evalMode, args.epoch, timestamp)
+    print(modelName)
 
     df = pd.read_csv("data/cedr/qrel.tsv", sep="\t", names=["qid", "empty", "pid", "rele_label"])
     qrelDict = collections.defaultdict(dict)

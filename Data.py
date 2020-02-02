@@ -3,13 +3,14 @@ from tqdm import tqdm
 import torch
 import numpy as np
 import modeling
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def read_datafiles(files):
     queries, wikis, questions, docs = {}, {}, {}, {}
     # for file in files:
-    for file in files:
+    for idx, file in enumerate(files):
         for line in tqdm(file, desc='loading datafile (by line)', leave=False):
             cols = line.rstrip().split('\t')
             if len(cols) != 3:
@@ -17,13 +18,15 @@ def read_datafiles(files):
                 continue
             c_type, c_id, c_text = cols
             assert c_type in ('query', 'doc', 'wiki', 'question')
-            if c_type == 'query':
+            # if c_type == 'query':
+            if idx == 0:
                 queries[c_id] = c_text
-            elif c_type == 'doc':
+            # elif c_type == 'doc':
+            elif idx == 1:
                 docs[c_id] = c_text
-            elif c_type == 'wiki':
+            elif idx == 2:
                 wikis[c_id] = c_text
-            elif c_type == 'question':
+            elif idx == 3:
                 questions[c_id] = c_text
 
     return queries, docs, wikis, questions
@@ -55,7 +58,8 @@ def read_pairs_dict(file):
 
 def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data, args):
     batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
-    for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_train_pairs(model, dataset, train_pairs, qrels, args):
+    for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_train_pairs(model, dataset, train_pairs, qrels,
+                                                                                  args):
         batch['query_id'].append(qid)
         batch['doc_id'].append(did)
         batch['query_tok'].append(query_tok)
@@ -66,7 +70,6 @@ def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data, args)
         if len(batch['query_id']) // 2 == batch_size:
             yield _pack_n_ship(batch, data, args)
             batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
-
 
 
 def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
@@ -137,6 +140,7 @@ def _iter_valid_records(model, dataset, run, args):
             doc_tok = model.tokenize(doc)
             yield qid, did, query_tok, doc_tok, wiki_tok, question_tok
 
+
 # Poor BERT
 def _pack_n_ship_original(batch):
     QLEN = 20
@@ -154,6 +158,7 @@ def _pack_n_ship_original(batch):
         'query_mask': _mask(batch['query_tok'], QLEN),
         'doc_mask': _mask(batch['doc_tok'], DLEN),
     }
+
 
 def _pack_n_ship(batch, data, args):
     QLEN = 9
@@ -195,7 +200,7 @@ def _pack_n_ship(batch, data, args):
 
 
 def _pack_n_ship_old(batch, data, args):
-    QLEN = 20 # fix to match models' dimensions
+    QLEN = 20  # fix to match models' dimensions
     MAX_DLEN = 800
 
     MAX_DLEN = 9  # longest property's lenght
