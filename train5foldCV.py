@@ -216,12 +216,12 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_birch')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
-    parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query-qw-bm25-nostopword.tsv")
+    parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query-type.tsv")
     parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
-    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wiki-overview-bm25.tsv")
+    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/type.tsv")
     parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq-bm25.tsv")
 
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
@@ -291,7 +291,10 @@ def main_cli():
         os.makedirs(args.out_dir)
 
     timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
-    modelName = "%s_m%d_%s_%s_e%d_%s" % (args.model, args.mode, args.data, args.evalMode, args.epoch, timestamp)
+    if "birch" in args.model:
+        modelName = "%s_m%d_%s_%s_e%d_%s" % (args.model, args.mode, args.data, args.evalMode, args.epoch, timestamp)
+    else:
+        modelName = "%s_%s_%s_e%d_%s" % (args.model, args.mode, args.data, args.evalMode, args.epoch, timestamp)
 
     df = pd.read_csv("data/cedr/qrel.tsv", sep="\t", names=["qid", "empty", "pid", "rele_label"])
     qrelDict = collections.defaultdict(dict)
