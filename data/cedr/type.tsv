@@ -1,0 +1,229 @@
+wiki	1	thing action
+wiki	2	thing action
+wiki	3	thing action
+wiki	4	thing action
+wiki	5	thing action
+wiki	6	thing action
+wiki	7	thing action
+wiki	8	thing action
+wiki	9	thing action
+wiki	10	thing action
+wiki	11	thing action
+wiki	12	thing action
+wiki	13	thing action
+wiki	14	thing creativework movie
+wiki	15	thing creativework movie
+wiki	16	thing creativework movie
+wiki	17	thing creativework musicrecording
+wiki	18	thing creativework book
+wiki	19	thing creativework movie
+wiki	20	thing creativework musicrecording
+wiki	21	thing creativework
+wiki	22	thing creativework movie
+wiki	23	thing creativework movie
+wiki	24	thing creativework movie
+wiki	25	thing creativework musicrecording
+wiki	26	thing creativework movie
+wiki	27	thing creativework movie
+wiki	28	thing creativework movie
+wiki	29	thing creativework movie
+wiki	30	thing creativework movie
+wiki	31	thing creativework movie
+wiki	32	thing creativework movie
+wiki	33	thing creativework movie
+wiki	34	thing creativework tvseries
+wiki	35	thing creativework movie
+wiki	36	thing creativework movie
+wiki	37	thing creativework movie
+wiki	38	thing creativework movie
+wiki	39	thing creativework movie
+wiki	40	thing creativework tvseries
+wiki	41	thing creativework tvseries
+wiki	42	thing creativework movie
+wiki	43	thing event
+wiki	44	thing event
+wiki	45	thing event sportsevent
+wiki	46	thing event educationevent
+wiki	47	thing event
+wiki	48	thing event
+wiki	49	thing event
+wiki	50	thing event
+wiki	51	thing event
+wiki	52	thing event
+wiki	53	thing event
+wiki	54	thing intangible
+wiki	55	thing intangible computerlanguage
+wiki	56	thing intangible computerlanguage
+wiki	57	thing intangible
+wiki	58	thing intangible
+wiki	59	thing intangible
+wiki	60	thing intangible
+wiki	61	thing intangible language
+wiki	62	thing intangible
+wiki	63	thing intangible
+wiki	64	thing intangible
+wiki	65	thing intangible service
+wiki	66	thing intangible service financialproduct
+wiki	67	thing intangible service
+wiki	68	thing intangible
+wiki	69	thing intangible
+wiki	70	thing intangible
+wiki	71	thing medicalentity medicalprocedure
+wiki	72	thing medicalentity medicalintangible
+wiki	73	thing medicalentity medicalcondition
+wiki	74	thing medicalentity medicalcondition
+wiki	75	thing medicalentity anatomicalsystem
+wiki	76	thing medicalentity medicalcondition
+wiki	77	thing medicalentity anatomicalsystem
+wiki	78	thing medicalentity medicalcondition
+wiki	79	thing medicalentity medicalcondition
+wiki	80	thing medicalentity anatomicalsystem
+wiki	81	thing medicalentity substance drug
+wiki	82	thing medicalentity anatomicalsystem
+wiki	83	thing medicalentity anatomicalsystem
+wiki	84	thing medicalentity medicalintangible
+wiki	85	thing medicalentity medicalcondition
+wiki	86	thing medicalentity anatomicalsystem
+wiki	87	thing medicalentity medicalcondition
+wiki	88	thing medicalentity medicalcondition
+wiki	89	thing medicalentity substance
+wiki	90	thing medicalentity substance
+wiki	91	thing medicalentity parasiticdisease
+wiki	92	thing medicalentity medicalcondition
+wiki	93	thing medicalentity medicalintangible
+wiki	94	thing organization corporation
+wiki	95	thing organization corporation
+wiki	96	thing organization corporation
+wiki	97	thing organization corporation
+wiki	98	thing organization corporation
+wiki	99	thing organization sportsorganization
+wiki	100	thing organization sportsorganization
+wiki	101	thing organization broadcastchannel
+wiki	102	thing organization corporation
+wiki	103	thing organization sportsorganization
+wiki	104	thing organization corporation
+wiki	105	thing organization corporation
+wiki	106	thing organization corporation
+wiki	107	thing organization governmentorganization
+wiki	108	thing organization sportsorganization
+wiki	109	thing organization sportsorganization
+wiki	110	thing organization sportsorganization
+wiki	111	thing organization performinggroup musicgroup
+wiki	112	thing organization company
+wiki	113	thing organization sportsorganization
+wiki	114	thing organization corporation
+wiki	115	thing organization company
+wiki	116	thing organization ngo
+wiki	117	thing organization sportsorganization
+wiki	118	thing organization airline
+wiki	119	thing organization corporation
+wiki	120	thing organization corporation
+wiki	121	thing organization corporation
+wiki	122	thing organization educationalorganization collegeoruniversity
+wiki	123	thing person
+wiki	124	thing person
+wiki	125	thing person
+wiki	126	thing person
+wiki	127	thing person
+wiki	128	thing person
+wiki	129	thing person
+wiki	130	thing person
+wiki	131	thing person
+wiki	132	thing person
+wiki	133	thing person
+wiki	134	thing person
+wiki	135	thing person
+wiki	136	thing person
+wiki	137	thing person
+wiki	138	thing person
+wiki	139	thing person
+wiki	140	thing person
+wiki	141	thing person
+wiki	142	thing person
+wiki	143	thing person
+wiki	144	thing place
+wiki	145	thing place
+wiki	146	thing place
+wiki	147	thing place
+wiki	148	thing place
+wiki	149	thing place accommodation
+wiki	150	thing place
+wiki	151	thing place touristattraction
+wiki	152	thing place
+wiki	153	thing place
+wiki	154	thing place
+wiki	155	thing place
+wiki	156	thing place
+wiki	157	thing place
+wiki	158	thing place
+wiki	159	thing place
+wiki	160	thing place localbusiness entertainmentbusiness
+wiki	161	thing place landform bodyofwater
+wiki	162	thing place
+wiki	163	thing place
+wiki	164	thing place landform mountain
+wiki	165	thing place
+wiki	166	thing place
+wiki	167	thing place
+wiki	168	thing place landform mountain
+wiki	169	thing place
+wiki	170	thing place
+wiki	171	thing place
+wiki	172	thing place
+wiki	173	thing place
+wiki	174	thing place
+wiki	175	thing place
+wiki	176	thing place
+wiki	177	thing product
+wiki	178	thing product
+wiki	179	thing product
+wiki	180	thing product
+wiki	181	thing product
+wiki	182	thing product
+wiki	183	thing product vehicle car
+wiki	184	thing product
+wiki	185	thing product
+wiki	186	thing product
+wiki	187	thing product
+wiki	188	thing product
+wiki	189	thing product
+wiki	190	thing product vehicle car
+wiki	191	thing product
+wiki	192	thing product
+wiki	193	thing product
+wiki	194	thing product
+wiki	195	thing product
+wiki	196	thing product
+wiki	197	thing product
+wiki	198	thing product
+wiki	199	thing product
+wiki	200	thing product vehicle
+wiki	201	thing product
+wiki	202	thing product
+wiki	203	thing product
+wiki	204	thing product vehicle car
+wiki	205	thing product
+wiki	206	thing product
+wiki	207	thing product
+wiki	208	thing product
+wiki	209	thing product
+wiki	210	thing product
+wiki	211	thing product vehicle car
+wiki	212	thing product
+wiki	213	thing product
+wiki	214	thing product
+wiki	215	thing product
+wiki	216	thing product
+wiki	217	thing product
+wiki	218	thing product
+wiki	219	thing product
+wiki	220	thing product
+wiki	221	thing product
+wiki	222	thing product
+wiki	223	thing product vehicle
+wiki	224	thing product
+wiki	225	thing product
+wiki	226	thing product
+wiki	227	thing product vehicle car
+wiki	228	thing product
+wiki	229	thing

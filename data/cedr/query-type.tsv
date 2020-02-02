@@ -1,0 +1,229 @@
+query	1	benchmarking have thing action
+query	2	bodybuilding take thing action
+query	3	brainstorming brainstorm thing action
+query	4	chain smoking start thing action
+query	5	funding get funding thing action
+query	6	hair coloring bleach hair back to brown thing action
+query	7	hit and run stop at the scene of an accident thing action
+query	8	language acquisition suggest a foreign language thats easy to learn thing action
+query	9	mediation help you come up with possible solutions thing action
+query	10	pull up do any aerobic physical activity thing action
+query	11	spoofing attack know who do the spoof  thing action
+query	12	spray painting use on fabric thing action
+query	13	translation know japanese recipe ingredient translation thing action
+query	14	all about my mother forget thing creativework movie
+query	15	back to the future remember thing creativework movie
+query	16	braveheart love that movie thing creativework movie
+query	17	give me five give fives thing creativework musicrecording
+query	18	on the road follow thing creativework book
+query	19	our daughter leave thing creativework movie
+query	20	run fast happen thing creativework musicrecording
+query	21	shakespeares plays prepare for a shakespeare play thing creativework
+query	22	showtime choose thing creativework movie
+query	23	so young abandon thing creativework movie
+query	24	striptease obsess thing creativework movie
+query	25	take on me forget thing creativework musicrecording
+query	26	terms of endearment come thing creativework movie
+query	27	the devil wears prada watch the devil wears prada thing creativework movie
+query	28	the wizard of oz watch full episode of robot chicken thing creativework movie
+query	29	the incredible hulk watch movie with english subtitle thing creativework movie
+query	30	the paper make love with a girl thing creativework movie
+query	31	the pyramid reclaim thing creativework movie
+query	32	the sixth sense see the spirits of people who have died thing creativework movie
+query	33	the tall man meet a good woman thing creativework movie
+query	34	today lose thing creativework tvseries
+query	35	trust me make trust thing creativework movie
+query	36	porco rosso watch porco rosso ( 1992 ) thing creativework movie
+query	37	prom night love the colors of prom thing creativework movie
+query	38	knowing find the name of a song  thing creativework movie
+query	39	krrish see thing creativework movie
+query	40	law & order: special victims unit win emmy thing creativework tvseries
+query	41	lost season 3 release on dvd thing creativework tvseries
+query	42	mary poppins watch this video thing creativework movie
+query	43	baby shower give thing event
+query	44	chernobyl disaster happen thing event
+query	45	formula one become a f1 driver thing event sportsevent
+query	46	graduation attend ceremony thing event educationevent
+query	47	honeymoon recommend thing event
+query	48	immigration apply for citizenship thing event
+query	49	islamic terrorism issue indictment thing event
+query	50	live aid raise dollars thing event
+query	51	the exodus believe thing event
+query	52	world war ii win thing event
+query	53	flood pevent thing event
+query	54	anti-gravity create an anti gravity propulsion system thing intangible
+query	55	html embed a sound in a html page thing intangible computerlanguage
+query	56	php debug thing intangible computerlanguage
+query	57	english grammar teach thing intangible
+query	58	free education apply thing intangible
+query	59	job satisfaction get thing intangible
+query	60	belief say thing intangible
+query	61	tagalog language teach thing intangible language
+query	62	environmentalism support environmentalism and climate change awareness thing intangible
+query	63	bibliography write the bibliography thing intangible
+query	64	email box send thing intangible
+query	65	google maps prepare thing intangible service
+query	66	property insurance receive thing intangible service financialproduct
+query	67	voip phone use thing intangible service
+query	68	separation of church and state allow thing intangible
+query	69	indian institute of technology joint entrance examination pass thing intangible
+query	70	history of television watch thing intangible
+query	71	acupuncture work thing medicalentity medicalprocedure
+query	72	apgar score improve thing medicalentity medicalintangible
+query	73	asthma relieve thing medicalentity medicalcondition
+query	74	back pain treat thing medicalentity medicalcondition
+query	75	brain develop thing medicalentity anatomicalsystem
+query	76	carpal tunnel syndrome suffer thing medicalentity medicalcondition
+query	77	dna identify thing medicalentity anatomicalsystem
+query	78	hepatitis c diagnose thing medicalentity medicalcondition
+query	79	insomnia cause thing medicalentity medicalcondition
+query	80	kidney donate thing medicalentity anatomicalsystem
+query	81	naproxen increase thing medicalentity substance drug
+query	82	pubis break thing medicalentity anatomicalsystem
+query	83	respiratory system evaluate thing medicalentity anatomicalsystem
+query	84	self-esteem boost thing medicalentity medicalintangible
+query	85	shock cause thing medicalentity medicalcondition
+query	86	skin care thing medicalentity anatomicalsystem
+query	87	speech disorder overcome thing medicalentity medicalcondition
+query	88	spinal muscular atrophy reduce thing medicalentity medicalcondition
+query	89	testosterone increase thing medicalentity substance
+query	90	thyroid hormone produce thing medicalentity substance
+query	91	trichinosis stop thing medicalentity parasiticdisease
+query	92	urinary incontinence prevent thing medicalentity medicalcondition
+query	93	blood type donate thing medicalentity medicalintangible
+query	94	adidas wear thing organization corporation
+query	95	aol use thing organization corporation
+query	96	bacardi drink thing organization corporation
+query	97	big oil sell thing organization corporation
+query	98	bp own thing organization corporation
+query	99	carolina panthers play thing organization sportsorganization
+query	100	chicago white sox win thing organization sportsorganization
+query	101	espn watch thing organization broadcastchannel
+query	102	fedex call thing organization corporation
+query	103	fifa watch thing organization sportsorganization
+query	104	ford motor company sell thing organization corporation
+query	105	ibm join thing organization corporation
+query	106	isuzu motors build thing organization corporation
+query	107	liberal party of canada support thing organization governmentorganization
+query	108	little league baseball join thing organization sportsorganization
+query	109	los angeles lakers win thing organization sportsorganization
+query	110	major league baseball announce retirement thing organization sportsorganization
+query	111	maroon 5 perform ballad thing organization performinggroup musicgroup
+query	112	maybelline buy makeup thing organization company
+query	113	miami heat win the championship thing organization sportsorganization
+query	114	motorola unlock motorola c975 thing organization corporation
+query	115	nvidia take complaint thing organization company
+query	116	people for the ethical treatment of animals treat animals thing organization ngo
+query	117	pga tour win tournament thing organization sportsorganization
+query	118	singapore airlines operate route thing organization airline
+query	119	tiscali get insurance thing organization corporation
+query	120	visa inc. extend visa thing organization corporation
+query	121	walmart apply for a job thing organization corporation
+query	122	university of houston apply for a job  thing organization educationalorganization collegeoruniversity
+query	123	abraham lincoln work lawyer thing person
+query	124	alan turing pass a turing test thing person
+query	125	aristotle discover secrets thing person
+query	126	barbie hsu study relationship thing person
+query	127	batman play villain thing person
+query	128	british royal family idolise family thing person
+query	129	diana ross sings jazz thing person
+query	130	jason kidd provide scoring thing person
+query	131	jean-claude van damme splits  thing person
+query	132	jesus died on a tree thing person
+query	133	johann sebastian bach listen  thing person
+query	134	kathy griffin watch premiere thing person
+query	135	luther vandross left money thing person
+query	136	pope benedict xvi visit pope thing person
+query	137	prince charming become man thing person
+query	138	roger federer win season thing person
+query	139	samuel beckett find hidden talent thing person
+query	140	serena williams beat niculescu thing person
+query	141	tink sing music thing person
+query	142	tony robbins live with passion thing person
+query	143	vin diesel become warming thing person
+query	144	acapulco hold mesino thing place
+query	145	angola take crudes thing place
+query	146	british columbia establish welfare thing place
+query	147	chennai fire naphtha thing place
+query	148	cincinnati buy a beginner drum set thing place
+query	149	dormitory provide meals thing place accommodation
+query	150	egypt visit thing place
+query	151	egyptian pyramids build thing place touristattraction
+query	152	finland go thing place
+query	153	glasgow look for a job  thing place
+query	154	greece live in greece thing place
+query	155	hawaii use wireless thing place
+query	156	himalayas go on a trek thing place
+query	157	iran discuss iran threat thing place
+query	158	kansas city locate thing place
+query	159	kelowna get into a bar in kelowna thing place
+query	160	kings island   thing place localbusiness entertainmentbusiness
+query	161	lake of the ozarks reach lake thing place landform bodyofwater
+query	162	melbourne migrate thing place
+query	163	mombasa compare to other african city thing place
+query	164	mount everest climb thing place landform mountain
+query	165	north korea see local laws and customs thing place
+query	166	prague stay at the carlton hotel prague thing place
+query	167	punta cana book vacation thing place
+query	168	rocky mountains find thing place landform mountain
+query	169	san francisco international airport leave thing place
+query	170	saudi arabia drive a car thing place
+query	171	south india develop thing place
+query	172	sudan get a greencard thing place
+query	173	tehran get some scenic views over tehran thing place
+query	174	times square performs live in times square thing place
+query	175	trinidad and tobago visit trinidad tobago from nigeria thing place
+query	176	west indies take deliveries thing place
+query	177	lager make thing product
+query	178	pretzel have thing product
+query	179	beetroot cook thing product
+query	180	boric acid produce thing product
+query	181	buttermilk make pancake thing product
+query	182	chess play chess on internet  thing product
+query	183	chrysler neon fix thing product vehicle car
+query	184	clenbuterol take thing product
+query	185	copper clean copper pan thing product
+query	186	dairy product buy raw milk product thing product
+query	187	diet coke drink thing product
+query	188	diet drink drink diet soda if have diabetes thing product
+query	189	ethernet hub switch off thing product
+query	190	ford aerostar buy thing product vehicle car
+query	191	french horn play thing product
+query	192	gear stick drive a manual transmission thing product
+query	193	goat meat refrigerate thing product
+query	194	guitar amplifier recommend thing product
+query	195	hair dryer use thing product
+query	196	handbag sell thing product
+query	197	hard disk drive connect to the computer thing product
+query	198	heart rate monitor hear baby 's heartbeat thing product
+query	199	hollywood video download thing product
+query	200	hybrid vehicle build thing product vehicle
+query	201	imac recognize by xp computer thing product
+query	202	jet ski rent a jet ski thing product
+query	203	laundry detergent wash thing product
+query	204	lincoln town car drive thing product vehicle car
+query	205	macbook pro upgrade thing product
+query	206	marmite get a large jar thing product
+query	207	mentos make mentos react with coke thing product
+query	208	metal gear solid know thing product
+query	209	nutella make dessert thing product
+query	210	pocket watch have a golden pocket watch thing product
+query	211	porsche 911 make faster thing product vehicle car
+query	212	replacement window install thing product
+query	213	stained glass cut thing product
+query	214	automotive battery recharge thing product
+query	215	banana bread bake thing product
+query	216	barbecue sauce serve thing product
+query	217	camcorder buy a dvd camcorder thing product
+query	218	central heating replace thing product
+query	219	chardonnay indicate popularity thing product
+query	220	eye shadow remove mascara thing product
+query	221	eyelash extensions put on fake eyelash thing product
+query	222	lacquer use acrylic paint thing product
+query	223	lockheed c-5 galaxy make thing product vehicle
+query	224	mason jar hold tea thing product
+query	225	refrigerator freeze thing product
+query	226	submarine sandwich look for the recipe  thing product
+query	227	volkswagen passat remove the door panel  thing product vehicle car
+query	228	apple cider drink thing product
+query	229	labrador retriever keep thing
