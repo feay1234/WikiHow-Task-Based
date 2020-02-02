@@ -1,0 +1,229 @@
+query	1	thing action
+query	2	thing action
+query	3	thing action
+query	4	thing action
+query	5	thing action
+query	6	thing action
+query	7	thing action
+query	8	thing action
+query	9	thing action
+query	10	thing action
+query	11	thing action
+query	12	thing action
+query	13	thing action
+query	14	thing creativework movie
+query	15	thing creativework movie
+query	16	thing creativework movie
+query	17	thing creativework musicrecording
+query	18	thing creativework book
+query	19	thing creativework movie
+query	20	thing creativework musicrecording
+query	21	thing creativework
+query	22	thing creativework movie
+query	23	thing creativework movie
+query	24	thing creativework movie
+query	25	thing creativework musicrecording
+query	26	thing creativework movie
+query	27	thing creativework movie
+query	28	thing creativework movie
+query	29	thing creativework movie
+query	30	thing creativework movie
+query	31	thing creativework movie
+query	32	thing creativework movie
+query	33	thing creativework movie
+query	34	thing creativework tvseries
+query	35	thing creativework movie
+query	36	thing creativework movie
+query	37	thing creativework movie
+query	38	thing creativework movie
+query	39	thing creativework movie
+query	40	thing creativework tvseries
+query	41	thing creativework tvseries
+query	42	thing creativework movie
+query	43	thing event
+query	44	thing event
+query	45	thing event sportsevent
+query	46	thing event educationevent
+query	47	thing event
+query	48	thing event
+query	49	thing event
+query	50	thing event
+query	51	thing event
+query	52	thing event
+query	53	thing event
+query	54	thing intangible
+query	55	thing intangible computerlanguage
+query	56	thing intangible computerlanguage
+query	57	thing intangible
+query	58	thing intangible
+query	59	thing intangible
+query	60	thing intangible
+query	61	thing intangible language
+query	62	thing intangible
+query	63	thing intangible
+query	64	thing intangible
+query	65	thing intangible service
+query	66	thing intangible service financialproduct
+query	67	thing intangible service
+query	68	thing intangible
+query	69	thing intangible
+query	70	thing intangible
+query	71	thing medicalentity medicalprocedure
+query	72	thing medicalentity medicalintangible
+query	73	thing medicalentity medicalcondition
+query	74	thing medicalentity medicalcondition
+query	75	thing medicalentity anatomicalsystem
+query	76	thing medicalentity medicalcondition
+query	77	thing medicalentity anatomicalsystem
+query	78	thing medicalentity medicalcondition
+query	79	thing medicalentity medicalcondition
+query	80	thing medicalentity anatomicalsystem
+query	81	thing medicalentity substance drug
+query	82	thing medicalentity anatomicalsystem
+query	83	thing medicalentity anatomicalsystem
+query	84	thing medicalentity medicalintangible
+query	85	thing medicalentity medicalcondition
+query	86	thing medicalentity anatomicalsystem
+query	87	thing medicalentity medicalcondition
+query	88	thing medicalentity medicalcondition
+query	89	thing medicalentity substance
+query	90	thing medicalentity substance
+query	91	thing medicalentity parasiticdisease
+query	92	thing medicalentity medicalcondition
+query	93	thing medicalentity medicalintangible
+query	94	thing organization corporation
+query	95	thing organization corporation
+query	96	thing organization corporation
+query	97	thing organization corporation
+query	98	thing organization corporation
+query	99	thing organization sportsorganization
+query	100	thing organization sportsorganization
+query	101	thing organization broadcastchannel
+query	102	thing organization corporation
+query	103	thing organization sportsorganization
+query	104	thing organization corporation
+query	105	thing organization corporation
+query	106	thing organization corporation
+query	107	thing organization governmentorganization
+query	108	thing organization sportsorganization
+query	109	thing organization sportsorganization
+query	110	thing organization sportsorganization
+query	111	thing organization performinggroup musicgroup
+query	112	thing organization company
+query	113	thing organization sportsorganization
+query	114	thing organization corporation
+query	115	thing organization company
+query	116	thing organization ngo
+query	117	thing organization sportsorganization
+query	118	thing organization airline
+query	119	thing organization corporation
+query	120	thing organization corporation
+query	121	thing organization corporation
+query	122	thing organization educationalorganization collegeoruniversity
+query	123	thing person
+query	124	thing person
+query	125	thing person
+query	126	thing person
+query	127	thing person
+query	128	thing person
+query	129	thing person
+query	130	thing person
+query	131	thing person
+query	132	thing person
+query	133	thing person
+query	134	thing person
+query	135	thing person
+query	136	thing person
+query	137	thing person
+query	138	thing person
+query	139	thing person
+query	140	thing person
+query	141	thing person
+query	142	thing person
+query	143	thing person
+query	144	thing place
+query	145	thing place
+query	146	thing place
+query	147	thing place
+query	148	thing place
+query	149	thing place accommodation
+query	150	thing place
+query	151	thing place touristattraction
+query	152	thing place
+query	153	thing place
+query	154	thing place
+query	155	thing place
+query	156	thing place
+query	157	thing place
+query	158	thing place
+query	159	thing place
+query	160	thing place localbusiness entertainmentbusiness
+query	161	thing place landform bodyofwater
+query	162	thing place
+query	163	thing place
+query	164	thing place landform mountain
+query	165	thing place
+query	166	thing place
+query	167	thing place
+query	168	thing place landform mountain
+query	169	thing place
+query	170	thing place
+query	171	thing place
+query	172	thing place
+query	173	thing place
+query	174	thing place
+query	175	thing place
+query	176	thing place
+query	177	thing product
+query	178	thing product
+query	179	thing product
+query	180	thing product
+query	181	thing product
+query	182	thing product
+query	183	thing product vehicle car
+query	184	thing product
+query	185	thing product
+query	186	thing product
+query	187	thing product
+query	188	thing product
+query	189	thing product
+query	190	thing product vehicle car
+query	191	thing product
+query	192	thing product
+query	193	thing product
+query	194	thing product
+query	195	thing product
+query	196	thing product
+query	197	thing product
+query	198	thing product
+query	199	thing product
+query	200	thing product vehicle
+query	201	thing product
+query	202	thing product
+query	203	thing product
+query	204	thing product vehicle car
+query	205	thing product
+query	206	thing product
+query	207	thing product
+query	208	thing product
+query	209	thing product
+query	210	thing product
+query	211	thing product vehicle car
+query	212	thing product
+query	213	thing product
+query	214	thing product
+query	215	thing product
+query	216	thing product
+query	217	thing product
+query	218	thing product
+query	219	thing product
+query	220	thing product
+query	221	thing product
+query	222	thing product
+query	223	thing product vehicle
+query	224	thing product
+query	225	thing product
+query	226	thing product
+query	227	thing product vehicle car
+query	228	thing product
+query	229	thing
