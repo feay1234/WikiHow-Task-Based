@@ -219,9 +219,9 @@ def main_cli():
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
-    parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query-type.tsv")
+    parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/wikipedia1.tsv")
     parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
-    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/type.tsv")
+    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wiki-headline-bm25.tsv")
     parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq-bm25.tsv")
 
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
@@ -259,7 +259,7 @@ def main_cli():
                 args.model](True, True, True)
     else:
         model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
-    dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile, args.questionfile])
+    dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile, args.questionfile] if "birch" in args.model else [args.queryfile, args.docfile])
 
     if isinstance(model, modeling.CedrPacrrRanker):
         args.maxlen = min(500, max([len(model.tokenize(dataset[0][i])) for i in dataset[0]]))
