@@ -22,6 +22,7 @@ random.seed(SEED)
 MODEL_MAP = {
     'vanilla_bert': modeling.VanillaBertRanker,
     'bert': modeling.BERT,
+    'ms': modeling.MSRanker,
     'vanilla_birch': modeling.VanillaBirchtRanker,
     'cedr_pacrr': modeling.CedrPacrrRanker,
     'cedr_knrm': modeling.CedrKnrmRanker,
@@ -217,7 +218,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='bert')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
@@ -261,6 +262,8 @@ def main_cli():
         elif args.mode == 6:
             model = MODEL_MAP[args.model](True, True, False).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
                 args.model](True, True, False)
+    elif args.model == "ms":
+        model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args)
     else:
         model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
     dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile, args.questionfile] if "birch" in args.model else [args.queryfile, args.docfile])

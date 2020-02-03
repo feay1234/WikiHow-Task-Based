@@ -179,6 +179,17 @@ def _pack_n_ship(batch, data, args):
             'doc_mask': _mask(batch['doc_tok'], DLEN),
         }
 
+    if args.model == "ms":
+
+        return {
+            'query_id': batch['query_id'],
+            'doc_id': batch['doc_id'],
+            'query_tok': toTensor(batch['query_tok']),
+            'doc_tok': toTensor(batch['doc_tok']),
+            'query_mask': None,
+            'doc_mask': None,
+        }
+
     else:
 
         DLEN = min(2000, int(np.max([len(b) for b in batch['query_tok']])))
@@ -193,6 +204,8 @@ def _pack_n_ship(batch, data, args):
             'doc_mask': _mask(batch['query_tok'], DLEN),
         }
 
+def toTensor(x):
+    return torch.tensor(x).float().cuda() if device.type == 'cuda' else torch.tensor(x).float()
 
 def _pad_crop(items, l):
     result = []

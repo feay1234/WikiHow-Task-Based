@@ -1,9 +1,12 @@
+import pickle
+
 from pytools import memoize_method
 import torch
 import torch.nn.functional as F
 import pytorch_pretrained_bert
 import modeling_util
 import numpy as np
+
 
 class BertPairwiseRanker(torch.nn.Module):
     def __init__(self):
@@ -85,37 +88,6 @@ class VanillaBertPairwiseRanker(BertPairwiseRanker):
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, prop_tok, prop_mask):
         cls_reps, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask, prop_tok, prop_mask)
         return self.cls(self.dropout(cls_reps[-1]))
-
-class MSRanker(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-
-        self.properties = []
-
-    def forward(self, **inputs):
-        raise NotImplementedError
-
-    def save(self, path):
-        state = self.state_dict(keep_vars=True)
-        for key in list(state):
-            if state[key].requires_grad:
-                state[key] = state[key].data
-            else:
-                del state[key]
-        torch.save(state, path)
-
-    def load(self, path):
-        self.load_state_dict(torch.load(path), strict=False)
-
-    @memoize_method
-    def tokenize(self, text):
-        return np.array(text)
-
-    def encode_bert(self, query_tok, query_mask, doc_tok, doc_mask):
-
-        return cls_results, query_results, doc_results
-        # return cls_results, doc_results, query_results
-
 
 
 class BertRanker(torch.nn.Module):
@@ -481,8 +453,8 @@ class OriginalBertRanker(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.BERT_MODEL = 'bert-base-uncased'
-        self.CHANNELS = 12 + 1 # from bert-base-uncased
-        self.BERT_SIZE = 768 # from bert-base-uncased
+        self.CHANNELS = 12 + 1  # from bert-base-uncased
+        self.BERT_SIZE = 768  # from bert-base-uncased
         self.bert = CustomBertModel.from_pretrained(self.BERT_MODEL)
         self.tokenizer = pytorch_pretrained_bert.BertTokenizer.from_pretrained(self.BERT_MODEL)
 
@@ -509,7 +481,7 @@ class OriginalBertRanker(torch.nn.Module):
 
     def encode_bert(self, query_tok, query_mask, doc_tok, doc_mask):
         BATCH, QLEN = query_tok.shape
-        DIFF = 3 # = [CLS] and 2x[SEP]
+        DIFF = 3  # = [CLS] and 2x[SEP]
         maxlen = self.bert.config.max_position_embeddings
         MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
 
@@ -528,14 +500,14 @@ class OriginalBertRanker(torch.nn.Module):
         toks = torch.cat([CLSS, query_toks, SEPS, doc_toks, SEPS], dim=1)
         mask = torch.cat([ONES, query_mask, ONES, doc_mask, ONES], dim=1)
         segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
-        toks[toks == -1] = 0 # remove padding (will be masked anyway)
+        toks[toks == -1] = 0  # remove padding (will be masked anyway)
 
         # execute BERT model
         result = self.bert(toks, segment_ids.long(), mask)
 
         # extract relevant subsequences for query and doc
-        query_results = [r[:BATCH, 1:QLEN+1] for r in result]
-        doc_results = [r[:, QLEN+2:-1] for r in result]
+        query_results = [r[:BATCH, 1:QLEN + 1] for r in result]
+        doc_results = [r[:, QLEN + 2:-1] for r in result]
         doc_results = [modeling_util.un_subbatch(r, doc_tok, MAX_DOC_TOK_LEN) for r in doc_results]
 
         # build CLS representation
@@ -544,11 +516,12 @@ class OriginalBertRanker(torch.nn.Module):
             cls_output = layer[:, 0]
             cls_result = []
             for i in range(cls_output.shape[0] // BATCH):
-                cls_result.append(cls_output[i*BATCH:(i+1)*BATCH])
+                cls_result.append(cls_output[i * BATCH:(i + 1) * BATCH])
             cls_result = torch.stack(cls_result, dim=2).mean(dim=2)
             cls_results.append(cls_result)
 
         return cls_results, query_results, doc_results
+
 
 class BERT(OriginalBertRanker):
     def __init__(self):
@@ -559,3 +532,31 @@ class BERT(OriginalBertRanker):
     def forward(self, query_tok, query_mask, doc_tok, doc_mask):
         cls_reps, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
         return self.cls(self.dropout(cls_reps[-1]))
+
+
+class MSRanker(BertRanker):
+    def __init__(self, args):
+        super().__init__()
+
+        self.MS_SIZE = 100
+        self.args = args
+
+        queryfile = self.args.queryfile.name.split("/")[-1].replace(".tsv", "")
+        docfile = self.args.docfile.name.split("/")[-1].replace(".tsv", "")
+
+        self.text2MSvec = pickle.load(open("data/cedr/" + queryfile + "-" + docfile + ".pkg", "rb"))
+
+        self.dropout = torch.nn.Dropout(0.1)
+        self.cls = torch.nn.Linear(self.MS_SIZE * 2 , 100)
+        self.cls3 = torch.nn.Linear(100, 1)
+
+        self.properties = []
+
+    def forward(self, query_tok, query_mask, doc_tok, doc_mask):
+        # mul = torch.mul(query_tok, doc_tok)
+        mul = torch.cat([query_tok, doc_tok], dim=1)
+        return self.cls3(self.dropout(self.cls(self.dropout(mul))))
+
+    @memoize_method
+    def tokenize(self, text):
+        return self.text2MSvec[text]
