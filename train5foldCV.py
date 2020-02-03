@@ -243,23 +243,23 @@ def main_cli():
 
     if args.model == "vanilla_birch":
         if args.mode == 1:
-            model = MODEL_MAP[args.model](True, False, True).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](True, False, True)
-        elif args.mode == 2:
-            model = MODEL_MAP[args.model](False, True, True).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](False, True, True)
-        elif args.mode == 3:
             model = MODEL_MAP[args.model](True, False, False).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
                 args.model](True, False, False)
-        elif args.mode == 4:
+        elif args.mode == 2:
             model = MODEL_MAP[args.model](False, True, False).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
                 args.model](False, True, False)
+        elif args.mode == 3:
+            model = MODEL_MAP[args.model](True, False, True).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](True, False, True)
+        elif args.mode == 4:
+            model = MODEL_MAP[args.model](False, True, True).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](False, True, True)
         elif args.mode == 5:
-            model = MODEL_MAP[args.model](True, True, False).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](True, True, False)
-        elif args.mode == 6:
             model = MODEL_MAP[args.model](True, True, True).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
                 args.model](True, True, True)
+        elif args.mode == 6:
+            model = MODEL_MAP[args.model](True, True, False).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](True, True, False)
     else:
         model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
     dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile, args.questionfile] if "birch" in args.model else [args.queryfile, args.docfile])

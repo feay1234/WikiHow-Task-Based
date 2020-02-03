@@ -241,7 +241,7 @@ class BirchRanker(BertRanker):
         self.enableQuestion = enableQuestion
         self.shareBERT = shareBERT
 
-        if not self.shareBERT:
+        if self.shareBERT:
             if self.enableWiki:
                 self.bertW = CustomBertModel.from_pretrained(self.BERT_MODEL)
             if self.enableQuestion:
