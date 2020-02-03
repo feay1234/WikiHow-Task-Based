@@ -253,11 +253,11 @@ class BirchRanker(BertRanker):
         if self.enableWiki:
             cls_reps_wiki, query_reps_wiki, doc_reps_wiki = self._encode_bert(query_tok, query_mask, wiki_tok,
                                                                               wiki_mask,
-                                                                              self.bertW if not self.shareBERT else self.bert)
+                                                                              self.bertW if self.shareBERT else self.bert)
         if self.enableQuestion:
             cls_reps_question, query_reps_question, doc_reps_question = self._encode_bert(query_tok, query_mask,
                                                                                           question_tok, question_mask,
-                                                                                          self.bertQ if not self.shareBERT else self.bert)
+                                                                                          self.bertQ if self.shareBERT else self.bert)
 
         for i in range(len(cls_reps_query)):
             if self.enableWiki and not self.enableQuestion:
