@@ -171,6 +171,8 @@ def _pack_n_ship(batch, data, args):
         QQLEN = min(512, int(np.max([len(b) for b in batch['question_tok']])))
         QLEN = 9 if not args.model == "cedr_pacrr" else args.maxlen
 
+        # print(DLEN, WLEN, QQLEN)
+
         return {
             'query_id': batch['query_id'],
             'doc_id': batch['doc_id'],
