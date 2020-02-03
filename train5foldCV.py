@@ -308,6 +308,8 @@ def main_cli():
             additionName.append(questionName)
 
         modelName = "%s_m%d_%s_%s_%s_e%d_%s" % (args.model, args.mode, args.data, "_".join(additionName), args.evalMode, args.epoch, timestamp)
+    elif "ms" in args.model:
+        modelName = "%s_m%d_%s_%s_e%d_%s" % (args.model, args.mode, args.data, args.evalMode, args.epoch, timestamp)
     else:
         modelName = "%s_%s_%s_e%d_%s" % (args.model, args.data, args.evalMode, args.epoch, timestamp)
     print(modelName)
