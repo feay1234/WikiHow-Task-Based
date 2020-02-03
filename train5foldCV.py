@@ -83,7 +83,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
 
-            if isinstance(model, modeling.BirchRanker):
+            if isinstance(model, modeling.BirchRanker) or isinstance(model, modeling.MSRanker):
                 scores = model(record['query_tok'],
                                record['query_mask'],
                                record['doc_tok'],
@@ -123,7 +123,7 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='val
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
         for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data, args):
-            if isinstance(model, modeling.BirchRanker):
+            if isinstance(model, modeling.BirchRanker) or isinstance(model, modeling.MSRanker):
                 scores = model(records['query_tok'],
                                records['query_mask'],
                                records['doc_tok'],
@@ -223,7 +223,7 @@ def main_cli():
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
     parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
-    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikipedia1-nostopword.tsv")
+    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikipedia1.tsv")
     parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq1.tsv")
 
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
@@ -236,7 +236,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=6)
+    parser.add_argument('--mode', type=int, default=2)
 
 
 
@@ -266,7 +266,7 @@ def main_cli():
         model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args)
     else:
         model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
-    dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile, args.questionfile] if "birch" in args.model else [args.queryfile, args.docfile])
+    dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile, args.questionfile] if "birch" in args.model or "ms" in args.model else [args.queryfile, args.docfile])
 
     if isinstance(model, modeling.CedrPacrrRanker):
         args.maxlen = min(500, max([len(model.tokenize(dataset[0][i])) for i in dataset[0]]))
