@@ -21,6 +21,7 @@ random.seed(SEED)
 
 MODEL_MAP = {
     'vanilla_bert': modeling.VanillaBertRanker,
+    'bert': modeling.BERT,
     'vanilla_birch': modeling.VanillaBirchtRanker,
     'cedr_pacrr': modeling.CedrPacrrRanker,
     'cedr_knrm': modeling.CedrKnrmRanker,
@@ -216,7 +217,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_birch')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='bert')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")

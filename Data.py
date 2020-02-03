@@ -140,26 +140,6 @@ def _iter_valid_records(model, dataset, run, args):
             doc_tok = model.tokenize(doc)
             yield qid, did, query_tok, doc_tok, wiki_tok, question_tok
 
-
-# Poor BERT
-def _pack_n_ship_original(batch):
-    QLEN = 20
-    MAX_DLEN = 800
-    # QLEN = 500
-    # MAX_DLEN = 200
-    DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
-    # DLEN = max(len(b) for b in batch['doc_tok'])
-    # QLEN = min(QLEN, max(len(b) for b in batch['query_tok']))
-    return {
-        'query_id': batch['query_id'],
-        'doc_id': batch['doc_id'],
-        'query_tok': _pad_crop(batch['query_tok'], QLEN),
-        'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
-        'query_mask': _mask(batch['query_tok'], QLEN),
-        'doc_mask': _mask(batch['doc_tok'], DLEN),
-    }
-
-
 def _pack_n_ship(batch, data, args):
     QLEN = 9
     # MAX_DLEN = 800
@@ -186,6 +166,19 @@ def _pack_n_ship(batch, data, args):
             'question_mask': _mask(batch['question_tok'], QQLEN),
         }
 
+    if args.model == "bert":
+        QLEN = 20
+        MAX_DLEN = 800
+        DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
+        return {
+            'query_id': batch['query_id'],
+            'doc_id': batch['doc_id'],
+            'query_tok': _pad_crop(batch['query_tok'], QLEN),
+            'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
+            'query_mask': _mask(batch['query_tok'], QLEN),
+            'doc_mask': _mask(batch['doc_tok'], DLEN),
+        }
+
     else:
 
         DLEN = min(2000, int(np.max([len(b) for b in batch['query_tok']])))
@@ -199,29 +192,6 @@ def _pack_n_ship(batch, data, args):
             'query_mask': _mask(batch['doc_tok'], QLEN),
             'doc_mask': _mask(batch['query_tok'], DLEN),
         }
-
-
-def _pack_n_ship_old(batch, data, args):
-    QLEN = 20  # fix to match models' dimensions
-    MAX_DLEN = 800
-
-    MAX_DLEN = 9  # longest property's lenght
-    DIFF = 3
-    MAX_QUE_TOK_LEN = 512 - MAX_DLEN - DIFF
-    DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
-    # QLEN = min(MAX_QUE_TOK_LEN, max(len(b) for b in batch['query_tok']))
-    # QLEN = min(20, max(len(b) for b in batch['query_tok']))
-
-    QLEN = max(len(b) for b in batch['query_tok']) if not args.model == "cedr_pacrr" else args.maxlen
-
-    return {
-        'query_id': batch['query_id'],
-        'doc_id': batch['doc_id'],
-        'query_tok': _pad_crop(batch['query_tok'], QLEN),
-        'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
-        'query_mask': _mask(batch['query_tok'], QLEN),
-        'doc_mask': _mask(batch['doc_tok'], DLEN),
-    }
 
 
 def _pad_crop(items, l):
