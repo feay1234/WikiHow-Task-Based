@@ -547,15 +547,16 @@ class MSRanker(BertRanker):
         self.text2MSvec = pickle.load(open("data/cedr/" + queryfile + "-" + docfile + ".pkg", "rb"))
 
         self.dropout = torch.nn.Dropout(0.1)
-        self.cls = torch.nn.Linear(self.MS_SIZE * 2 , 100)
-        self.cls3 = torch.nn.Linear(100, 1)
+        self.q = torch.nn.Linear(self.MS_SIZE, 100)
+        self.d = torch.nn.Linear(self.MS_SIZE, 100)
+        self.cls = torch.nn.Linear(100, 1)
 
         self.properties = []
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask):
-        # mul = torch.mul(query_tok, doc_tok)
-        mul = torch.cat([query_tok, doc_tok], dim=1)
-        return self.cls3(self.dropout(self.cls(self.dropout(mul))))
+        mul = torch.mul(self.q(query_tok), self.d(doc_tok))
+        # mul = torch.cat([query_tok, doc_tok], dim=1)
+        return self.cls(self.dropout(mul))
 
     @memoize_method
     def tokenize(self, text):
