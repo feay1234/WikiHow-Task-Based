@@ -550,7 +550,7 @@ class SentenceBert(BertRanker):
 
         self.bert = BertModel.from_pretrained('bert-base-uncased')
 
-
+        self.cos = torch.nn.CosineSimilarity(dim=1)
     def encode_bert(self, query_tok):
 
         CLSS = torch.full_like(query_tok[:, :1], self.tokenizer.vocab['[CLS]'])
@@ -579,6 +579,7 @@ class SentenceBert(BertRanker):
     def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
         query_tok = self.encode_bert(query_tok)
         doc_tok = self.encode_bert(doc_tok)
+
         mul = torch.mul(self.q(query_tok), self.d(doc_tok))
         if self.args.mode == 2:
             wiki_tok = self.encode_bert(wiki_tok)
@@ -589,5 +590,6 @@ class SentenceBert(BertRanker):
             mul = torch.mul(mul, wiki_tok)
             mul = torch.mul(mul, question_tok)
 
-        return self.cls(self.dropout(mul))
+        # return self.cls(self.dropout(mul))
+        return self.cos(query_tok, doc_tok)
 
