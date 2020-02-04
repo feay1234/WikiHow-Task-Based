@@ -148,7 +148,7 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='val
                                records['wiki_mask'],
                                records['question_tok'],
                                records['question_mask'])
-            elif args.model in ["ms", "sbert"]:
+            elif args.model in ["ms"]:
                 scores = model(records['query_tok'],
                                records['doc_tok'],
                                records['wiki_tok'],
