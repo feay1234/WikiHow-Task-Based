@@ -9,6 +9,7 @@ from pytorch_pretrained_bert import BertModel
 import modeling_util
 import numpy as np
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class BertPairwiseRanker(torch.nn.Module):
     def __init__(self):
@@ -556,7 +557,7 @@ class SentenceBert(BertRanker):
         # build BERT input sequences
         toks = torch.cat([CLSS, query_tok, SEPS], dim=1)
         segments_ids = [[1] * toks.shape[1]] * toks.shape[0]
-        segments_ids = torch.tensor(segments_ids)
+        segments_ids = torch.tensor(segments_ids).long().cuda() if device.type == 'cuda' else torch.tensor(segments_ids)
 
         # execute BERT model
         encoded_layers, _ = self.bert(toks, segments_ids)
