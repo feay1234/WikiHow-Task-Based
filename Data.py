@@ -88,7 +88,7 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 print("No neg instances", qid)
                 continue
             neg_id = random.choice(neg_ids)
-            query_tok = model.tokenize(ds_queries[qid])
+            query_tok = model.tokenize(ds_queries[qid]) if args.model not in ["sbert"] else  model.tokenize("[CLS] " + ds_queries[qid] +" [SEP]")
             wiki_tok = model.tokenize(ds_wikis[qid]) if args.model in ["birch", "ms", "sbert"] else None
             question_tok = model.tokenize(ds_questions[qid]) if args.model in ["birch", "ms", "sbert"] else None
 
@@ -101,8 +101,8 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 tqdm.write(f'missing doc {neg_id}! Skipping')
                 continue
 
-            yield qid, pos_id, query_tok, model.tokenize(pos_doc), wiki_tok, question_tok
-            yield qid, neg_id, query_tok, model.tokenize(neg_doc), wiki_tok, question_tok
+            yield qid, pos_id, query_tok, model.tokenize(pos_doc) if args.model not in ["sbert"] else model.tokenize("[CLS] " + pos_doc + " [SEP]"), wiki_tok, question_tok
+            yield qid, neg_id, query_tok, model.tokenize(neg_doc) if args.model not in ["sbert"] else model.tokenize("[CLS] " + neg_doc + " [SEP]"), wiki_tok, question_tok
         # break
 
 

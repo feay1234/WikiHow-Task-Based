@@ -544,7 +544,7 @@ class SentenceBert(BertRanker):
         self.args = args
 
         self.dropout = torch.nn.Dropout(0.1)
-        self.cls = torch.nn.Linear(100, 1)
+        self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
         self.q = torch.nn.Linear(self.BERT_SIZE, 100)
         self.d = torch.nn.Linear(self.BERT_SIZE, 100)
 
@@ -552,35 +552,38 @@ class SentenceBert(BertRanker):
 
         self.cos = torch.nn.CosineSimilarity(dim=1)
     def encode_bert(self, query_tok):
+        # print("encoded_ber", query_tok)
 
-        CLSS = torch.full_like(query_tok[:, :1], self.tokenizer.vocab['[CLS]'])
-        SEPS = torch.full_like(query_tok[:, :1], self.tokenizer.vocab['[SEP]'])
+        # CLSS = torch.full_like(query_tok[:, :1], self.tokenizer.vocab['[CLS]'])
+        # SEPS = torch.full_like(query_tok[:, :1], self.tokenizer.vocab['[SEP]'])
 
         # build BERT input sequences
-        toks = torch.cat([CLSS, query_tok, SEPS], dim=1)
-        segments_ids = [[1] * toks.shape[1]] * toks.shape[0]
+        # toks = torch.cat([CLSS, query_tok, SEPS], dim=1)
+        segments_ids = [[1] * query_tok.shape[1]] * query_tok.shape[0]
         segments_ids = torch.tensor(segments_ids).long().cuda() if device.type == 'cuda' else torch.tensor(segments_ids)
 
         # execute BERT model
-        encoded_layers, _ = self.bert(toks, segments_ids)
+        encoded_layers, _ = self.bert(query_tok, segments_ids)
 
         token_embeddings = torch.stack(encoded_layers, dim=0)
         token_embeddings = torch.squeeze(token_embeddings, dim=1)
         token_embeddings = token_embeddings.permute(1,2,0,3)
 
         # First one
-        sentence_embedding = token_embeddings[:, 0, -1]
+        # sentence_embedding = token_embeddings[:, 0, -1]
         # print(token_vecs.shape)
-        # sentence_embedding = torch.mean(token_vecs, dim=1)
+        sentence_embedding = torch.mean(token_embeddings[:, 0], dim=1)
 
         return sentence_embedding
 
 
     def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
+        # print("forward", query_tok)
         query_tok = self.encode_bert(query_tok)
+        # print("forward", doc_tok)
         doc_tok = self.encode_bert(doc_tok)
 
-        mul = torch.mul(self.q(query_tok), self.d(doc_tok))
+        mul = torch.mul(query_tok, doc_tok)
         if self.args.mode == 2:
             wiki_tok = self.encode_bert(wiki_tok)
             mul = torch.mul(mul, wiki_tok)
@@ -590,6 +593,6 @@ class SentenceBert(BertRanker):
             mul = torch.mul(mul, wiki_tok)
             mul = torch.mul(mul, question_tok)
 
-        # return self.cls(self.dropout(mul))
-        return self.cos(query_tok, doc_tok)
+        return self.cls(self.dropout(mul))
+        # return self.cos(query_tok, doc_tok)
 
