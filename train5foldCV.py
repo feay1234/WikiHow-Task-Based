@@ -236,7 +236,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=1)
+    parser.add_argument('--mode', type=int, default=2)
 
 
 

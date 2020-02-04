@@ -267,9 +267,10 @@ class BirchRanker(BertRanker):
                 # cls_reps_query[i] = torch.cat([cls_reps_query[i], cls_reps_wiki[i]], dim=1)
                 # query_reps_query[i] = torch.cat([query_reps_query[i], query_reps_wiki[i]], dim=1)
                 # doc_reps_query[i] = torch.cat([doc_reps_query[i], doc_reps_wiki[i]], dim=1)
-                cls_reps_query[i] = torch.mul(cls_reps_query[i], cls_reps_wiki[i])
+                # cls_reps_query[i] = torch.mul(cls_reps_query[i], cls_reps_wiki[i])
                 # query_reps_query[i] = torch.mul(query_reps_query[i], query_reps_wiki[i])
                 # doc_reps_query[i] = torch.mul(doc_reps_query[i], doc_reps_wiki[i])
+                return cls_reps_query, query_reps_query, doc_reps_query, cls_reps_wiki
             elif not self.enableWiki and self.enableQuestion:
                 cls_reps_query[i] = torch.cat([cls_reps_query[i], cls_reps_question[i]], dim=1)
                 query_reps_query[i] = torch.cat([query_reps_query[i], query_reps_question[i]], dim=1)
@@ -341,14 +342,18 @@ class VanillaBirchtRanker(BirchRanker):
         if enableQuestion:
             size += 1
         # self.cls = torch.nn.Linear(self.BERT_SIZE * (1 + size), 1)
-        self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
-        # self.q = torch.nn.Linear(self.BERT_SIZE, self.BERT_SIZE)
-        # self.w = torch.nn.Linear(self.BERT_SIZE, self.BERT_SIZE)
+        self.cls = torch.nn.Linear(100, 1)
+        self.q = torch.nn.Linear(self.BERT_SIZE, 100)
+        self.w = torch.nn.Linear(self.BERT_SIZE, 100)
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
-        cls_reps, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok,
+        cls_reps, _, _, cls_reps_wiki = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok,
                                           question_mask)
-        return self.cls(self.dropout(cls_reps[-1]))
+
+        mul = torch.mul(self.q(cls_reps[-1]), self.w(cls_reps_wiki[-1]))
+
+        # return self.cls(self.dropout(cls_reps[-1]))
+        return self.cls(self.dropout(mul))
 
 
 class CedrPacrrRanker(BertRanker):
