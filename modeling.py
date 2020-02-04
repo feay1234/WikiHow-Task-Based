@@ -577,7 +577,15 @@ class SentenceBert(BertRanker):
     def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
         query_tok = self.encode_bert(query_tok)
         doc_tok = self.encode_bert(doc_tok)
-        if self.args.mode == 1:
-            mul = torch.mul(query_tok, doc_tok)
+        mul = torch.mul(query_tok, doc_tok)
+        if self.args.mode == 2:
+            wiki_tok = self.encode_bert(wiki_tok)
+            mul = torch.mul(mul, wiki_tok)
+        elif self.args.mode == 3:
+            wiki_tok = self.encode_bert(wiki_tok)
+            question_tok = self.encode_bert(question_tok)
+            mul = torch.mul(mul, wiki_tok)
+            mul = torch.mul(mul, question_tok)
+
         return self.cls(self.dropout(mul))
 
