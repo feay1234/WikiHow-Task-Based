@@ -103,9 +103,11 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['question_mask'])
             elif args.model in ["ms", "sbert"]:
                 scores = model(record['query_tok'],
+                               record['query_mask'],
                                record['doc_tok'],
-                               record['wiki_tok'],
-                               record['question_tok'])
+                               record['doc_mask'])
+                               # record['wiki_tok'],
+                               # record['question_tok'])
             else:
                 scores = model(record['query_tok'],
                                record['query_mask'],

@@ -88,7 +88,7 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 print("No neg instances", qid)
                 continue
             neg_id = random.choice(neg_ids)
-            query_tok = model.tokenize(ds_queries[qid]) if args.model not in ["sbert"] else  model.tokenize("[CLS] " + ds_queries[qid] +" [SEP]")
+            query_tok = model.tokenize(ds_queries[qid])
             wiki_tok = model.tokenize(ds_wikis[qid]) if args.model in ["birch", "ms", "sbert"] else None
             question_tok = model.tokenize(ds_questions[qid]) if args.model in ["birch", "ms", "sbert"] else None
 
@@ -101,8 +101,13 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 tqdm.write(f'missing doc {neg_id}! Skipping')
                 continue
 
-            yield qid, pos_id, query_tok, model.tokenize(pos_doc) if args.model not in ["sbert"] else model.tokenize("[CLS] " + pos_doc + " [SEP]"), wiki_tok, question_tok
-            yield qid, neg_id, query_tok, model.tokenize(neg_doc) if args.model not in ["sbert"] else model.tokenize("[CLS] " + neg_doc + " [SEP]"), wiki_tok, question_tok
+            # yield qid, pos_id, query_tok, model.tokenize(pos_doc) if args.model not in ["sbert"] else model.tokenize(
+            #     "[CLS] " + pos_doc + " [SEP]"), wiki_tok, question_tok
+            # yield qid, neg_id, query_tok, model.tokenize(neg_doc) if args.model not in ["sbert"] else model.tokenize(
+            #     "[CLS] " + neg_doc + " [SEP]/"), wiki_tok, question_tok
+            yield qid, pos_id, query_tok, model.tokenize(pos_doc), wiki_tok, question_tok
+            yield qid, neg_id, query_tok, model.tokenize(neg_doc), wiki_tok, question_tok
+
         # break
 
 
@@ -193,18 +198,22 @@ def _pack_n_ship(batch, data, args):
         }
     elif args.model == "sbert":
 
-        QLEN = min(510, int(np.max([len(b) for b in batch['query_tok']])))
-        DLEN = min(510, int(np.max([len(b) for b in batch['doc_tok']])))
-        WLEN = min(510, int(np.max([len(b) for b in batch['wiki_tok']])))
-        QQLEN = min(510, int(np.max([len(b) for b in batch['question_tok']])))
+        QLEN = 20
+        DLEN = 20
+        # QLEN = min(510, int(np.max([len(b) for b in batch['query_tok']])))
+        # DLEN = min(510, int(np.max([len(b) for b in batch['doc_tok']])))
+        # WLEN = min(510, int(np.max([len(b) for b in batch['wiki_tok']])))
+        # QQLEN = min(510, int(np.max([len(b) for b in batch['question_tok']])))
 
         return {
             'query_id': batch['query_id'],
             'doc_id': batch['doc_id'],
-            'query_tok': _pad_crop(batch['query_tok'], QLEN, 0), # BERT's [PAD] token is 0
-            'doc_tok': _pad_crop(batch['doc_tok'], DLEN, 0),
-            'wiki_tok': _pad_crop(batch['wiki_tok'], WLEN, 0),
-            'question_tok': _pad_crop(batch['question_tok'], QQLEN, 0)
+            'query_tok': _pad_crop(batch['query_tok'], QLEN),  # BERT's [PAD] token is 0
+            'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
+            'query_mask': _mask(batch['query_tok'], QLEN),
+            'doc_mask': _mask(batch['doc_tok'], DLEN),
+            # 'wiki_tok': _pad_crop(batch['wiki_tok'], WLEN, 0),
+            # 'question_tok': _pad_crop(batch['question_tok'], QQLEN, 0)
         }
 
     else:
