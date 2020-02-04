@@ -187,6 +187,7 @@ def _pack_n_ship(batch, data, args):
             'query_tok': toTensor(batch['query_tok']),
             'doc_tok': toTensor(batch['doc_tok']),
             'wiki_tok': toTensor(batch['wiki_tok']),
+            # 'question_tok': _pad_crop_np(batch['question_tok'], 5),
             'question_tok': toTensor(batch['question_tok']),
             'query_mask': None,
             'doc_mask': None,
@@ -209,8 +210,22 @@ def _pack_n_ship(batch, data, args):
         }
 
 def toTensor(x):
-    # print(x)
+    # print(torch.tensor(x))
+    # try:
     return torch.tensor(x).float().cuda() if device.type == 'cuda' else torch.tensor(x).float()
+    # except:
+    #     print(x)
+
+def _pad_crop_np(items, l):
+    results = []
+    for item in items:
+        if len(item) < l:
+            while len(item) != l:
+                item.append([0]*100)
+        if len(item) > l:
+            item = item[:l]
+        results.append(item)
+    return torch.tensor(results).float().cuda() if device.type == 'cuda' else torch.tensor(results).float()
 
 def _pad_crop(items, l):
     result = []

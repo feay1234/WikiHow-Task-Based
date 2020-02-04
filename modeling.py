@@ -342,9 +342,9 @@ class VanillaBirchtRanker(BirchRanker):
         if enableQuestion:
             size += 1
         # self.cls = torch.nn.Linear(self.BERT_SIZE * (1 + size), 1)
-        self.cls = torch.nn.Linear(100, 1)
-        self.q = torch.nn.Linear(self.BERT_SIZE, 100)
-        self.w = torch.nn.Linear(self.BERT_SIZE, 100)
+        self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
+        self.q = torch.nn.Linear(self.BERT_SIZE, self.BERT_SIZE)
+        self.w = torch.nn.Linear(self.BERT_SIZE, self.BERT_SIZE)
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
         cls_reps, _, _, cls_reps_wiki = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok,
@@ -558,7 +558,7 @@ class MSRanker(BertRanker):
         if self.args.mode == 2:
             self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki.pkg", "rb"))
         if self.args.mode == 3:
-            self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki-question.pkg", "rb"))
+            self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki-question5.pkg", "rb"))
 
 
         self.dropout = torch.nn.Dropout(0.1)
@@ -579,7 +579,10 @@ class MSRanker(BertRanker):
         elif self.args.mode == 3:
             mul = torch.mul(self.q(query_tok), self.d(doc_tok))
             mul = torch.mul(mul, self.w(wiki_tok))
+            # question_tok = torch.tensor(question_tok)
+            # mul = torch.mul(mul, torch.max(self.qq(question_tok), 1).values)
             mul = torch.mul(mul, self.qq(question_tok))
+            # torch.mean(t, 1).shape
 
         return self.cls(self.dropout(mul))
 
