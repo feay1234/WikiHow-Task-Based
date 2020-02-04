@@ -89,8 +89,8 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 continue
             neg_id = random.choice(neg_ids)
             query_tok = model.tokenize(ds_queries[qid])
-            wiki_tok = model.tokenize(ds_wikis[qid]) if "birch" in args.model or "ms" in args.model else None
-            question_tok = model.tokenize(ds_questions[qid]) if "birch" in args.model or "ms" in args.model else None
+            wiki_tok = model.tokenize(ds_wikis[qid]) if args.model in ["birch", "ms", "sbert"] else None
+            question_tok = model.tokenize(ds_questions[qid]) if args.model in ["birch", "ms", "sbert"] else None
 
             pos_doc = ds_docs.get(pos_id)
             neg_doc = ds_docs.get(neg_id)
@@ -130,8 +130,8 @@ def _iter_valid_records(model, dataset, run, args):
     ds_queries, ds_docs, ds_wikis, ds_questions = dataset
     for qid in run:
         query_tok = model.tokenize(ds_queries[qid])
-        wiki_tok = model.tokenize(ds_wikis[qid]) if "birch" in args.model or "ms" in args.model else None
-        question_tok = model.tokenize(ds_questions[qid]) if "birch" in args.model or "ms" in args.model else None
+        wiki_tok = model.tokenize(ds_wikis[qid]) if args.model in ["birch", "ms", "sbert"] else None
+        question_tok = model.tokenize(ds_questions[qid]) if args.model in ["birch", "ms", "sbert"] else None
         for did in run[qid]:
             doc = ds_docs.get(did)
             if doc is None:
@@ -139,6 +139,7 @@ def _iter_valid_records(model, dataset, run, args):
                 continue
             doc_tok = model.tokenize(doc)
             yield qid, did, query_tok, doc_tok, wiki_tok, question_tok
+
 
 def _pack_n_ship(batch, data, args):
     QLEN = 9
@@ -166,7 +167,7 @@ def _pack_n_ship(batch, data, args):
             'question_mask': _mask(batch['question_tok'], QQLEN),
         }
 
-    if args.model == "bert":
+    elif args.model == "bert":
         QLEN = 20
         MAX_DLEN = 800
         DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
@@ -179,7 +180,7 @@ def _pack_n_ship(batch, data, args):
             'doc_mask': _mask(batch['doc_tok'], DLEN),
         }
 
-    if args.model == "ms":
+    elif args.model == "ms":
 
         return {
             'query_id': batch['query_id'],
@@ -188,11 +189,22 @@ def _pack_n_ship(batch, data, args):
             'doc_tok': toTensor(batch['doc_tok']),
             'wiki_tok': toTensor(batch['wiki_tok']),
             # 'question_tok': _pad_crop_np(batch['question_tok'], 5),
-            'question_tok': toTensor(batch['question_tok']),
-            'query_mask': None,
-            'doc_mask': None,
-            'wiki_mask': None,
-            'question_mask': None,
+            'question_tok': toTensor(batch['question_tok'])
+        }
+    elif args.model == "sbert":
+
+        QLEN = min(510, int(np.max([len(b) for b in batch['query_tok']])))
+        DLEN = min(510, int(np.max([len(b) for b in batch['doc_tok']])))
+        WLEN = min(510, int(np.max([len(b) for b in batch['wiki_tok']])))
+        QQLEN = min(510, int(np.max([len(b) for b in batch['question_tok']])))
+
+        return {
+            'query_id': batch['query_id'],
+            'doc_id': batch['doc_id'],
+            'query_tok': _pad_crop(batch['query_tok'], QLEN, 0), # BERT's [PAD] token is 0
+            'doc_tok': _pad_crop(batch['doc_tok'], DLEN, 0),
+            'wiki_tok': _pad_crop(batch['wiki_tok'], WLEN, 0),
+            'question_tok': _pad_crop(batch['question_tok'], QQLEN, 0)
         }
 
     else:
@@ -209,6 +221,7 @@ def _pack_n_ship(batch, data, args):
             'doc_mask': _mask(batch['query_tok'], DLEN),
         }
 
+
 def toTensor(x):
     # print(torch.tensor(x))
     # try:
@@ -216,22 +229,24 @@ def toTensor(x):
     # except:
     #     print(x)
 
+
 def _pad_crop_np(items, l):
     results = []
     for item in items:
         if len(item) < l:
             while len(item) != l:
-                item.append([0]*100)
+                item.append([0] * 100)
         if len(item) > l:
             item = item[:l]
         results.append(item)
     return torch.tensor(results).float().cuda() if device.type == 'cuda' else torch.tensor(results).float()
 
-def _pad_crop(items, l):
+
+def _pad_crop(items, l, val=-1):
     result = []
     for item in items:
         if len(item) < l:
-            item = item + [-1] * (l - len(item))
+            item = item + [val] * (l - len(item))
         if len(item) > l:
             item = item[:l]
         result.append(item)

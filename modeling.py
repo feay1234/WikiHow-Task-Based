@@ -4,6 +4,8 @@ from pytools import memoize_method
 import torch
 import torch.nn.functional as F
 import pytorch_pretrained_bert
+from pytorch_pretrained_bert import BertModel
+
 import modeling_util
 import numpy as np
 
@@ -166,63 +168,6 @@ class BertRanker(torch.nn.Module):
 
         return cls_results, query_results, doc_results
         # return cls_results, doc_results, query_results
-
-    # confusing one
-    def encode_bert_old(self, query_tok, query_mask, doc_tok, doc_mask):
-        BATCH, QLEN = query_tok.shape
-        DIFF = 3  # = [CLS] and 2x[SEP]
-        maxlen = self.bert.config.max_position_embeddings
-        # MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
-        # doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
-        # doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)
-        # query_toks = torch.cat([query_tok] * sbcount, dim=0)
-        # query_mask = torch.cat([query_mask] * sbcount, dim=0)
-
-        # Long query
-        DLEN = 9  # longest property's lenght
-        MAX_QUE_TOK_LEN = maxlen - DLEN - DIFF
-        query_toks, sbcount = modeling_util.subbatch(query_tok, MAX_QUE_TOK_LEN)
-        query_mask, _ = modeling_util.subbatch(query_mask, MAX_QUE_TOK_LEN)
-        doc_toks = torch.cat([doc_tok] * sbcount, dim=0)
-        doc_mask = torch.cat([doc_mask] * sbcount, dim=0)
-
-        CLSS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[CLS]'])
-        SEPS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[SEP]'])
-        ONES = torch.ones_like(query_mask[:, :1])
-        NILS = torch.zeros_like(query_mask[:, :1])
-
-        # build BERT input sequences
-        toks = torch.cat([CLSS, query_toks, SEPS, doc_toks, SEPS], dim=1)
-        mask = torch.cat([ONES, query_mask, ONES, doc_mask, ONES], dim=1)
-        segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
-        # segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
-        toks[toks == -1] = 0  # remove padding (will be masked anyway)
-
-        # execute BERT model
-        result = self.bert(toks, segment_ids.long(), mask)
-
-        # Original
-        # extract relevant subsequences for query and doc
-        # query_results = [r[:BATCH, 1:QLEN+1] for r in result]
-        # doc_results = [r[:, QLEN+2:-1] for r in result]
-        # doc_results = [modeling_util.un_subbatch(r, doc_tok, MAX_DOC_TOK_LEN) for r in doc_results]
-        #
-        # Support long queries
-        query_results = [r[:, 1: query_tok.shape[-1] + 1] for r in result]
-        query_results = [modeling_util.un_subbatch(r, query_tok, query_tok.shape[-1]) for r in query_results]
-        doc_results = [r[:, query_tok.shape[-1] + 2:-1] for r in result]
-
-        # build CLS representation
-        cls_results = []
-        for layer in result:
-            cls_output = layer[:, 0]
-            cls_result = []
-            for i in range(cls_output.shape[0] // BATCH):
-                cls_result.append(cls_output[i * BATCH:(i + 1) * BATCH])
-            cls_result = torch.stack(cls_result, dim=2).mean(dim=2)
-            cls_results.append(cls_result)
-
-        return cls_results, query_results, doc_results
 
 
 class VanillaBertRanker(BertRanker):
@@ -570,7 +515,7 @@ class MSRanker(BertRanker):
 
         self.properties = []
 
-    def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
+    def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
         if self.args.mode == 1:
             mul = torch.mul(self.q(query_tok), self.d(doc_tok))
         elif self.args.mode == 2:
@@ -579,10 +524,8 @@ class MSRanker(BertRanker):
         elif self.args.mode == 3:
             mul = torch.mul(self.q(query_tok), self.d(doc_tok))
             mul = torch.mul(mul, self.w(wiki_tok))
-            # question_tok = torch.tensor(question_tok)
             # mul = torch.mul(mul, torch.max(self.qq(question_tok), 1).values)
             mul = torch.mul(mul, self.qq(question_tok))
-            # torch.mean(t, 1).shape
 
         return self.cls(self.dropout(mul))
 
@@ -592,3 +535,48 @@ class MSRanker(BertRanker):
             return self.text2MSvec[text]
         print("not found:", text)
         return np.zeros(100)
+
+class SentenceBert(BertRanker):
+    def __init__(self, args):
+        super().__init__()
+
+        self.args = args
+
+        self.dropout = torch.nn.Dropout(0.1)
+        self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
+
+        self.bert = BertModel.from_pretrained('bert-base-uncased')
+
+
+    def encode_bert(self, query_tok):
+
+        CLSS = torch.full_like(query_tok[:, :1], self.tokenizer.vocab['[CLS]'])
+        SEPS = torch.full_like(query_tok[:, :1], self.tokenizer.vocab['[SEP]'])
+
+        # build BERT input sequences
+        toks = torch.cat([CLSS, query_tok, SEPS], dim=1)
+        segments_ids = [[1] * toks.shape[1]] * toks.shape[0]
+        segments_ids = torch.tensor(segments_ids)
+
+        # execute BERT model
+        encoded_layers, _ = self.bert(toks, segments_ids)
+
+        token_embeddings = torch.stack(encoded_layers, dim=0)
+        token_embeddings = torch.squeeze(token_embeddings, dim=1)
+        token_embeddings = token_embeddings.permute(1,2,0,3)
+
+        # First one
+        token_vecs = token_embeddings[:, 0]
+
+        sentence_embedding = torch.mean(token_vecs, dim=1)
+
+        return sentence_embedding
+
+
+    def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
+        query_tok = self.encode_bert(query_tok)
+        doc_tok = self.encode_bert(doc_tok)
+        if self.args.mode == 1:
+            mul = torch.mul(query_tok, doc_tok)
+        return self.cls(self.dropout(mul))
+

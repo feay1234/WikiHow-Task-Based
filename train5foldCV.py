@@ -22,6 +22,7 @@ random.seed(SEED)
 MODEL_MAP = {
     'vanilla_bert': modeling.VanillaBertRanker,
     'bert': modeling.BERT,
+    'sbert': modeling.SentenceBert,
     'ms': modeling.MSRanker,
     'birch': modeling.VanillaBirchtRanker,
     'cedr_pacrr': modeling.CedrPacrrRanker,
@@ -38,8 +39,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     params = [(k, v) for k, v in model.named_parameters() if v.requires_grad]
     non_bert_params = {'params': [v for k, v in params if not k.startswith('bert.')]}
     bert_params = {'params': [v for k, v in params if k.startswith('bert.')], 'lr': BERT_LR}
-    # optimizer = torch.optim.Adam([non_bert_params, bert_params], lr=LR)
-    optimizer = torch.optim.Adam([non_bert_params], lr=LR)
+    optimizer = torch.optim.Adam([non_bert_params, bert_params], lr=LR)
+    # optimizer = torch.optim.Adam([non_bert_params], lr=LR)
 
     top_valid_score = None
     bestResults = {}
@@ -84,7 +85,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
 
-            if isinstance(model, modeling.BirchRanker) or isinstance(model, modeling.MSRanker):
+            if isinstance(model, modeling.BirchRanker):
                 scores = model(record['query_tok'],
                                record['query_mask'],
                                record['doc_tok'],
@@ -93,6 +94,11 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['wiki_mask'],
                                record['question_tok'],
                                record['question_mask'])
+            elif args.model in ["ms", "sbert"]:
+                scores = model(record['query_tok'],
+                               record['doc_tok'],
+                               record['wiki_tok'],
+                               record['question_tok'])
             else:
                 scores = model(record['query_tok'],
                                record['query_mask'],
@@ -124,7 +130,7 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='val
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
         for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data, args):
-            if isinstance(model, modeling.BirchRanker) or isinstance(model, modeling.MSRanker):
+            if isinstance(model, modeling.BirchRanker):
                 scores = model(records['query_tok'],
                                records['query_mask'],
                                records['doc_tok'],
@@ -133,6 +139,11 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='val
                                records['wiki_mask'],
                                records['question_tok'],
                                records['question_mask'])
+            elif args.model in ["ms", "sbert"]:
+                scores = model(records['query_tok'],
+                               records['doc_tok'],
+                               records['wiki_tok'],
+                               records['question_tok'])
             else:
                 scores = model(records['query_tok'],
                                records['query_mask'],
@@ -219,7 +230,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='birch')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sbert')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
@@ -237,12 +248,9 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=3)
-
-
+    parser.add_argument('--mode', type=int, default=1)
 
     args = parser.parse_args()
-
 
     if args.model == "birch":
         if args.mode == 1:
@@ -263,11 +271,13 @@ def main_cli():
         elif args.mode == 6:
             model = MODEL_MAP[args.model](True, True, False, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
                 args.model](True, True, False, args)
-    elif args.model == "ms":
+    elif args.model in ["ms", "sbert"]:
         model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args)
     else:
         model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
-    dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile, args.questionfile] if "birch" in args.model or "ms" in args.model else [args.queryfile, args.docfile])
+    dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile,
+                                   args.questionfile] if args.model in ["birch", "ms", "sbert"] else [
+        args.queryfile, args.docfile])
 
     if isinstance(model, modeling.CedrPacrrRanker):
         args.maxlen = min(500, max([len(model.tokenize(dataset[0][i])) for i in dataset[0]]))
@@ -308,8 +318,9 @@ def main_cli():
         if args.mode in [2, 4, 5, 6]:
             additionName.append(questionName)
 
-        modelName = "%s_m%d_%s_%s_%s_e%d_%s" % (args.model, args.mode, args.data, "_".join(additionName), args.evalMode, args.epoch, timestamp)
-    elif "ms" in args.model:
+        modelName = "%s_m%d_%s_%s_%s_e%d_%s" % (
+            args.model, args.mode, args.data, "_".join(additionName), args.evalMode, args.epoch, timestamp)
+    elif args.model in ["ms", "sbert"]:
         modelName = "%s_m%d_%s_%s_e%d_%s" % (args.model, args.mode, args.data, args.evalMode, args.epoch, timestamp)
     else:
         modelName = "%s_%s_%s_e%d_%s" % (args.model, args.data, args.evalMode, args.epoch, timestamp)
