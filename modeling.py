@@ -544,7 +544,9 @@ class SentenceBert(BertRanker):
         self.args = args
 
         self.dropout = torch.nn.Dropout(0.1)
-        self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
+        self.cls = torch.nn.Linear(100, 1)
+        self.q = torch.nn.Linear(self.BERT_SIZE, 100)
+        self.d = torch.nn.Linear(self.BERT_SIZE, 100)
 
         self.bert = BertModel.from_pretrained('bert-base-uncased')
 
@@ -577,7 +579,7 @@ class SentenceBert(BertRanker):
     def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
         query_tok = self.encode_bert(query_tok)
         doc_tok = self.encode_bert(doc_tok)
-        mul = torch.mul(query_tok, doc_tok)
+        mul = torch.mul(self.q(query_tok), self.d(doc_tok))
         if self.args.mode == 2:
             wiki_tok = self.encode_bert(wiki_tok)
             mul = torch.mul(mul, wiki_tok)

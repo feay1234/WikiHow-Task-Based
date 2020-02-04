@@ -51,14 +51,18 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
 
     for epoch in range(MAX_EPOCH):
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args)
-        print(f'train epoch={epoch} loss={loss}')
+        txt = f'train epoch={epoch} loss={loss}'
+        print2file(args.out_dir, modelName, ".txt", txt, fold)
+
         valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
                                                                 model_out_dir, qidInWiki, data, args, "valid")
         valid_score = np.mean(valid_results["ndcg@15"])
-        print(f'validation epoch={epoch} score={valid_score}')
+        txt = f'validation epoch={epoch} score={valid_score}'
+        print2file(args.out_dir, modelName, ".txt", txt, fold)
         if top_valid_score is None or valid_score > top_valid_score:
             top_valid_score = valid_score
-            print('new top validation score')
+            txt = 'new top validation score'
+            print2file(args.out_dir, modelName, ".txt", txt, fold)
             # model.save(os.path.join(model_out_dir, 'weights.p'))
             test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch,
                                                                  model_out_dir, qidInWiki, data, args, "test")
@@ -214,6 +218,13 @@ def prediction2file(path, name, format, preds, fold):
         thefile.write("%d\t%s\t%s\t%f\n" % (fold, qid, pid, score))
     thefile.close()
 
+def print2file(path, name, format, printout, fold):
+    print(printout)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    thefile = open(path + name + format, 'a')
+    thefile.write("%d-%s\n" % (fold, printout))
+    thefile.close()
 
 def result2file(path, name, format, res, qids, fold):
     if not os.path.exists(path):
@@ -248,7 +259,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=3)
+    parser.add_argument('--mode', type=int, default=1)
 
     args = parser.parse_args()
 
