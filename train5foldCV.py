@@ -218,13 +218,13 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_birch')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
     parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
     parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikipedia1.tsv")
-    parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq1.tsv")
+    parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq.tsv")
 
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
     parser.add_argument('--train_pairs', default="data/cedr/train")
@@ -236,7 +236,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=2)
+    parser.add_argument('--mode', type=int, default=3)
 
 
 

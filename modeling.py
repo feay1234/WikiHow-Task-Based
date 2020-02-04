@@ -553,14 +553,12 @@ class MSRanker(BertRanker):
         self.MS_SIZE = 100
         self.args = args
 
-        queryfile = self.args.queryfile.name.split("/")[-1].replace(".tsv", "")
-        docfile = self.args.docfile.name.split("/")[-1].replace(".tsv", "")
-
         if self.args.mode == 1:
-            self.text2MSvec = pickle.load(open("data/cedr/" + queryfile + "-" + docfile + ".pkg", "rb"))
+            self.text2MSvec = pickle.load(open("data/cedr/query-doc.pkg", "rb"))
         if self.args.mode == 2:
-            # wikifile = self.args.wikifile.name.split("/")[-1].replace(".tsv", "")
-            self.text2MSvec = pickle.load(open("data/cedr/" + queryfile + "-" + docfile + "-wiki.pkg", "rb"))
+            self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki.pkg", "rb"))
+        if self.args.mode == 3:
+            self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki-question.pkg", "rb"))
 
 
         self.dropout = torch.nn.Dropout(0.1)
@@ -578,10 +576,16 @@ class MSRanker(BertRanker):
         elif self.args.mode == 2:
             mul = torch.mul(self.q(query_tok), self.d(doc_tok))
             mul = torch.mul(mul, self.w(wiki_tok))
+        elif self.args.mode == 3:
+            mul = torch.mul(self.q(query_tok), self.d(doc_tok))
+            mul = torch.mul(mul, self.w(wiki_tok))
+            mul = torch.mul(mul, self.qq(question_tok))
+
         return self.cls(self.dropout(mul))
 
     @memoize_method
     def tokenize(self, text):
         if text in self.text2MSvec:
             return self.text2MSvec[text]
+        print("not found:", text)
         return np.zeros(100)
