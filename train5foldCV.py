@@ -61,11 +61,14 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
         print2file(args.out_dir, modelName, ".txt", txt, fold)
         if top_valid_score is None or valid_score > top_valid_score:
             top_valid_score = valid_score
-            txt = 'new top validation score'
-            print2file(args.out_dir, modelName, ".txt", txt, fold)
             # model.save(os.path.join(model_out_dir, 'weights.p'))
             test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch,
                                                                  model_out_dir, qidInWiki, data, args, "test")
+
+            # print(test_results["ndcg@15"])
+            txt = 'new top validation score, %.4f' % np.mean(test_results["ndcg@15"])
+            print2file(args.out_dir, modelName, ".txt", txt, fold)
+
             bestResults = test_results
             bestPredictions = test_predictions
             bestQids = test_qids
@@ -241,7 +244,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sbert')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
