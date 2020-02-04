@@ -558,7 +558,7 @@ class MSRanker(BertRanker):
         if self.args.mode == 2:
             self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki.pkg", "rb"))
         if self.args.mode == 3:
-            self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki-question.pkg", "rb"))
+            self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki-question5.pkg", "rb"))
 
 
         self.dropout = torch.nn.Dropout(0.1)
