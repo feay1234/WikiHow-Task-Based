@@ -38,7 +38,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     params = [(k, v) for k, v in model.named_parameters() if v.requires_grad]
     non_bert_params = {'params': [v for k, v in params if not k.startswith('bert.')]}
     bert_params = {'params': [v for k, v in params if k.startswith('bert.')], 'lr': BERT_LR}
-    optimizer = torch.optim.Adam([non_bert_params, bert_params], lr=LR)
+    # optimizer = torch.optim.Adam([non_bert_params, bert_params], lr=LR)
+    optimizer = torch.optim.Adam([non_bert_params], lr=LR)
 
     top_valid_score = None
     bestResults = {}
