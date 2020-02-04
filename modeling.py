@@ -569,9 +569,9 @@ class SentenceBert(BertRanker):
         token_embeddings = token_embeddings.permute(1,2,0,3)
 
         # First one
-        token_vecs = token_embeddings[:, 0]
-
-        sentence_embedding = torch.mean(token_vecs, dim=1)
+        sentence_embedding = token_embeddings[:, 0, -1]
+        # print(token_vecs.shape)
+        # sentence_embedding = torch.mean(token_vecs, dim=1)
 
         return sentence_embedding
 
