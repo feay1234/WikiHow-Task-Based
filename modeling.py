@@ -264,9 +264,12 @@ class BirchRanker(BertRanker):
 
         for i in range(len(cls_reps_query)):
             if self.enableWiki and not self.enableQuestion:
-                cls_reps_query[i] = torch.cat([cls_reps_query[i], cls_reps_wiki[i]], dim=1)
-                query_reps_query[i] = torch.cat([query_reps_query[i], query_reps_wiki[i]], dim=1)
-                doc_reps_query[i] = torch.cat([doc_reps_query[i], doc_reps_wiki[i]], dim=1)
+                # cls_reps_query[i] = torch.cat([cls_reps_query[i], cls_reps_wiki[i]], dim=1)
+                # query_reps_query[i] = torch.cat([query_reps_query[i], query_reps_wiki[i]], dim=1)
+                # doc_reps_query[i] = torch.cat([doc_reps_query[i], doc_reps_wiki[i]], dim=1)
+                cls_reps_query[i] = torch.mul(cls_reps_query[i], cls_reps_wiki[i])
+                # query_reps_query[i] = torch.mul(query_reps_query[i], query_reps_wiki[i])
+                # doc_reps_query[i] = torch.mul(doc_reps_query[i], doc_reps_wiki[i])
             elif not self.enableWiki and self.enableQuestion:
                 cls_reps_query[i] = torch.cat([cls_reps_query[i], cls_reps_question[i]], dim=1)
                 query_reps_query[i] = torch.cat([query_reps_query[i], query_reps_question[i]], dim=1)
@@ -328,15 +331,19 @@ class BirchRanker(BertRanker):
 
 
 class VanillaBirchtRanker(BirchRanker):
-    def __init__(self, enableWiki, enableQuestion, shareBERT):
+    def __init__(self, enableWiki, enableQuestion, shareBERT, args):
         super().__init__(enableWiki, enableQuestion, shareBERT)
         self.dropout = torch.nn.Dropout(0.1)
+        self.args = args
         size = 0
         if enableWiki:
-            size += 1
+            size += 0
         if enableQuestion:
             size += 1
-        self.cls = torch.nn.Linear(self.BERT_SIZE * (1 + size), 1)
+        # self.cls = torch.nn.Linear(self.BERT_SIZE * (1 + size), 1)
+        self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
+        # self.q = torch.nn.Linear(self.BERT_SIZE, self.BERT_SIZE)
+        # self.w = torch.nn.Linear(self.BERT_SIZE, self.BERT_SIZE)
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
         cls_reps, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok,

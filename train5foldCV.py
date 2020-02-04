@@ -218,7 +218,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_birch')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
@@ -236,7 +236,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=2)
+    parser.add_argument('--mode', type=int, default=1)
 
 
 
@@ -245,23 +245,23 @@ def main_cli():
 
     if args.model == "vanilla_birch":
         if args.mode == 1:
-            model = MODEL_MAP[args.model](True, False, False).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](True, False, False)
+            model = MODEL_MAP[args.model](True, False, False, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](True, False, False, args)
         elif args.mode == 2:
-            model = MODEL_MAP[args.model](False, True, False).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](False, True, False)
+            model = MODEL_MAP[args.model](False, True, False, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](False, True, False, args)
         elif args.mode == 3:
-            model = MODEL_MAP[args.model](True, False, True).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](True, False, True)
+            model = MODEL_MAP[args.model](True, False, True, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](True, False, True, args)
         elif args.mode == 4:
-            model = MODEL_MAP[args.model](False, True, True).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](False, True, True)
+            model = MODEL_MAP[args.model](False, True, True, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](False, True, True, args)
         elif args.mode == 5:
-            model = MODEL_MAP[args.model](True, True, True).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](True, True, True)
+            model = MODEL_MAP[args.model](True, True, True, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](True, True, True, args)
         elif args.mode == 6:
-            model = MODEL_MAP[args.model](True, True, False).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](True, True, False)
+            model = MODEL_MAP[args.model](True, True, False, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
+                args.model](True, True, False, args)
     elif args.model == "ms":
         model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args)
     else:
