@@ -113,7 +113,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['query_mask'],
                                record['doc_tok'],
                                record['doc_mask'])
-
+            print(scores)
             count = len(record['query_id']) // 2
             scores = scores.reshape(count, 2)
             loss = torch.mean(1. - scores.softmax(dim=1)[:, 0])  # pariwse softmax
@@ -264,7 +264,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=5)
+    parser.add_argument('--mode', type=int, default=7)
 
     args = parser.parse_args()
 

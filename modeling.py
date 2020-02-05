@@ -575,7 +575,7 @@ class SentenceBert(BertRanker):
             mask = torch.cat([ONES, query_mask, ONES, doc_mask, ONES], dim=1)
             segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
             toks[toks == -1] = 0 # remove padding (will be masked anyway)
-        elif self.args.mode == 4:
+        elif self.args.mode in [4, 7, 8]:
             toks = torch.cat([CLSS, query_toks, SEPS], dim=1)
             mask = torch.cat([ONES, query_mask, ONES], dim=1)
             segment_ids = torch.cat([ONES] * (2 + QLEN), dim=1)
@@ -603,7 +603,6 @@ class SentenceBert(BertRanker):
         return cls_results
 
 
-    # def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
 
         if self.args.mode == 1:
@@ -620,6 +619,24 @@ class SentenceBert(BertRanker):
             cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
             mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
             return self.cls(self.dropout(mul))
+        elif self.args.mode == 7:
+            print(self.args.mode)
+            cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
+            cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
+            cls_wiki_tok = self.encode_bert_ori(wiki_tok, wiki_mask, query_tok, query_mask)
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul = torch.mul(mul, cls_wiki_tok[-1])
+            return self.cls(self.dropout(mul))
+        elif self.args.mode == 8:
+            cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
+            cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
+            cls_wiki_tok = self.encode_bert_ori(wiki_tok, wiki_mask, query_tok, query_mask)
+            cls_question_tok = self.encode_bert_ori(question_tok, question_mask, query_tok, query_mask)
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul = torch.mul(mul, cls_wiki_tok[-1])
+            mul = torch.mul(mul, cls_question_tok[-1])
+            return self.cls(self.dropout(mul))
+
         elif self.args.mode == 5:
             cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)

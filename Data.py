@@ -198,19 +198,20 @@ def _pack_n_ship(batch, data, args):
         }
     elif args.model == "sbert":
 
-        QLEN = 20
-        DLEN = 20
-        WLEN = 20
-        QQLEN = 20
-        # QLEN = min(510, int(np.max([len(b) for b in batch['query_tok']])))
-        # DLEN = min(510, int(np.max([len(b) for b in batch['doc_tok']])))
-        # WLEN = min(510, int(np.max([len(b) for b in batch['wiki_tok']])))
-        # QQLEN = min(510, int(np.max([len(b) for b in batch['question_tok']])))
+        # best one
+        # QLEN = 20
+        # DLEN = 20
+        # WLEN = 20
+        # QQLEN = 20
+        QLEN = min(510, int(np.max([len(b) for b in batch['query_tok']])))
+        DLEN = min(510, int(np.max([len(b) for b in batch['doc_tok']])))
+        WLEN = min(510, int(np.max([len(b) for b in batch['wiki_tok']])))
+        QQLEN = min(510, int(np.max([len(b) for b in batch['question_tok']])))
 
         return {
             'query_id': batch['query_id'],
             'doc_id': batch['doc_id'],
-            'query_tok': _pad_crop(batch['query_tok'], QLEN),  # BERT's [PAD] token is 0
+            'query_tok': _pad_crop(batch['query_tok'], QLEN),
             'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
             'wiki_tok': _pad_crop(batch['wiki_tok'], WLEN),
             'question_tok': _pad_crop(batch['question_tok'], QQLEN),
@@ -264,7 +265,6 @@ def _pad_crop(items, l, val=-1):
             item = item[:l]
         result.append(item)
     return torch.tensor(result).long().cuda() if device.type == 'cuda' else torch.tensor(result).long()
-
 
 def _mask(items, l):
     result = []
