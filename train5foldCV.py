@@ -251,8 +251,8 @@ def main_cli():
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
     parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
-    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikipedia.tsv")
-    parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq.tsv")
+    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikihow.tsv")
+    parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qw.tsv")
 
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
     parser.add_argument('--train_pairs', default="data/cedr/train")
