@@ -552,17 +552,73 @@ class SentenceBert(BertRanker):
 
         self.cos = torch.nn.CosineSimilarity(dim=1)
 
+    def encode_bert_ori(self, query_tok, query_mask, doc_tok, doc_mask):
+        BATCH, QLEN = query_tok.shape
+        DIFF = 3 # = [CLS] and 2x[SEP]
+        maxlen = self.bert.config.max_position_embeddings
+        MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
+
+        doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
+        doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)
+
+        query_toks = torch.cat([query_tok] * sbcount, dim=0)
+        query_mask = torch.cat([query_mask] * sbcount, dim=0)
+
+        CLSS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[CLS]'])
+        SEPS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[SEP]'])
+        ONES = torch.ones_like(query_mask[:, :1])
+        NILS = torch.zeros_like(query_mask[:, :1])
+
+        # build BERT input sequences
+        if self.args.mode == 3:
+            toks = torch.cat([CLSS, query_toks, SEPS, doc_toks, SEPS], dim=1)
+            mask = torch.cat([ONES, query_mask, ONES, doc_mask, ONES], dim=1)
+            segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
+            toks[toks == -1] = 0 # remove padding (will be masked anyway)
+        elif self.args.mode == 4:
+            toks = torch.cat([CLSS, query_toks, SEPS], dim=1)
+            mask = torch.cat([ONES, query_mask, ONES], dim=1)
+            segment_ids = torch.cat([ONES] * (2 + QLEN), dim=1)
+            toks[toks == -1] = 0 # remove padding (will be masked anyway)
+
+        # execute BERT model
+        result = self.bert(toks, segment_ids.long(), mask)
+
+        # extract relevant subsequences for query and doc
+        # query_results = [r[:BATCH, 1:QLEN+1] for r in result]
+        # doc_results = [r[:, QLEN+2:-1] for r in result]
+        # doc_results = [modeling_util.un_subbatch(r, doc_tok, MAX_DOC_TOK_LEN) for r in doc_results]
+
+        # build CLS representation
+        cls_results = []
+        for layer in result:
+            cls_output = layer[:, 0]
+            cls_result = []
+            for i in range(cls_output.shape[0] // BATCH):
+                cls_result.append(cls_output[i*BATCH:(i+1)*BATCH])
+            cls_result = torch.stack(cls_result, dim=2).mean(dim=2)
+            cls_results.append(cls_result)
+
+        # return cls_results, query_results, doc_results
+        return cls_results
+
+
     # def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
     def forward(self, query_tok, query_mask, doc_tok, doc_mask):
 
-        # print("forward", query_tok)
 
-        cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
-        # print("forward", doc_tok)
-
-        cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-
-        mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-
-        return self.cls(self.dropout(mul))
+        if self.args.mode == 1:
+            cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+            cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            return self.cls(self.dropout(mul))
+        elif self.args.mode == 2:
+            cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+            cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+            return self.cos(cls_query_tok[-1], cls_doc_tok[-1])
+        elif self.args.mode in [3, 4]:
+            cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
+            cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            return self.cls(self.dropout(mul))
 
