@@ -620,7 +620,7 @@ class SentenceBert(BertRanker):
             mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
             return self.cls(self.dropout(mul))
         elif self.args.mode == 7:
-            print(self.args.mode)
+            # print(self.args.mode)
             cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
             cls_wiki_tok = self.encode_bert_ori(wiki_tok, wiki_mask, query_tok, query_mask)
