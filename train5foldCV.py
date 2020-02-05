@@ -92,7 +92,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
 
-            if isinstance(model, modeling.BirchRanker):
+            if args.model in ["sbert", "vanilla_bert"]:
                 scores = model(record['query_tok'],
                                record['query_mask'],
                                record['doc_tok'],
@@ -101,13 +101,13 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['wiki_mask'],
                                record['question_tok'],
                                record['question_mask'])
-            elif args.model in ["ms", "sbert"]:
+            elif args.model in ["ms"]:
                 scores = model(record['query_tok'],
-                               record['query_mask'],
+                               # record['query_mask'],
                                record['doc_tok'],
-                               record['doc_mask'])
-                               # record['wiki_tok'],
-                               # record['question_tok'])
+                               # record['doc_mask'])
+                               record['wiki_tok'],
+                               record['question_tok'])
             else:
                 scores = model(record['query_tok'],
                                record['query_mask'],
@@ -139,7 +139,7 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='val
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
         for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data, args):
-            if isinstance(model, modeling.BirchRanker):
+            if args.model in ["sbert", "vanilla_bert"]:
                 scores = model(records['query_tok'],
                                records['query_mask'],
                                records['doc_tok'],
@@ -264,7 +264,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=4)
+    parser.add_argument('--mode', type=int, default=5)
 
     args = parser.parse_args()
 

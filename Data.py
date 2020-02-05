@@ -200,6 +200,8 @@ def _pack_n_ship(batch, data, args):
 
         QLEN = 20
         DLEN = 20
+        WLEN = 20
+        QQLEN = 20
         # QLEN = min(510, int(np.max([len(b) for b in batch['query_tok']])))
         # DLEN = min(510, int(np.max([len(b) for b in batch['doc_tok']])))
         # WLEN = min(510, int(np.max([len(b) for b in batch['wiki_tok']])))
@@ -210,10 +212,12 @@ def _pack_n_ship(batch, data, args):
             'doc_id': batch['doc_id'],
             'query_tok': _pad_crop(batch['query_tok'], QLEN),  # BERT's [PAD] token is 0
             'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
+            'wiki_tok': _pad_crop(batch['wiki_tok'], WLEN),
+            'question_tok': _pad_crop(batch['question_tok'], QQLEN),
             'query_mask': _mask(batch['query_tok'], QLEN),
             'doc_mask': _mask(batch['doc_tok'], DLEN),
-            # 'wiki_tok': _pad_crop(batch['wiki_tok'], WLEN, 0),
-            # 'question_tok': _pad_crop(batch['question_tok'], QQLEN, 0)
+            'wiki_mask': _mask(batch['wiki_tok'], WLEN),
+            'question_mask': _mask(batch['question_tok'], QQLEN),
         }
 
     else:

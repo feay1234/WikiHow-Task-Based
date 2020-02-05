@@ -604,8 +604,7 @@ class SentenceBert(BertRanker):
 
 
     # def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
-    def forward(self, query_tok, query_mask, doc_tok, doc_mask):
-
+    def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
 
         if self.args.mode == 1:
             cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
@@ -620,5 +619,33 @@ class SentenceBert(BertRanker):
             cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
             mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            return self.cls(self.dropout(mul))
+        elif self.args.mode == 5:
+            cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+            cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+
+            cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+            cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
+            mul = torch.mul(mul, mul_wiki)
+            return self.cls(self.dropout(mul))
+
+        elif self.args.mode == 6:
+            cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+            cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+
+            cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+            cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
+
+            cls_question_doc_tok, _, _ = self.encode_bert(question_tok, question_mask, doc_tok, doc_mask)
+            cls_doc_question_tok, _, _ = self.encode_bert(doc_tok, doc_mask, question_tok, question_mask)
+
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
+            mul_question = torch.mul(cls_question_doc_tok[-1], cls_doc_question_tok[-1])
+
+            mul = torch.mul(mul, mul_wiki)
+            mul = torch.mul(mul, mul_question)
             return self.cls(self.dropout(mul))
 
