@@ -251,9 +251,8 @@ def main_cli():
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
     parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
-    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikipedia3.tsv")
-    # parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikihow-sectionLabel.tsv")
-    parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq3.tsv")
+    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikipedia.tsv")
+    parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq.tsv")
 
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
     parser.add_argument('--train_pairs', default="data/cedr/train")
@@ -266,6 +265,7 @@ def main_cli():
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
     parser.add_argument('--mode', type=int, default=5)
+    parser.add_argument('--maxlen', type=int, default=50)
 
     args = parser.parse_args()
 
@@ -340,7 +340,7 @@ def main_cli():
     elif args.model in ["ms", "sbert"]:
         wikipediaFile = args.wikifile.name.split("/")[-1].replace(".tsv", "")
         questionFile = args.questionfile.name.split("/")[-1].replace(".tsv", "")
-        modelName = "%s_m%d_%s_%s_%s_%s_e%d_%s" % (args.model, args.mode, args.data, wikipediaFile, questionFile, args.evalMode, args.epoch, timestamp)
+        modelName = "%s_m%d_ml%d_%s_%s_%s_e%d_%s" % (args.model, args.mode, args.maxlen, wikipediaFile, questionFile, args.evalMode, args.epoch, timestamp)
     else:
         modelName = "%s_%s_%s_e%d_%s" % (args.model, args.data, args.evalMode, args.epoch, timestamp)
     print(modelName)

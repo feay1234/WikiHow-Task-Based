@@ -203,10 +203,10 @@ def _pack_n_ship(batch, data, args):
         # DLEN = 20
         # WLEN = 20
         # QQLEN = 20
-        QLEN = min(510, int(np.max([len(b) for b in batch['query_tok']])))
-        DLEN = min(510, int(np.max([len(b) for b in batch['doc_tok']])))
-        WLEN = min(510, int(np.max([len(b) for b in batch['wiki_tok']])))
-        QQLEN = min(510, int(np.max([len(b) for b in batch['question_tok']])))
+        QLEN = min(args.maxlen, int(np.max([len(b) for b in batch['query_tok']])))
+        DLEN = min(args.maxlen, int(np.max([len(b) for b in batch['doc_tok']])))
+        WLEN = min(args.maxlen, int(np.max([len(b) for b in batch['wiki_tok']])))
+        QQLEN = min(args.maxlen, int(np.max([len(b) for b in batch['question_tok']])))
 
         return {
             'query_id': batch['query_id'],
