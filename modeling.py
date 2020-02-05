@@ -502,7 +502,8 @@ class MSRanker(BertRanker):
         if self.args.mode == 1:
             self.text2MSvec = pickle.load(open("data/cedr/query-doc.pkg", "rb"))
         if self.args.mode == 2:
-            self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki.pkg", "rb"))
+            # self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki.pkg", "rb"))
+            self.text2MSvec = pickle.load(open("data/cedr/query-doc-wikihowSectionLabel.pkg", "rb"))
         if self.args.mode == 3:
             self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki-question5.pkg", "rb"))
 
