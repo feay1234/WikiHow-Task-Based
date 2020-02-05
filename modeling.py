@@ -499,14 +499,7 @@ class MSRanker(BertRanker):
         self.MS_SIZE = 100
         self.args = args
 
-        if self.args.mode == 1:
-            self.text2MSvec = pickle.load(open("data/cedr/query-doc.pkg", "rb"))
-        if self.args.mode == 2:
-            # self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki.pkg", "rb"))
-            self.text2MSvec = pickle.load(open("data/cedr/query-doc-wikihowSectionLabel.pkg", "rb"))
-        if self.args.mode == 3:
-            self.text2MSvec = pickle.load(open("data/cedr/query-doc-wiki-question5.pkg", "rb"))
-
+        self.text2MSvec = pickle.load(open("data/cedr/ms%d" % self.args.maxlen, "rb"))
 
         self.dropout = torch.nn.Dropout(0.1)
         self.q = torch.nn.Linear(self.MS_SIZE, 100)
@@ -533,6 +526,7 @@ class MSRanker(BertRanker):
 
     @memoize_method
     def tokenize(self, text):
+        text = " ".join(text.split(" ")[:self.args.maxlen])
         if text in self.text2MSvec:
             return self.text2MSvec[text]
         print("not found:", text)

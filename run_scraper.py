@@ -107,7 +107,7 @@ class MultiThreadScraper:
 
         # self.base_url = base_url
         # self.root_url = '{}://{}'.format(urlparse(self.base_url).scheme, urlparse(self.base_url).netloc)
-        self.pool = ThreadPoolExecutor(max_workers=20)
+        self.pool = ThreadPoolExecutor(max_workers=10)
         self.scraped_pages = set([])
         self.to_crawl = to_crawl
         self.folder = folder
