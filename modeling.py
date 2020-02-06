@@ -543,6 +543,8 @@ class SentenceBert(BertRanker):
 
         self.dropout = torch.nn.Dropout(0.1)
         self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
+        self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
+        self.clsAll = torch.nn.Linear(2, 1)
         self.q = torch.nn.Linear(self.BERT_SIZE, 100)
         self.d = torch.nn.Linear(self.BERT_SIZE, 100)
 
@@ -653,8 +655,11 @@ class SentenceBert(BertRanker):
                 cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask, self.bertWiki)
             mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
             mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
-            mul = torch.mul(mul, mul_wiki)
-            return self.cls(self.dropout(mul))
+
+            mul = self.cls(self.dropout(mul))
+            mul_wiki = self.cls2(self.dropout(mul_wiki))
+
+            return self.clsAll(torch.cat([mul, mul_wiki], dim=1))
 
         elif self.args.mode == 6:
             cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
