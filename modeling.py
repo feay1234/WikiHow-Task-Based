@@ -577,8 +577,8 @@ class SentenceBert(BertRanker):
         elif self.args.mode in [4, 7, 8]:
             toks = torch.cat([CLSS, query_toks, SEPS], dim=1)
             mask = torch.cat([ONES, query_mask, ONES], dim=1)
-            # segment_ids = torch.cat([ONES] * (2 + QLEN), dim=1)
-            segment_ids = torch.cat([NILS] * (2 + QLEN), dim=1)
+            segment_ids = torch.cat([ONES] * (2 + QLEN), dim=1)
+            # segment_ids = torch.cat([NILS] * (2 + QLEN), dim=1)
             toks[toks == -1] = 0 # remove padding (will be masked anyway)
 
         # execute BERT model
@@ -617,7 +617,12 @@ class SentenceBert(BertRanker):
         elif self.args.mode in [3, 4]:
             cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
-            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+
+            cls_query_tok = torch.stack(cls_query_tok, dim=2).mean(dim=2)
+            cls_doc_tok = torch.stack(cls_doc_tok, dim=2).mean(dim=2)
+
+            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul = torch.mul(cls_query_tok, cls_doc_tok)
             return self.cls(self.dropout(mul))
         elif self.args.mode == 7:
             # print(self.args.mode)
