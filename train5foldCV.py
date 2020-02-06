@@ -49,7 +49,6 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
 
     print("Fold: %d" % fold)
 
-
     for epoch in range(MAX_EPOCH):
         t2 = time.time()
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args)
@@ -75,6 +74,10 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
             bestResults = test_results
             bestPredictions = test_predictions
             bestQids = test_qids
+
+        elif args.earlystop:
+            break
+
 
     #   save outputs to files
 
@@ -269,8 +272,9 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=1)
-    parser.add_argument('--maxlen', type=int, default=128)
+    parser.add_argument('--mode', type=int, default=3)
+    parser.add_argument('--maxlen', type=int, default=32)
+    parser.add_argument('--earlystop', type=int, default=1)
 
     args = parser.parse_args()
 
@@ -340,14 +344,14 @@ def main_cli():
         if args.mode in [2, 4, 5, 6]:
             additionName.append(questionName)
 
-        modelName = "%s_m%d_%s_%s_%s_e%d_%s" % (
-            args.model, args.mode, args.data, "_".join(additionName), args.evalMode, args.epoch, timestamp)
+        modelName = "%s_m%d_%s_%s_%s_e%d_es%d_%s" % (
+            args.model, args.mode, args.data, "_".join(additionName), args.evalMode, args.epoch, args.earlystop, timestamp)
     elif args.model in ["ms", "sbert"]:
         wikipediaFile = args.wikifile.name.split("/")[-1].replace(".tsv", "")
         questionFile = args.questionfile.name.split("/")[-1].replace(".tsv", "")
-        modelName = "%s_m%d_ml%d_%s_%s_%s_e%d_%s" % (args.model, args.mode, args.maxlen, wikipediaFile, questionFile, args.evalMode, args.epoch, timestamp)
+        modelName = "%s_m%d_ml%d_%s_%s_%s_e%d_es%d_%s" % (args.model, args.mode, args.maxlen, wikipediaFile, questionFile, args.evalMode, args.epoch, args.earlystop, timestamp)
     else:
-        modelName = "%s_%s_%s_e%d_%s" % (args.model, args.data, args.evalMode, args.epoch, timestamp)
+        modelName = "%s_%s_%s_e%d_es%d_%s" % (args.model, args.data, args.evalMode, args.epoch, args.earlystop, timestamp)
     print(modelName)
 
     df = pd.read_csv("data/cedr/qrel.tsv", sep="\t", names=["qid", "empty", "pid", "rele_label"])
