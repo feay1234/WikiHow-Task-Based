@@ -2,7 +2,7 @@ import os
 import argparse
 import subprocess
 from time import strftime, localtime
-
+import time
 import pandas as pd
 import numpy as np
 import random, pickle
@@ -49,7 +49,9 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
 
     print("Fold: %d" % fold)
 
+
     for epoch in range(MAX_EPOCH):
+        t2 = time.time()
         loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args)
         txt = f'train epoch={epoch} loss={loss}'
         print2file(args.out_dir, modelName, ".txt", txt, fold)
@@ -57,7 +59,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
         valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
                                                                 model_out_dir, qidInWiki, data, args, "valid")
         valid_score = np.mean(valid_results["ndcg@15"])
-        txt = f'validation epoch={epoch} score={valid_score}'
+        elapsed_time = time.time() - t2
+        txt = f'validation epoch={epoch} score={valid_score} : {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}'
         print2file(args.out_dir, modelName, ".txt", txt, fold)
         if top_valid_score is None or valid_score > top_valid_score:
             top_valid_score = valid_score
@@ -79,6 +82,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
         result2file(args.out_dir, modelName, "." + k, bestResults[k], bestQids, fold)
 
     prediction2file(args.out_dir, modelName, ".out", bestPredictions, fold)
+
+    print2file(args.out_dir, modelName, ".txt", txt, fold)
     return bestResults
 
 
@@ -356,10 +361,18 @@ def main_cli():
     metricKeys["rp"] = []
 
     results = []
+
+
+    t1 = time.time()
+
+
     for fold in range(len(train_pairs)):
         results.append(
             main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir,
                  qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH, Data, args))
+    elapsed_time = time.time() - t1
+    txt = f'total : {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}'
+    print2file(args.out_dir, modelName, ".txt", txt, fold)
 
     #   average results across 5 folds
     output = []

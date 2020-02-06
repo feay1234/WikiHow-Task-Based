@@ -123,7 +123,7 @@ class BertRanker(torch.nn.Module):
         toks = [self.tokenizer.vocab[t] for t in toks]
         return toks
 
-    def encode_bert(self, query_tok, query_mask, doc_tok, doc_mask):
+    def encode_bert(self, query_tok, query_mask, doc_tok, doc_mask, customBert=None):
         BATCH, QLEN = query_tok.shape
         DIFF = 3  # = [CLS] and 2x[SEP]
         maxlen = self.bert.config.max_position_embeddings
@@ -150,7 +150,10 @@ class BertRanker(torch.nn.Module):
         # print(MAX_DOC_TOK_LEN, doc_tok.shape)
 
         # execute BERT model
-        result = self.bert(toks, segment_ids.long(), mask)
+        if not customBert:
+            result = self.bert(toks, segment_ids.long(), mask)
+        else:
+            result = customBert(toks, segment_ids.long(), mask)
 
         # extract relevant subsequences for query and doc
         query_results = [r[:BATCH, 1:QLEN + 1] for r in result]
@@ -543,7 +546,8 @@ class SentenceBert(BertRanker):
         self.q = torch.nn.Linear(self.BERT_SIZE, 100)
         self.d = torch.nn.Linear(self.BERT_SIZE, 100)
 
-        # self.bert = BertModel.from_pretrained('bert-base-uncased')
+        if self.args.mode == 9:
+            self.bertWiki = CustomBertModel.from_pretrained(self.BERT_MODEL)
 
         self.cos = torch.nn.CosineSimilarity(dim=1)
 
@@ -633,12 +637,15 @@ class SentenceBert(BertRanker):
             mul = torch.mul(mul, cls_question_tok[-1])
             return self.cls(self.dropout(mul))
 
-        elif self.args.mode == 5:
+        elif self.args.mode in [5, 9]:
             cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-
-            cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
-            cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
+            if self.args.mode == 5:
+                cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+                cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
+            elif self.args.mode == 9:
+                cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask, self.bertWiki)
+                cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask, self.bertWiki)
             mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
             mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
             mul = torch.mul(mul, mul_wiki)
