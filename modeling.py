@@ -386,7 +386,7 @@ class CedrPacrrRanker(BertRanker):
         # QLEN = 20
         self.args = args
         QLEN = self.args.maxlen
-        KMAX = 2  # Original was 2, which causes unknown bug
+        KMAX = 1  # Original was 2, which causes unknown bug
         NFILTERS = 32
         MINGRAM = 1
         MAXGRAM = 3
