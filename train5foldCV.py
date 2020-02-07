@@ -256,7 +256,7 @@ def main_cli():
     parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
     parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
     parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikipedia.tsv")
-    parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qw.tsv")
+    parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq.tsv")
 
     parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
     parser.add_argument('--train_pairs', default="data/cedr/train")
@@ -268,7 +268,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=3)
+    parser.add_argument('--mode', type=int, default=2)
     parser.add_argument('--maxlen', type=int, default=32)
     parser.add_argument('--earlystop', type=int, default=1)
 

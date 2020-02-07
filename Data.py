@@ -136,8 +136,8 @@ def _iter_valid_records(model, dataset, run, args):
     ds_queries, ds_docs, ds_wikis, ds_questions = dataset
     for qid in run:
         query_tok = model.tokenize(ds_queries[qid])
-        wiki_tok = model.tokenize(ds_wikis[qid]) if args.model in ["birch", "ms", "sbert"] else None
-        question_tok = model.tokenize(ds_questions[qid]) if args.model in ["birch", "ms", "sbert"] else None
+        wiki_tok = model.tokenize(ds_wikis[qid]) if args.model in ["birch", "ms", "sbert", "vanilla_bert"] else None
+        question_tok = model.tokenize(ds_questions[qid]) if args.model in ["birch", "ms", "sbert", "vanilla_bert"] else None
         for did in run[qid]:
             doc = ds_docs.get(did)
             if doc is None:
