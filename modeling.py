@@ -618,10 +618,10 @@ class SentenceBert(BertRanker):
             cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
 
-            cls_query_tok = torch.stack(cls_query_tok, dim=2).mean(dim=2)
-            cls_doc_tok = torch.stack(cls_doc_tok, dim=2).mean(dim=2)
+            # cls_query_tok = torch.stack(cls_query_tok, dim=2).mean(dim=2)
+            # cls_doc_tok = torch.stack(cls_doc_tok, dim=2).mean(dim=2)
 
-            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
             # mul = torch.mul(cls_query_tok, cls_doc_tok)
             # return self.cls(self.dropout(mul))
             return self.cos(cls_query_tok, cls_doc_tok)
