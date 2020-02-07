@@ -90,8 +90,8 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 continue
             neg_id = random.choice(neg_ids)
             query_tok = model.tokenize(ds_queries[qid])
-            wiki_tok = model.tokenize(ds_wikis[qid]) if args.model in ["birch", "ms", "sbert", "vanilla_bert"] else None
-            question_tok = model.tokenize(ds_questions[qid]) if args.model in ["birch", "ms", "sbert", "vanilla_bert"] else None
+            wiki_tok = model.tokenize(ds_wikis[qid])
+            question_tok = model.tokenize(ds_questions[qid])
 
             pos_doc = ds_docs.get(pos_id)
             neg_doc = ds_docs.get(neg_id)
@@ -136,8 +136,8 @@ def _iter_valid_records(model, dataset, run, args):
     ds_queries, ds_docs, ds_wikis, ds_questions = dataset
     for qid in run:
         query_tok = model.tokenize(ds_queries[qid])
-        wiki_tok = model.tokenize(ds_wikis[qid]) if args.model in ["birch", "ms", "sbert", "vanilla_bert"] else None
-        question_tok = model.tokenize(ds_questions[qid]) if args.model in ["birch", "ms", "sbert", "vanilla_bert"] else None
+        wiki_tok = model.tokenize(ds_wikis[qid])
+        question_tok = model.tokenize(ds_questions[qid])
         for did in run[qid]:
             doc = ds_docs.get(did)
             if doc is None:
@@ -221,7 +221,7 @@ def _pack_n_ship(batch, data, args):
             'wiki_mask': _mask(batch['wiki_tok'], WLEN),
             'question_mask': _mask(batch['question_tok'], QQLEN),
         }
-    elif args.model in ["vanilla_bert"]:
+    else:
 
         QLEN = min(args.maxlen, int(np.max([len(b) for b in batch['query_tok']])))
         DLEN = min(args.maxlen, int(np.max([len(b) for b in batch['doc_tok']])))
@@ -235,7 +235,7 @@ def _pack_n_ship(batch, data, args):
                 'query_tok': _pad_crop(batch['query_tok'], QLEN),
                 'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
                 'query_mask': _mask(batch['query_tok'], QLEN),
-                'doc_mask': _mask(batch['doc_tok'], QLEN),
+                'doc_mask': _mask(batch['doc_tok'], DLEN),
             }
         elif args.mode in [2, 3]:
             toks = []
@@ -243,6 +243,7 @@ def _pack_n_ship(batch, data, args):
                 for i, j in zip(batch['query_tok'], batch['wiki_tok']):
                     toks.append(i + j)
                 QLEN += WLEN
+                # print(len(batch['query_tok'][0]), len(toks[0]))
             elif args.mode == 3:
                 for i, j, k in zip(batch['query_tok'], batch['wiki_tok'], batch['question_tok']):
                     toks.append(i + j + k)
@@ -255,21 +256,6 @@ def _pack_n_ship(batch, data, args):
                 'query_mask': _mask(toks, QLEN),
                 'doc_mask': _mask(batch['doc_tok'], DLEN),
             }
-
-
-    else:
-
-        DLEN = min(2000, int(np.max([len(b) for b in batch['query_tok']])))
-        QLEN = 9 if not args.model == "cedr_pacrr" else args.maxlen
-
-        return {
-            'query_id': batch['query_id'],
-            'doc_id': batch['doc_id'],
-            'query_tok': _pad_crop(batch['doc_tok'], QLEN),
-            'doc_tok': _pad_crop(batch['query_tok'], DLEN),
-            'query_mask': _mask(batch['doc_tok'], QLEN),
-            'doc_mask': _mask(batch['query_tok'], DLEN),
-        }
 
 
 def toTensor(x):

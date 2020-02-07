@@ -417,7 +417,7 @@ class CedrKnrmRanker(BertRanker):
         super().__init__()
         MUS = [-0.9, -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]
         SIGMAS = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.001]
-        self.bert_ranker = VanillaBertRanker()
+        # self.bert_ranker = VanillaBertRanker()
         self.simmat = modeling_util.SimmatModule()
         self.kernels = modeling_util.KNRMRbfKernelBank(MUS, SIGMAS)
         self.combine = torch.nn.Linear(self.kernels.count() * self.CHANNELS + self.BERT_SIZE, 1)
@@ -440,12 +440,13 @@ class CedrKnrmRanker(BertRanker):
         return scores
 
 
-class CedrDrmmRanker(BertRanker):
-    def __init__(self):
+class CedrDrmmRanker(OriginalBertRanker):
+    def __init__(self, args):
         super().__init__()
+        self.args = args
         NBINS = 11
         HIDDEN = 5
-        self.bert_ranker = VanillaBertRanker()
+        # self.bert_ranker = VanillaBertRanker(args)
         self.simmat = modeling_util.SimmatModule()
         self.histogram = modeling_util.DRMMLogCountHistogram(NBINS)
         self.hidden_1 = torch.nn.Linear(NBINS * self.CHANNELS + self.BERT_SIZE, HIDDEN)
