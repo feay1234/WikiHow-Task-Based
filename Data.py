@@ -67,7 +67,6 @@ def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data, args)
         batch['wiki_tok'].append(wiki_tok)
         batch['question_tok'].append(question_tok)
 
-
         if len(batch['query_id']) // 2 == batch_size:
             yield _pack_n_ship(batch, data, args)
             batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
@@ -223,12 +222,15 @@ def _pack_n_ship(batch, data, args):
         }
     else:
 
-        QLEN = min(args.maxlen, int(np.max([len(b) for b in batch['query_tok']])))
+        QLEN = min(args.maxlen,
+                   int(np.max([len(b) for b in batch['query_tok']]))) if args.model != "cedr_pacrr" else args.maxlen
         DLEN = min(args.maxlen, int(np.max([len(b) for b in batch['doc_tok']])))
         WLEN = min(args.maxlen, int(np.max([len(b) for b in batch['wiki_tok']])))
         QQLEN = min(args.maxlen, int(np.max([len(b) for b in batch['question_tok']])))
 
         if args.mode == 1:
+            if args.model == "cedr_pacrr":
+                QLEN = 500
             return {
                 'query_id': batch['query_id'],
                 'doc_id': batch['doc_id'],
@@ -242,12 +244,12 @@ def _pack_n_ship(batch, data, args):
             if args.mode == 2:
                 for i, j in zip(batch['query_tok'], batch['wiki_tok']):
                     toks.append(i + j)
-                QLEN += WLEN
+                QLEN = QLEN + WLEN if args.model != "cedr_pacrr" else args.maxlen
                 # print(len(batch['query_tok'][0]), len(toks[0]))
             elif args.mode == 3:
                 for i, j, k in zip(batch['query_tok'], batch['wiki_tok'], batch['question_tok']):
                     toks.append(i + j + k)
-                QLEN += WLEN + QQLEN
+                QLEN = QLEN + WLEN + QQLEN if args.model != "cedr_pacrr" else args.maxlen
             return {
                 'query_id': batch['query_id'],
                 'doc_id': batch['doc_id'],
@@ -287,6 +289,7 @@ def _pad_crop(items, l, val=-1):
             item = item[:l]
         result.append(item)
     return torch.tensor(result).long().cuda() if device.type == 'cuda' else torch.tensor(result).long()
+
 
 def _mask(items, l):
     result = []

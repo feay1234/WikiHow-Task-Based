@@ -381,9 +381,11 @@ class VanillaBirchtRanker(BirchRanker):
 
 
 class CedrPacrrRanker(BertRanker):
-    def __init__(self, QLEN=500):
+    def __init__(self, args):
         super().__init__()
         # QLEN = 20
+        self.args = args
+        QLEN = self.args.maxlen
         KMAX = 2  # Original was 2, which causes unknown bug
         NFILTERS = 32
         MINGRAM = 1
@@ -413,8 +415,9 @@ class CedrPacrrRanker(BertRanker):
 
 
 class CedrKnrmRanker(BertRanker):
-    def __init__(self):
+    def __init__(self, args):
         super().__init__()
+        self.args = args
         MUS = [-0.9, -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]
         SIGMAS = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.001]
         # self.bert_ranker = VanillaBertRanker()
