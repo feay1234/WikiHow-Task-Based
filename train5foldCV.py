@@ -21,7 +21,6 @@ random.seed(SEED)
 
 MODEL_MAP = {
     'vanilla_bert': modeling.VanillaBertRanker,
-    'bert': modeling.BERT,
     'sbert': modeling.SentenceBert,
     'ms': modeling.MSRanker,
     'birch': modeling.VanillaBirchtRanker,
@@ -99,7 +98,6 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
-
             if args.model in ["sbert"]:
                 scores = model(record['query_tok'],
                                record['query_mask'],
@@ -111,9 +109,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['question_mask'])
             elif args.model in ["ms"]:
                 scores = model(record['query_tok'],
-                               # record['query_mask'],
                                record['doc_tok'],
-                               # record['doc_mask'])
                                record['wiki_tok'],
                                record['question_tok'])
             else:
@@ -254,7 +250,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sbert')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
     parser.add_argument('--data', default='query')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
     parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
@@ -272,7 +268,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=6)
+    parser.add_argument('--mode', type=int, default=3)
     parser.add_argument('--maxlen', type=int, default=32)
     parser.add_argument('--earlystop', type=int, default=1)
 
@@ -297,13 +293,14 @@ def main_cli():
         elif args.mode == 6:
             model = MODEL_MAP[args.model](True, True, False, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
                 args.model](True, True, False, args)
-    elif args.model in ["ms", "sbert"]:
+    elif args.model in ["ms", "sbert", "vanilla_bert"]:
         model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args)
     else:
         model = MODEL_MAP[args.model]().cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model]()
     dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile,
-                                   args.questionfile] if args.model in ["birch", "ms", "sbert"] else [
+                                   args.questionfile] if args.model in ["birch", "ms", "sbert", "vanilla_bert"] else [
         args.queryfile, args.docfile])
+
 
     if isinstance(model, modeling.CedrPacrrRanker):
         args.maxlen = min(500, max([len(model.tokenize(dataset[0][i])) for i in dataset[0]]))
@@ -346,7 +343,7 @@ def main_cli():
 
         modelName = "%s_m%d_%s_%s_%s_e%d_es%d_%s" % (
             args.model, args.mode, args.data, "_".join(additionName), args.evalMode, args.epoch, args.earlystop, timestamp)
-    elif args.model in ["ms", "sbert"]:
+    elif args.model in ["ms", "sbert", "vanilla_bert"]:
         wikipediaFile = args.wikifile.name.split("/")[-1].replace(".tsv", "")
         questionFile = args.questionfile.name.split("/")[-1].replace(".tsv", "")
         modelName = "%s_m%d_ml%d_%s_%s_%s_e%d_es%d_%s" % (args.model, args.mode, args.maxlen, wikipediaFile, questionFile, args.evalMode, args.epoch, args.earlystop, timestamp)

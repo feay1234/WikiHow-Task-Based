@@ -17,7 +17,7 @@ def read_datafiles(files):
                 tqdm.write(f'skipping line: `{line.rstrip()}`')
                 continue
             c_type, c_id, c_text = cols
-            assert c_type in ('query', 'doc', 'wiki', 'question')
+            # assert c_type in ('query', 'doc', 'wiki', 'question')
             # if c_type == 'query':
             if idx == 0:
                 queries[c_id] = c_text
@@ -67,6 +67,7 @@ def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data, args)
         batch['wiki_tok'].append(wiki_tok)
         batch['question_tok'].append(question_tok)
 
+
         if len(batch['query_id']) // 2 == batch_size:
             yield _pack_n_ship(batch, data, args)
             batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
@@ -89,8 +90,8 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 continue
             neg_id = random.choice(neg_ids)
             query_tok = model.tokenize(ds_queries[qid])
-            wiki_tok = model.tokenize(ds_wikis[qid]) if args.model in ["birch", "ms", "sbert"] else None
-            question_tok = model.tokenize(ds_questions[qid]) if args.model in ["birch", "ms", "sbert"] else None
+            wiki_tok = model.tokenize(ds_wikis[qid]) if args.model in ["birch", "ms", "sbert", "vanilla_bert"] else None
+            question_tok = model.tokenize(ds_questions[qid]) if args.model in ["birch", "ms", "sbert", "vanilla_bert"] else None
 
             pos_doc = ds_docs.get(pos_id)
             neg_doc = ds_docs.get(neg_id)
@@ -196,7 +197,7 @@ def _pack_n_ship(batch, data, args):
             # 'question_tok': _pad_crop_np(batch['question_tok'], 5),
             'question_tok': toTensor(batch['question_tok'])
         }
-    elif args.model == "sbert":
+    elif args.model in ["sbert"]:
 
         # best one
         # QLEN = 20
@@ -220,6 +221,41 @@ def _pack_n_ship(batch, data, args):
             'wiki_mask': _mask(batch['wiki_tok'], WLEN),
             'question_mask': _mask(batch['question_tok'], QQLEN),
         }
+    elif args.model in ["vanilla_bert"]:
+
+        QLEN = min(args.maxlen, int(np.max([len(b) for b in batch['query_tok']])))
+        DLEN = min(args.maxlen, int(np.max([len(b) for b in batch['doc_tok']])))
+        WLEN = min(args.maxlen, int(np.max([len(b) for b in batch['wiki_tok']])))
+        QQLEN = min(args.maxlen, int(np.max([len(b) for b in batch['question_tok']])))
+
+        if args.mode == 1:
+            return {
+                'query_id': batch['query_id'],
+                'doc_id': batch['doc_id'],
+                'query_tok': _pad_crop(batch['query_tok'], QLEN),
+                'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
+                'query_mask': _mask(batch['query_tok'], QLEN),
+                'doc_mask': _mask(batch['doc_tok'], QLEN),
+            }
+        elif args.mode in [2, 3]:
+            toks = []
+            if args.mode == 2:
+                for i, j in zip(batch['query_tok'], batch['wiki_tok']):
+                    toks.append(i + j)
+                QLEN += WLEN
+            elif args.mode == 3:
+                for i, j, k in zip(batch['query_tok'], batch['wiki_tok'], batch['question_tok']):
+                    toks.append(i + j + k)
+                QLEN += WLEN + QQLEN
+            return {
+                'query_id': batch['query_id'],
+                'doc_id': batch['doc_id'],
+                'query_tok': _pad_crop(toks, QLEN),
+                'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
+                'query_mask': _mask(toks, QLEN),
+                'doc_mask': _mask(batch['doc_tok'], DLEN),
+            }
+
 
     else:
 
