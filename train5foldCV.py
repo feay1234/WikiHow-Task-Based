@@ -250,25 +250,25 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sbert')
-    parser.add_argument('--data', default='query')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
+    parser.add_argument('--data', default='eai')
     # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
-    parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/query.tsv")
-    parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/doc.tsv")
+    parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/eai-query.tsv")
+    parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/eai-doc.tsv")
     parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikipedia.tsv")
     parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq.tsv")
 
-    parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/qrel.tsv")
-    parser.add_argument('--train_pairs', default="data/cedr/train")
-    parser.add_argument('--valid_run', default="data/cedr/valid")
-    parser.add_argument('--test_run', default="data/cedr/test")
+    parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/eai-qrel.tsv")
+    parser.add_argument('--train_pairs', default="data/cedr/eai-train")
+    parser.add_argument('--valid_run', default="data/cedr/eai-valid")
+    parser.add_argument('--test_run', default="data/cedr/eai-test")
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
     parser.add_argument('--model_out_dir', default="models/vbert")
     parser.add_argument('--epoch', type=int, default=20)
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=4)
+    parser.add_argument('--mode', type=int, default=2)
     parser.add_argument('--maxlen', type=int, default=32)
     parser.add_argument('--earlystop', type=int, default=1)
 
@@ -342,7 +342,8 @@ def main_cli():
     else:
         wikipediaFile = args.wikifile.name.split("/")[-1].replace(".tsv", "")
         questionFile = args.questionfile.name.split("/")[-1].replace(".tsv", "")
-        modelName = "%s_m%d_ml%d_%s_%s_%s_e%d_es%d_%s" % (args.model, args.mode, args.maxlen, wikipediaFile, questionFile, args.evalMode, args.epoch, args.earlystop, timestamp)
+        modelName = "%s_%s_m%d_ml%d_%s_%s_%s_e%d_es%d_%s" % (args.data, args.model, args.mode, args.maxlen, wikipediaFile, questionFile, args.evalMode, args.epoch, args.earlystop, timestamp)
+
     print(modelName)
 
     df = pd.read_csv("data/cedr/qrel.tsv", sep="\t", names=["qid", "empty", "pid", "rele_label"])

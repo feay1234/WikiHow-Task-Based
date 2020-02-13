@@ -89,8 +89,8 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 continue
             neg_id = random.choice(neg_ids)
             query_tok = model.tokenize(ds_queries[qid])
-            wiki_tok = model.tokenize(ds_wikis[qid])
-            question_tok = model.tokenize(ds_questions[qid])
+            wiki_tok = model.tokenize(ds_wikis[qid] if qid in ds_wikis else "")
+            question_tok = model.tokenize(ds_questions[qid] if qid in ds_questions else "")
 
             pos_doc = ds_docs.get(pos_id)
             neg_doc = ds_docs.get(neg_id)
