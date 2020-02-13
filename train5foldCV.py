@@ -1,4 +1,4 @@
-import os
+import os, io
 import argparse
 import subprocess
 from time import strftime, localtime
@@ -30,7 +30,7 @@ MODEL_MAP = {
 }
 
 
-def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, qidInWiki, fold,
+def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir, qrelDict, modelName, fold,
          metricKeys, MAX_EPOCH, data, args):
     LR = 0.001
     BERT_LR = 2e-5
@@ -55,7 +55,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
         print2file(args.out_dir, modelName, ".txt", txt, fold)
 
         valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
-                                                                model_out_dir, qidInWiki, data, args, "valid")
+                                                                model_out_dir, data, args, "valid")
         valid_score = np.mean(valid_results["ndcg@15"])
         elapsed_time = time.time() - t2
         txt = f'validation epoch={epoch} score={valid_score} : {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}'
@@ -64,7 +64,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
             top_valid_score = valid_score
             # model.save(os.path.join(model_out_dir, 'weights.p'))
             test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch,
-                                                                 model_out_dir, qidInWiki, data, args, "test")
+                                                                 model_out_dir, data, args, "test")
 
             # print(test_results["ndcg@15"])
             txt = 'new top validation score, %.4f' % np.mean(test_results["ndcg@15"])
@@ -132,12 +132,12 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                 return total_loss
 
 
-def validate(model, dataset, run, qrel, epoch, model_out_dir, qidInWiki, data, args, desc):
+def validate(model, dataset, run, qrel, epoch, model_out_dir, data, args, desc):
     runf = os.path.join(model_out_dir, f'{epoch}.run')
-    return run_model(model, dataset, run, runf, qrel, qidInWiki, data, args, desc)
+    return run_model(model, dataset, run, runf, qrel, data, args, desc)
 
 
-def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='valid'):
+def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
     BATCH_SIZE = 16
     rerank_run = {}
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
@@ -173,8 +173,7 @@ def run_model(model, dataset, run, runf, qrels, qidInWiki, data, args, desc='val
     predictions = []
     qids = []
     for qid in rerank_run:
-        if args.evalMode != "all" and int(qid) not in qidInWiki:
-            continue
+
         ranked_list_scores = sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)
         ranked_list = [i[0] for i in ranked_list_scores]
         for (pid, score) in ranked_list_scores:
@@ -251,17 +250,16 @@ def result2file(path, name, format, res, qids, fold):
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
-    parser.add_argument('--data', default='eai')
-    # parser.add_argument('--datafiles', type=argparse.FileType('rt'), default="data/cedr/query-title-bm25-v2.tsv")
-    parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/eai-query.tsv")
-    parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/eai-doc.tsv")
-    parser.add_argument('--wikifile', type=argparse.FileType('rt'), default="data/cedr/wikipedia.tsv")
-    parser.add_argument('--questionfile', type=argparse.FileType('rt'), default="data/cedr/question-qq.tsv")
-
-    parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/eai-qrel.tsv")
-    parser.add_argument('--train_pairs', default="data/cedr/eai-train")
-    parser.add_argument('--valid_run', default="data/cedr/eai-valid")
-    parser.add_argument('--test_run', default="data/cedr/eai-test")
+    parser.add_argument('--data', default='akgg')
+    parser.add_argument('--path', default="data/cedr/")
+    # parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/eai-query.tsv")
+    # parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/eai-doc.tsv")
+    parser.add_argument('--wikifile', default="wikipedia")
+    parser.add_argument('--questionfile', default="question-qq")
+    # parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/eai-qrel.tsv")
+    # parser.add_argument('--train_pairs', default="data/cedr/eai-train")
+    # parser.add_argument('--valid_run', default="data/cedr/eai-valid")
+    # parser.add_argument('--test_run', default="data/cedr/eai-test")
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
     parser.add_argument('--model_out_dir', default="models/vbert")
     parser.add_argument('--epoch', type=int, default=20)
@@ -273,6 +271,17 @@ def main_cli():
     parser.add_argument('--earlystop', type=int, default=1)
 
     args = parser.parse_args()
+
+    args.queryfile = io.TextIOWrapper(io.open("%s%s-query.tsv" % (args.path, args.data),'rb'), 'UTF-8')
+    args.docfile = io.TextIOWrapper(io.open("%s%s-doc.tsv" % (args.path, args.data),'rb'), 'UTF-8')
+    args.wikifile = io.TextIOWrapper(io.open("%s%s-%s.tsv" % (args.path, args.data, args.wikifile),'rb'), 'UTF-8')
+    args.questionfile = io.TextIOWrapper(io.open("%s%s-%s.tsv" % (args.path, args.data, args.questionfile),'rb'), 'UTF-8')
+
+    args.train_pairs = "%s%s-train" % (args.path, args.data)
+    args.valid_run = "%s%s-valid" % (args.path, args.data)
+    args.test_run = "%s%s-test" % (args.path, args.data)
+
+    args.qrels = io.TextIOWrapper(io.open("%s%s-qrel.tsv" % (args.path, args.data),'rb'), 'UTF-8')
 
     if args.model == "birch":
         if args.mode == 1:
@@ -346,12 +355,11 @@ def main_cli():
 
     print(modelName)
 
-    df = pd.read_csv("data/cedr/qrel.tsv", sep="\t", names=["qid", "empty", "pid", "rele_label"])
+    df = pd.read_csv("%s%s-qrel.tsv" % (args.path, args.data), sep="\t", names=["qid", "empty", "pid", "rele_label"])
     qrelDict = collections.defaultdict(dict)
     for qid, prop, label in df[['qid', 'pid', 'rele_label']].values:
         qrelDict[str(qid)][str(prop)] = int(label)
 
-    qidInWiki = pickle.load(open("qidInWiki", "rb"))
 
     metricKeys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}
     metricKeys["rp"] = []
@@ -365,7 +373,7 @@ def main_cli():
     for fold in range(len(train_pairs)):
         results.append(
             main(model, dataset, train_pairs[fold], qrels, valid_run[fold], test_run[fold], args.model_out_dir,
-                 qrelDict, modelName, qidInWiki, fold, metricKeys, MAX_EPOCH, Data, args))
+                 qrelDict, modelName, fold, metricKeys, MAX_EPOCH, Data, args))
     elapsed_time = time.time() - t1
     txt = f'total : {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}'
     print2file(args.out_dir, modelName, ".txt", txt, fold)
