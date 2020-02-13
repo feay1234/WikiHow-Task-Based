@@ -222,15 +222,13 @@ def _pack_n_ship(batch, data, args):
         }
     else:
 
-        QLEN = min(args.maxlen,
-                   int(np.max([len(b) for b in batch['query_tok']]))) if args.model != "cedr_pacrr" else args.maxlen
-        DLEN = min(args.maxlen, int(np.max([len(b) for b in batch['doc_tok']])))
-        WLEN = min(args.maxlen, int(np.max([len(b) for b in batch['wiki_tok']])))
-        QQLEN = min(args.maxlen, int(np.max([len(b) for b in batch['question_tok']])))
 
         if args.mode == 1:
             if args.model == "cedr_pacrr":
-                QLEN = 500
+                QLEN = args.maxlen
+            else:
+                QLEN = 20
+            DLEN = min(32, max(len(b) for b in batch['doc_tok']))
             return {
                 'query_id': batch['query_id'],
                 'doc_id': batch['doc_id'],
@@ -240,6 +238,12 @@ def _pack_n_ship(batch, data, args):
                 'doc_mask': _mask(batch['doc_tok'], DLEN),
             }
         elif args.mode in [2, 3]:
+            QLEN = min(args.maxlen,
+                       int(np.max([len(b) for b in batch['query_tok']]))) if args.model != "cedr_pacrr" else args.maxlen
+            DLEN = min(args.maxlen, int(np.max([len(b) for b in batch['doc_tok']])))
+            WLEN = min(args.maxlen, int(np.max([len(b) for b in batch['wiki_tok']])))
+            QQLEN = min(args.maxlen, int(np.max([len(b) for b in batch['question_tok']])))
+
             toks = []
             if args.mode == 2:
                 for i, j in zip(batch['query_tok'], batch['wiki_tok']):

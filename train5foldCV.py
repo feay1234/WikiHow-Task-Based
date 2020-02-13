@@ -249,7 +249,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sbert')
     parser.add_argument('--data', default='akgg')
     parser.add_argument('--path', default="data/cedr/")
     # parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/eai-query.tsv")
