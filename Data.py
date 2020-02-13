@@ -222,12 +222,16 @@ def _pack_n_ship(batch, data, args):
         }
     else:
 
-
         if args.mode == 1:
             if args.model == "cedr_pacrr":
                 QLEN = args.maxlen
             else:
-                QLEN = 20
+
+                QLEN = min(args.maxlen,
+                           int(np.max(
+                               [len(b) for b in batch['query_tok']])))
+
+                # QLEN = 20
             DLEN = min(32, max(len(b) for b in batch['doc_tok']))
             return {
                 'query_id': batch['query_id'],
