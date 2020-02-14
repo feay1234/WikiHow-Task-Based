@@ -257,17 +257,11 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sbert')
     parser.add_argument('--data', default='eai')
     parser.add_argument('--path', default="data/cedr/")
-    # parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/eai-query.tsv")
-    # parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/eai-doc.tsv")
     parser.add_argument('--wikifile', default="wikipedia")
     parser.add_argument('--questionfile', default="question-qq")
-    # parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/eai-qrel.tsv")
-    # parser.add_argument('--train_pairs', default="data/cedr/eai-train")
-    # parser.add_argument('--valid_run', default="data/cedr/eai-valid")
-    # parser.add_argument('--test_run', default="data/cedr/eai-test")
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
     parser.add_argument('--model_out_dir', default="models/vbert")
     parser.add_argument('--epoch', type=int, default=20)
@@ -315,7 +309,7 @@ def main_cli():
                                    args.questionfile])
 
 
-    if isinstance(model, modeling.CedrPacrrRanker):
+    if args.model == "cedr_pacrr" and args.mode > 1:
         args.maxlen = args.maxlen * args.mode
         model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](
             args)

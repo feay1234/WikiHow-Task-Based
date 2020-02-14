@@ -157,8 +157,6 @@ def _pack_n_ship(batch, data, args):
         QQLEN = min(512, int(np.max([len(b) for b in batch['question_tok']])))
         QLEN = 9 if not args.model == "cedr_pacrr" else args.maxlen
 
-        # print(DLEN, WLEN, QQLEN)
-
         return {
             'query_id': batch['query_id'],
             'doc_id': batch['doc_id'],
@@ -170,19 +168,6 @@ def _pack_n_ship(batch, data, args):
             'doc_mask': _mask(batch['query_tok'], DLEN),
             'wiki_mask': _mask(batch['wiki_tok'], WLEN),
             'question_mask': _mask(batch['question_tok'], QQLEN),
-        }
-
-    elif args.model == "bert":
-        QLEN = 20
-        MAX_DLEN = 800
-        DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
-        return {
-            'query_id': batch['query_id'],
-            'doc_id': batch['doc_id'],
-            'query_tok': _pad_crop(batch['query_tok'], QLEN),
-            'doc_tok': _pad_crop(batch['doc_tok'], DLEN),
-            'query_mask': _mask(batch['query_tok'], QLEN),
-            'doc_mask': _mask(batch['doc_tok'], DLEN),
         }
 
     elif args.model == "ms":
@@ -223,11 +208,9 @@ def _pack_n_ship(batch, data, args):
     else:
 
         if args.mode == 1:
-            if args.model == "cedr_pacrr":
-                QLEN = args.maxlen
-            else:
-                QLEN = 20
-            DLEN = min(32, max(len(b) for b in batch['doc_tok']))
+            QLEN = 20
+            MAX_DLEN = 800
+            DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
             return {
                 'query_id': batch['query_id'],
                 'doc_id': batch['doc_id'],
