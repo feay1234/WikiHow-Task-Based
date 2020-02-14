@@ -713,16 +713,16 @@ class CrossBert(OriginalBertRanker):
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
         cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
         cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-        mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+        dif = cls_query_tok[-1] - cls_doc_tok[-1]
 
         if self.args.mode == 1:
-            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], mul], 1)
+            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], 1)
             return self.cls(self.dropout(cat))
         elif self.args.mode == 2:
             cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
             cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
-            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
-            mul = torch.mul(mul, mul_wiki)
-            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], cls_wiki_doc_tok[-1], cls_doc_wiki_tok, mul], 1)
+            dif_wiki = cls_wiki_doc_tok[-1] - cls_doc_wiki_tok[-1]
+            dif = dif - dif_wiki
+            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], cls_wiki_doc_tok[-1], cls_doc_wiki_tok, dif], 1)
             return self.cls(self.dropout(cat))
 
