@@ -723,6 +723,6 @@ class CrossBert(OriginalBertRanker):
             cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
             dif_wiki = cls_wiki_doc_tok[-1] - cls_doc_wiki_tok[-1]
             dif = dif - dif_wiki
-            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], cls_wiki_doc_tok[-1], cls_doc_wiki_tok, dif], 1)
+            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1], dif], 1)
             return self.cls(self.dropout(cat))
 
