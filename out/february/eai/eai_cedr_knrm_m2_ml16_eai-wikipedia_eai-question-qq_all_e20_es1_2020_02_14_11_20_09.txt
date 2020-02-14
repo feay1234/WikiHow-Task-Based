@@ -1,0 +1,3 @@
+0-train epoch=0 loss=98.88184213638306
+0-validation epoch=0 score=0.29438813045447626 : 00:01:11
+0-new top validation score, 0.2099
