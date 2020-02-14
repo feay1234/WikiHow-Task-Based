@@ -267,6 +267,7 @@ class InvertBertRanker(OriginalBertRanker):
         self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask):
+        print(query_tok.shape)
         cls_reps, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
         return self.cls(self.dropout(cls_reps[-1]))
 
@@ -626,7 +627,7 @@ class SentenceBert(BertRanker):
             # cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
             # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
             # return self.cls(self.dropout(mul))
-            
+
             cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
             mul = cls_query_tok[-1] - cls_doc_tok[-1]
@@ -739,11 +740,6 @@ class CrossBert(BertRanker):
         # execute BERT model
         result = self.bert(toks, segment_ids.long(), mask)
 
-        # extract relevant subsequences for query and doc
-        # query_results = [r[:BATCH, 1:QLEN+1] for r in result]
-        # doc_results = [r[:, QLEN+2:-1] for r in result]
-        # doc_results = [modeling_util.un_subbatch(r, doc_tok, MAX_DOC_TOK_LEN) for r in doc_results]
-
         # build CLS representation
         cls_results = []
         for layer in result:
@@ -754,7 +750,6 @@ class CrossBert(BertRanker):
             cls_result = torch.stack(cls_result, dim=2).mean(dim=2)
             cls_results.append(cls_result)
 
-        # return cls_results, query_results, doc_results
         return cls_results
 
 
@@ -762,7 +757,7 @@ class CrossBert(BertRanker):
 
         cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
         cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
-
         mul = cls_query_tok[-1] - cls_doc_tok[-1]
         cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], mul], dim=1)
         return self.cls(self.dropout(cat))
+
