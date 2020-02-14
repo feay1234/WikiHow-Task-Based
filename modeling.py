@@ -549,6 +549,8 @@ class SentenceBert(BertRanker):
 
         if self.args.mode == 2:
             self.cls = torch.nn.Linear(self.BERT_SIZE*2, 1)
+        if self.args.mode in [3, 4]:
+            self.cls = torch.nn.Linear(self.BERT_SIZE * 3, 1)
         elif self.args.mode == 5:
             self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
             self.clsAll = torch.nn.Linear(2, 1)
@@ -636,10 +638,11 @@ class SentenceBert(BertRanker):
             # cls_query_tok = torch.stack(cls_query_tok, dim=2).mean(dim=2)
             # cls_doc_tok = torch.stack(cls_doc_tok, dim=2).mean(dim=2)
 
-            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], mul], dim=1)
             # mul = torch.mul(cls_query_tok, cls_doc_tok)
-            # return self.cls(self.dropout(mul))
-            return self.cos(cls_query_tok[-1], cls_doc_tok[-1])
+            return self.cls(self.dropout(cat))
+            # return self.cos(cls_query_tok[-1], cls_doc_tok[-1])
         elif self.args.mode == 7:
             # print(self.args.mode)
             cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
