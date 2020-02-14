@@ -548,13 +548,15 @@ class SentenceBert(BertRanker):
         self.dropout = torch.nn.Dropout(0.1)
         self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
 
-        if self.args.mode == 2:
-            self.cls = torch.nn.Linear(self.BERT_SIZE*2, 1)
-        if self.args.mode in [1, 3, 4]:
+        if self.args.mode in [1, 2, 3, 4]:
             self.cls = torch.nn.Linear(self.BERT_SIZE * 3, 1)
-        elif self.args.mode == 5:
-            self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
             self.clsAll = torch.nn.Linear(2, 1)
+            self.cls2 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
+        elif self.args.mode == 5:
+            # self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
+            self.clsAll = torch.nn.Linear(2, 1)
+            self.cls2 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
+            # self.clsAll = torch.nn.Linear(2, 1)
 
         elif self.args.mode == 6:
             self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
@@ -592,7 +594,7 @@ class SentenceBert(BertRanker):
             segment_ids = torch.cat([ONES] * (2 + QLEN), dim=1)
             # segment_ids = torch.cat([NILS] * (2 + QLEN), dim=1)
             toks[toks == -1] = 0 # remove padding (will be masked anyway)
-        elif self.args.mode in [1, 3]:
+        elif self.args.mode in [1, 2, 3]:
             toks = torch.cat([CLSS, query_toks, SEPS, doc_toks, SEPS], dim=1)
             mask = torch.cat([ONES, query_mask, ONES, doc_mask, ONES], dim=1)
             segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
@@ -630,14 +632,26 @@ class SentenceBert(BertRanker):
 
             cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
-            mul = cls_query_tok[-1] - cls_doc_tok[-1]
-            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], mul], dim=1)
+            dif = cls_query_tok[-1] - cls_doc_tok[-1]
+            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], dim=1)
             return self.cls(self.dropout(cat))
+
         elif self.args.mode == 2:
-            cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
-            cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1]], 1)
-            return self.cls(self.dropout(cat))
+
+            cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
+            cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
+            dif = cls_query_tok[-1] - cls_doc_tok[-1]
+            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], dim=1)
+            cat = self.cls(self.dropout(cat))
+
+            cls_wiki_doc_tok = self.encode_bert_ori(wiki_tok, wiki_mask, doc_tok, doc_mask)
+            cls_doc_wiki_tok = self.encode_bert_ori(doc_tok, doc_mask, wiki_tok, wiki_mask)
+            dif = cls_wiki_doc_tok[-1] - cls_doc_wiki_tok[-1]
+            wiki_cat = torch.cat([cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1], dif], dim=1)
+            wiki_cat = self.cls2(self.dropout(wiki_cat))
+
+            return self.clsAll(torch.cat([cat, wiki_cat], dim=1))
+
         elif self.args.mode in [3, 4]:
             cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
