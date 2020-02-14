@@ -522,7 +522,7 @@ class MSRanker(BertRanker):
 
     @memoize_method
     def tokenize(self, text):
-        text = " ".join(text.split(" ")[:self.args.maxlen])
+        text = " ".join(text.split(" ")[:self.args.maxlen]).replace("\'", "")
         if text in self.text2MSvec:
             return self.text2MSvec[text]
         print("not found:", text)
