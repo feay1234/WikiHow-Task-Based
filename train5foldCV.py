@@ -23,6 +23,7 @@ MODEL_MAP = {
     'vanilla_bert': modeling.VanillaBertRanker,
     'invert_bert': modeling.InvertBertRanker,
     'sbert': modeling.SentenceBert,
+    'crossbert': modeling.CrossBert,
     'ms': modeling.MSRanker,
     'birch': modeling.VanillaBirchtRanker,
     'cedr_pacrr': modeling.CedrPacrrRanker,
@@ -99,7 +100,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
-            if args.model in ["sbert"]:
+            if args.model in ["sbert", "crossbert"]:
                 scores = model(record['query_tok'],
                                record['query_mask'],
                                record['doc_tok'],
@@ -144,7 +145,7 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
         for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data, args):
-            if args.model in ["sbert"]:
+            if args.model in ["sbert", "crossbert"]:
                 scores = model(records['query_tok'],
                                records['query_mask'],
                                records['doc_tok'],

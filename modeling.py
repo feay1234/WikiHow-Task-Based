@@ -638,7 +638,8 @@ class SentenceBert(BertRanker):
             # cls_query_tok = torch.stack(cls_query_tok, dim=2).mean(dim=2)
             # cls_doc_tok = torch.stack(cls_doc_tok, dim=2).mean(dim=2)
 
-            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul = cls_query_tok[-1] - cls_doc_tok[-1]
             cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], mul], dim=1)
             # mul = torch.mul(cls_query_tok, cls_doc_tok)
             return self.cls(self.dropout(cat))
@@ -696,4 +697,32 @@ class SentenceBert(BertRanker):
             mul_wiki = self.cls2(mul_wiki)
             mul_question = self.cls3(mul_question)
             return self.clsAll(torch.cat([mul, mul_wiki, mul_question], dim=1))
+
+class CrossBert(OriginalBertRanker):
+    def __init__(self, args):
+        super().__init__()
+
+        self.args = args
+
+        self.dropout = torch.nn.Dropout(0.1)
+        self.cls = torch.nn.Linear(self.BERT_SIZE * 3, 1)
+
+        if self.args.mode == 2:
+            self.cls = torch.nn.Linear(self.BERT_SIZE*5, 1)
+
+    def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
+        cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+        cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+        mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+
+        if self.args.mode == 1:
+            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], mul], 1)
+            return self.cls(self.dropout(cat))
+        elif self.args.mode == 2:
+            cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+            cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
+            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
+            mul = torch.mul(mul, mul_wiki)
+            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], cls_wiki_doc_tok[-1], cls_doc_wiki_tok, mul], 1)
+            return self.cls(self.dropout(cat))
 

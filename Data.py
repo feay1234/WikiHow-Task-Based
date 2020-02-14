@@ -101,10 +101,6 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 tqdm.write(f'missing doc {neg_id}! Skipping')
                 continue
 
-            # yield qid, pos_id, query_tok, model.tokenize(pos_doc) if args.model not in ["sbert"] else model.tokenize(
-            #     "[CLS] " + pos_doc + " [SEP]"), wiki_tok, question_tok
-            # yield qid, neg_id, query_tok, model.tokenize(neg_doc) if args.model not in ["sbert"] else model.tokenize(
-            #     "[CLS] " + neg_doc + " [SEP]/"), wiki_tok, question_tok
             yield qid, pos_id, query_tok, model.tokenize(pos_doc), wiki_tok, question_tok
             yield qid, neg_id, query_tok, model.tokenize(neg_doc), wiki_tok, question_tok
 
@@ -181,13 +177,8 @@ def _pack_n_ship(batch, data, args):
             # 'question_tok': _pad_crop_np(batch['question_tok'], 5),
             'question_tok': toTensor(batch['question_tok'])
         }
-    elif args.model in ["sbert"]:
+    elif args.model in ["sbert", "crossbert"]:
 
-        # best one
-        # QLEN = 20
-        # DLEN = 20
-        # WLEN = 20
-        # QQLEN = 20
         QLEN = min(args.maxlen, int(np.max([len(b) for b in batch['query_tok']])))
         DLEN = min(args.maxlen, int(np.max([len(b) for b in batch['doc_tok']])))
         WLEN = min(args.maxlen, int(np.max([len(b) for b in batch['wiki_tok']])))
