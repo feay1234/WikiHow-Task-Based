@@ -11,7 +11,7 @@ import torch
 import modeling
 import Data
 from pyNTCIREVAL import Labeler
-from pyNTCIREVAL.metrics import MSnDCG, nERR, nDCG
+from pyNTCIREVAL.metrics import MSnDCG, nERR, nDCG, AP, RR
 import collections
 
 SEED = 42
@@ -169,6 +169,8 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
             # break
 
     res = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}
+    res['map'] = []
+    res['mrr'] = []
     res['rp'] = []
     predictions = []
     qids = []
@@ -205,6 +207,12 @@ def eval(qrels, ranked_list):
         result["r@%d" % i] = len(set.intersection(set(qrels.keys()), set(_ranked_list))) / len(qrels)
 
     result["rp"] = len(set.intersection(set(qrels.keys()), set(ranked_list[:len(qrels)]))) / len(qrels)
+    metric = MSnDCG(xrelnum, grades, cutoff=i)
+
+    map = AP(xrelnum, grades)
+    result["map"] = map.compute(labeled_ranked_list)
+    mrr = RR()
+    result["mrr"] = mrr.compute(labeled_ranked_list)
 
     return result
 
@@ -254,7 +262,7 @@ def main_cli():
     parser.add_argument('--path', default="data/cedr/")
     # parser.add_argument('--queryfile', type=argparse.FileType('rt'), default="data/cedr/eai-query.tsv")
     # parser.add_argument('--docfile', type=argparse.FileType('rt'), default="data/cedr/eai-doc.tsv")
-    parser.add_argument('--wikifile', default="wikipedia")
+    parser.add_argument('--wikifile', default="wikihow")
     parser.add_argument('--questionfile', default="question-qq")
     # parser.add_argument('--qrels', type=argparse.FileType('rt'), default="data/cedr/eai-qrel.tsv")
     # parser.add_argument('--train_pairs', default="data/cedr/eai-train")
@@ -363,6 +371,8 @@ def main_cli():
 
     metricKeys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}
     metricKeys["rp"] = []
+    metricKeys["mrr"] = []
+    metricKeys["map"] = []
 
     results = []
 
