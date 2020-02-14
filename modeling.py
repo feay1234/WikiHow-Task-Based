@@ -259,6 +259,16 @@ class VanillaBertRanker(OriginalBertRanker):
         cls_reps, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
         return self.cls(self.dropout(cls_reps[-1]))
 
+class InvertBertRanker(OriginalBertRanker):
+    def __init__(self, args):
+        super().__init__()
+        self.args = args
+        self.dropout = torch.nn.Dropout(0.1)
+        self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
+
+    def forward(self, query_tok, query_mask, doc_tok, doc_mask):
+        cls_reps, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+        return self.cls(self.dropout(cls_reps[-1]))
 
 class BirchRanker(BertRanker):
     def __init__(self, enableWiki, enableQuestion, shareBERT):
