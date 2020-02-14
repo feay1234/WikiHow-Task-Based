@@ -710,7 +710,7 @@ class CrossBert(OriginalBertRanker):
         if self.args.mode == 2:
             self.cls = torch.nn.Linear(self.BERT_SIZE*5, 1)
 
-    def encode_bert(self, query_tok, query_mask, doc_tok, doc_mask):
+    def c_encode_bert(self, query_tok, query_mask, doc_tok, doc_mask):
         BATCH, QLEN = query_tok.shape
         DIFF = 3 # = [CLS] and 2x[SEP]
         maxlen = self.bert.config.max_position_embeddings
@@ -749,16 +749,16 @@ class CrossBert(OriginalBertRanker):
         return cls_results
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
-        cls_query_tok = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
-        cls_doc_tok  = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+        cls_query_tok = self.c_encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+        cls_doc_tok  = self.c_encode_bert(doc_tok, doc_mask, query_tok, query_mask)
         dif = cls_query_tok[-1] - cls_doc_tok[-1]
 
         if self.args.mode == 1:
             cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], 1)
             return self.cls(self.dropout(cat))
         elif self.args.mode == 2:
-            cls_wiki_doc_tok  = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
-            cls_doc_wiki_tok = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
+            cls_wiki_doc_tok  = self.c_encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+            cls_doc_wiki_tok = self.c_encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
             dif_wiki = cls_wiki_doc_tok[-1] - cls_doc_wiki_tok[-1]
             dif = dif - dif_wiki
             cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1], dif], 1)
