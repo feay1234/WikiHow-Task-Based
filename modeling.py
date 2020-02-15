@@ -545,6 +545,12 @@ class MSRanker(BertRanker):
         return np.zeros(100)
 
 
+# Original
+# class SentenceBert(BertRanker):
+# mul, two cls , and clsAll
+# sbert use encode_bert_ori, mode = 4
+
+
 class SentenceBert(OriginalBertRanker):
     def __init__(self, args):
         super().__init__()
@@ -553,33 +559,11 @@ class SentenceBert(OriginalBertRanker):
 
         self.dropout = torch.nn.Dropout(0.1)
         self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
+        self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
+        self.clsAll = torch.nn.Linear(2, 1)
+        self.clsAllWiki = torch.nn.Linear(2, 1)
 
-        if self.args.mode in [1, 3, 4]:
-            self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
-            # self.clsAll = torch.nn.Linear(2, 1)
-            # self.cls2 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
-        elif self.args.mode == 2:
-            self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
-            self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
-            self.clsAll = torch.nn.Linear(2, 1)
-
-        elif self.args.mode == 5:
-            self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
-            self.clsAll = torch.nn.Linear(2, 1)
-            # self.cls2 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
-            # self.clsAll = torch.nn.Linear(2, 1)
-
-        elif self.args.mode == 6:
-            self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
-            self.cls3 = torch.nn.Linear(self.BERT_SIZE, 1)
-            self.clsAll = torch.nn.Linear(3, 1)
-        self.q = torch.nn.Linear(self.BERT_SIZE, 100)
-        self.d = torch.nn.Linear(self.BERT_SIZE, 100)
-
-        if self.args.mode == 9:
-            self.bertWiki = CustomBertModel.from_pretrained(self.BERT_MODEL)
-
-        self.cos = torch.nn.CosineSimilarity(dim=1)
+        self.clsAll = torch.nn.Linear(2, 1)
 
     def encode_bert_ori(self, query_tok, query_mask, doc_tok, doc_mask):
         BATCH, QLEN = query_tok.shape
@@ -633,112 +617,33 @@ class SentenceBert(OriginalBertRanker):
         return cls_results
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
+        cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+        cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+        if self.args.mode % 2 == 0:
+            cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+            cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
 
         if self.args.mode == 1:
-            cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
-            cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            dif = cls_query_tok[-1] - cls_doc_tok[-1]
-            return self.cls(self.dropout(dif))
-
-            # cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
-            # cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
-            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            # return self.cls(self.dropout(mul))
-
-            # cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
-            # cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
-            # dif = cls_query_tok[-1] - cls_doc_tok[-1]
-            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            # cat = torch.cat([mul, dif], dim=1)
-            # return self.cls(self.dropout(cat))
+            mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
+            return self.cls(self.dropout(mul))
 
         elif self.args.mode == 2:
-
-            cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
-            cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-            cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
-            cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
-
-            dif = cls_query_tok[-1] - cls_doc_tok[-1]
-            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            # cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], dim=1)
-            # cat = torch.cat([mul, dif], dim=1)
-
-            dif_wiki = cls_wiki_doc_tok[-1] - cls_doc_wiki_tok[-1]
-            # mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
-            # cat_wiki = torch.cat([cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1], dif_wiki], dim=1)
-            # cat_wiki = torch.cat([mul_wiki, dif_wiki], dim=1)
-
-            cat = self.cls(self.dropout(dif))
-            cat_wiki = self.cls2(self.dropout(dif_wiki))
-
+            mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
+            mul_wiki = torch.mul(self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]))
+            cat = self.cls(mul)
+            cat_wiki = self.cls2(mul_wiki)
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
+        elif self.args.mode == 3:
+            cat1 = self.cls(self.dropout(cls_query_tok[-1]))
+            cat2 = self.cls(self.dropout(cls_doc_tok[-1]))
+            return self.clsAll(torch.cat([cat1, cat2], dim=1))
 
-        elif self.args.mode in [3, 4]:
-            cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
-            cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
+        elif self.args.mode == 4:
+            cat1 = self.cls(self.dropout(cls_query_tok[-1]))
+            cat2 = self.cls(self.dropout(cls_doc_tok[-1]))
+            cat1 = self.clsAll(torch.cat([cat1, cat2], dim=1))
 
-            # cls_query_tok = torch.stack(cls_query_tok, dim=2).mean(dim=2)
-            # cls_doc_tok = torch.stack(cls_doc_tok, dim=2).mean(dim=2)
-
-            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            mul = cls_query_tok[-1] - cls_doc_tok[-1]
-            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], mul], dim=1)
-            # mul = torch.mul(cls_query_tok, cls_doc_tok)
-            return self.cls(self.dropout(cat))
-            # return self.cos(cls_query_tok[-1], cls_doc_tok[-1])
-        elif self.args.mode == 7:
-            # print(self.args.mode)
-            cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
-            cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
-            cls_wiki_tok = self.encode_bert_ori(wiki_tok, wiki_mask, query_tok, query_mask)
-            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            mul = torch.mul(mul, cls_wiki_tok[-1])
-            return self.cls(self.dropout(mul))
-        elif self.args.mode == 8:
-            cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
-            cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
-            cls_wiki_tok = self.encode_bert_ori(wiki_tok, wiki_mask, query_tok, query_mask)
-            cls_question_tok = self.encode_bert_ori(question_tok, question_mask, query_tok, query_mask)
-            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            mul = torch.mul(mul, cls_wiki_tok[-1])
-            mul = torch.mul(mul, cls_question_tok[-1])
-            return self.cls(self.dropout(mul))
-
-        elif self.args.mode in [5, 9]:
-            cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
-            cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-            if self.args.mode == 5:
-                cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
-                cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
-            elif self.args.mode == 9:
-                cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask, self.bertWiki)
-                cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask, self.bertWiki)
-            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
-
-            mul = self.cls(self.dropout(mul))
-            mul_wiki = self.cls2(self.dropout(mul_wiki))
-
-            return self.clsAll(torch.cat([mul, mul_wiki], dim=1))
-
-        elif self.args.mode == 6:
-            cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
-            cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-
-            cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
-            cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
-
-            cls_question_doc_tok, _, _ = self.encode_bert(question_tok, question_mask, doc_tok, doc_mask)
-            cls_doc_question_tok, _, _ = self.encode_bert(doc_tok, doc_mask, question_tok, question_mask)
-
-            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
-            mul_question = torch.mul(cls_question_doc_tok[-1], cls_doc_question_tok[-1])
-
-            mul = self.cls(mul)
-            mul_wiki = self.cls2(mul_wiki)
-            mul_question = self.cls3(mul_question)
-            return self.clsAll(torch.cat([mul, mul_wiki, mul_question], dim=1))
+            catW1 = self.cls(self.dropout(cls_wiki_doc_tok[-1]))
+            catW2 = self.cls(self.dropout(cls_doc_wiki_tok[-1]))
+            catW1 = self.clsAllWiki(torch.cat([catW1, catW2], dim=1))
