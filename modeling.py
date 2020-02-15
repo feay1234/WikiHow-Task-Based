@@ -638,7 +638,8 @@ class SentenceBert(OriginalBertRanker):
             cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
             mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            return self.cls(self.dropout(mul))
+            dif = cls_query_tok[-1] - cls_doc_tok[-1]
+            return self.cls(self.dropout(dif))
 
             # cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
             # cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
@@ -660,17 +661,17 @@ class SentenceBert(OriginalBertRanker):
             cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
 
             dif = cls_query_tok[-1] - cls_doc_tok[-1]
-            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], dim=1)
-            cat = torch.cat([mul, dif], dim=1)
+            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            # cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], dim=1)
+            # cat = torch.cat([mul, dif], dim=1)
 
             dif_wiki = cls_wiki_doc_tok[-1] - cls_doc_wiki_tok[-1]
-            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
+            # mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
             # cat_wiki = torch.cat([cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1], dif_wiki], dim=1)
-            cat_wiki = torch.cat([mul_wiki, dif_wiki], dim=1)
+            # cat_wiki = torch.cat([mul_wiki, dif_wiki], dim=1)
 
-            cat = self.cls(self.dropout(mul))
-            cat_wiki = self.cls2(self.dropout(mul_wiki))
+            cat = self.cls(self.dropout(dif))
+            cat_wiki = self.cls2(self.dropout(dif_wiki))
 
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
