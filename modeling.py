@@ -564,9 +564,9 @@ class SentenceBert(OriginalBertRanker):
             self.clsAll = torch.nn.Linear(2, 1)
 
         elif self.args.mode == 5:
-            # self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
+            self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
             self.clsAll = torch.nn.Linear(2, 1)
-            self.cls2 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
+            # self.cls2 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
             # self.clsAll = torch.nn.Linear(2, 1)
 
         elif self.args.mode == 6:
