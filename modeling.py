@@ -562,6 +562,15 @@ class SentenceBert(OriginalBertRanker):
         self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
         self.clsAll = torch.nn.Linear(2, 1)
         self.clsAllWiki = torch.nn.Linear(2, 1)
+        self.clsCat2 = torch.nn.Linear(self.BERT_SIZE * 2, 1)
+        self.clsWikiCat2 = torch.nn.Linear(self.BERT_SIZE * 2, 1)
+
+        if self.args.mode == 3:
+            self.clsCat2 = torch.nn.Linear(self.BERT_SIZE * 2, 1)
+
+        elif self.args.mode == 4:
+            self.clsCat4 = torch.nn.Linear(self.BERT_SIZE * 4, 1)
+            self.clsWikiCat4 = torch.nn.Linear(self.BERT_SIZE * 4, 1)
 
         self.clsAll = torch.nn.Linear(2, 1)
 
@@ -635,15 +644,10 @@ class SentenceBert(OriginalBertRanker):
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
         elif self.args.mode == 3:
-            cat1 = self.cls(self.dropout(cls_query_tok[-1]))
-            cat2 = self.cls(self.dropout(cls_doc_tok[-1]))
-            return self.clsAll(torch.cat([cat1, cat2], dim=1))
+            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1])], dim=1)
+            return self.clsCat2(cat)
 
         elif self.args.mode == 4:
-            cat1 = self.cls(self.dropout(cls_query_tok[-1]))
-            cat2 = self.cls(self.dropout(cls_doc_tok[-1]))
-            cat1 = self.clsAll(torch.cat([cat1, cat2], dim=1))
-
-            catW1 = self.cls(self.dropout(cls_wiki_doc_tok[-1]))
-            catW2 = self.cls(self.dropout(cls_doc_wiki_tok[-1]))
-            catW1 = self.clsAllWiki(torch.cat([catW1, catW2], dim=1))
+            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1])], dim=1)
+            catWiki = torch.cat([self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1])], dim=1)
+            return self.clsCat4(torch.cat([cat, catWiki], dim=1))
