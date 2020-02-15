@@ -317,6 +317,9 @@ def main_cli():
         model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](
             args)
 
+    pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(pytorch_total_params)
+
     qrels = Data.read_qrels_dict(args.qrels)
 
     MAX_EPOCH = args.epoch

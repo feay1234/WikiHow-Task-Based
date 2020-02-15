@@ -549,12 +549,12 @@ class SentenceBert(BertRanker):
         self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
 
         if self.args.mode in [1, 3, 4]:
-            self.cls = torch.nn.Linear(self.BERT_SIZE * 2, 1)
+            self.cls = torch.nn.Linear(self.BERT_SIZE , 1)
             # self.clsAll = torch.nn.Linear(2, 1)
             # self.cls2 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
         elif self.args.mode == 2:
-            self.cls = torch.nn.Linear(self.BERT_SIZE * 2, 1)
-            self.cls2 = torch.nn.Linear(self.BERT_SIZE * 2, 1)
+            self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
+            self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
             self.clsAll = torch.nn.Linear(2, 1)
 
         elif self.args.mode == 5:
@@ -637,13 +637,15 @@ class SentenceBert(BertRanker):
 
             cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
-            dif = cls_query_tok[-1] - cls_doc_tok[-1]
             mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            return self.cls(self.dropout(mul))
 
-            # dif = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            # cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], dim=1)
-            cat = torch.cat([mul, dif], dim=1)
-            return self.cls(self.dropout(cat))
+            # cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
+            # cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
+            # dif = cls_query_tok[-1] - cls_doc_tok[-1]
+            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            # cat = torch.cat([mul, dif], dim=1)
+            # return self.cls(self.dropout(cat))
 
         elif self.args.mode == 2:
 
@@ -654,7 +656,7 @@ class SentenceBert(BertRanker):
 
             dif = cls_query_tok[-1] - cls_doc_tok[-1]
             mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            # cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], dim=1)
+            cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], dim=1)
             cat = torch.cat([mul, dif], dim=1)
 
             dif_wiki = cls_wiki_doc_tok[-1] - cls_doc_wiki_tok[-1]
@@ -662,8 +664,8 @@ class SentenceBert(BertRanker):
             # cat_wiki = torch.cat([cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1], dif_wiki], dim=1)
             cat_wiki = torch.cat([mul_wiki, dif_wiki], dim=1)
 
-            cat = self.cls(self.dropout(cat))
-            cat_wiki = self.cls2(self.dropout(cat_wiki))
+            cat = self.cls(self.dropout(mul))
+            cat_wiki = self.cls2(self.dropout(mul_wiki))
 
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
