@@ -1,0 +1,49 @@
+0-train epoch=0 loss=117.76484715938568
+0-validation epoch=0 score=0.5391684524705957 : 00:04:55
+0-new top validation score, 0.5336
+0-train epoch=1 loss=89.2286873459816
+0-validation epoch=1 score=0.5579154845679669 : 00:04:32
+0-new top validation score, 0.5709
+0-train epoch=2 loss=77.23299118876457
+0-validation epoch=2 score=0.5543336703162284 : 00:03:34
+0-validation epoch=2 score=0.5543336703162284 : 00:03:34
+1-train epoch=0 loss=82.70001488924026
+1-validation epoch=0 score=0.6186593202706124 : 00:03:33
+1-new top validation score, 0.6193
+1-train epoch=1 loss=79.75946301221848
+1-validation epoch=1 score=0.6289321815969486 : 00:02:33
+1-new top validation score, 0.6380
+1-train epoch=2 loss=72.91751408576965
+1-validation epoch=2 score=0.631658433681484 : 00:02:05
+1-new top validation score, 0.6400
+1-train epoch=3 loss=71.03041937947273
+1-validation epoch=3 score=0.6488629273502463 : 00:02:46
+1-new top validation score, 0.6540
+1-train epoch=4 loss=75.49377101659775
+1-validation epoch=4 score=0.630269721900841 : 00:07:02
+1-validation epoch=4 score=0.630269721900841 : 00:07:02
+2-train epoch=0 loss=75.4117942750454
+2-validation epoch=0 score=0.6388029907146645 : 00:08:36
+2-new top validation score, 0.6278
+2-train epoch=1 loss=59.94420289993286
+2-validation epoch=1 score=0.6429376168132634 : 00:09:42
+2-new top validation score, 0.6297
+2-train epoch=2 loss=67.59860873222351
+2-validation epoch=2 score=0.6373237267119332 : 00:05:38
+2-validation epoch=2 score=0.6373237267119332 : 00:05:38
+3-train epoch=0 loss=71.38722604513168
+3-validation epoch=0 score=0.623751546951426 : 00:02:00
+3-new top validation score, 0.6522
+3-train epoch=1 loss=74.91354808211327
+3-validation epoch=1 score=0.6236878529043256 : 00:01:23
+3-validation epoch=1 score=0.6236878529043256 : 00:01:23
+4-train epoch=0 loss=65.89212888479233
+4-validation epoch=0 score=0.6476477481930315 : 00:01:17
+4-new top validation score, 0.6124
+4-train epoch=1 loss=67.73849213123322
+4-validation epoch=1 score=0.653281861656637 : 00:01:13
+4-new top validation score, 0.6393
+4-train epoch=2 loss=67.55767264962196
+4-validation epoch=2 score=0.6465636117997048 : 00:01:13
+4-validation epoch=2 score=0.6465636117997048 : 00:01:13
+4-total : 01:18:50
