@@ -645,11 +645,9 @@ class SentenceBert(OriginalBertRanker):
         elif self.args.mode == 2:
             mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
             mul_wiki = torch.mul(self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]))
-            mul = torch.mul(mul, mul_wiki)
             cat = self.cls(self.dropout(mul))
-            cat_wiki = self.cls(self.dropout(mul_wiki))
-            # return self.clsAll(self.dropout(torch.cat([cat, cat_wiki], dim=1)))
-            return self.clsAll(self.dropout(torch.cat([cat, cat_wiki], dim=1)))
+            cat_wiki = self.cls2(self.dropout(mul_wiki))
+            return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
         #   1 original
         #   2 add dropout at clasALL
         #   3 add dropout to all
