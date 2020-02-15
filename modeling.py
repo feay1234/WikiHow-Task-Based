@@ -11,6 +11,7 @@ import numpy as np
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+
 class BertPairwiseRanker(torch.nn.Module):
     def __init__(self):
         super().__init__()
@@ -173,6 +174,7 @@ class BertRanker(torch.nn.Module):
         return cls_results, query_results, doc_results
         # return cls_results, doc_results, query_results
 
+
 class OriginalBertRanker(torch.nn.Module):
     def __init__(self):
         super().__init__()
@@ -247,7 +249,6 @@ class OriginalBertRanker(torch.nn.Module):
         return cls_results, query_results, doc_results
 
 
-
 class VanillaBertRanker(OriginalBertRanker):
     def __init__(self, args):
         super().__init__()
@@ -258,6 +259,7 @@ class VanillaBertRanker(OriginalBertRanker):
     def forward(self, query_tok, query_mask, doc_tok, doc_mask):
         cls_reps, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
         return self.cls(self.dropout(cls_reps[-1]))
+
 
 class InvertBertRanker(OriginalBertRanker):
     def __init__(self, args):
@@ -270,6 +272,7 @@ class InvertBertRanker(OriginalBertRanker):
         print(query_tok.shape)
         cls_reps, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
         return self.cls(self.dropout(cls_reps[-1]))
+
 
 class BirchRanker(BertRanker):
     def __init__(self, enableWiki, enableQuestion, shareBERT):
@@ -382,8 +385,9 @@ class VanillaBirchtRanker(BirchRanker):
         self.w = torch.nn.Linear(self.BERT_SIZE, self.BERT_SIZE)
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
-        cls_reps, _, _, cls_reps_wiki = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok,
-                                          question_mask)
+        cls_reps, _, _, cls_reps_wiki = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask,
+                                                         question_tok,
+                                                         question_mask)
 
         mul = torch.mul(self.q(cls_reps[-1]), self.w(cls_reps_wiki[-1]))
 
@@ -499,6 +503,7 @@ class CustomBertModel(pytorch_pretrained_bert.BertModel):
 
         return [embedding_output] + encoded_layers
 
+
 class MSRanker(BertRanker):
     def __init__(self, args):
         super().__init__()
@@ -539,7 +544,8 @@ class MSRanker(BertRanker):
         print("not found:", text)
         return np.zeros(100)
 
-class SentenceBert(BertRanker):
+
+class SentenceBert(OriginalBertRanker):
     def __init__(self, args):
         super().__init__()
 
@@ -549,7 +555,7 @@ class SentenceBert(BertRanker):
         self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
 
         if self.args.mode in [1, 3, 4]:
-            self.cls = torch.nn.Linear(self.BERT_SIZE , 1)
+            self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
             # self.clsAll = torch.nn.Linear(2, 1)
             # self.cls2 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
         elif self.args.mode == 2:
@@ -577,7 +583,7 @@ class SentenceBert(BertRanker):
 
     def encode_bert_ori(self, query_tok, query_mask, doc_tok, doc_mask):
         BATCH, QLEN = query_tok.shape
-        DIFF = 3 # = [CLS] and 2x[SEP]
+        DIFF = 3  # = [CLS] and 2x[SEP]
         maxlen = self.bert.config.max_position_embeddings
         MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
 
@@ -598,12 +604,12 @@ class SentenceBert(BertRanker):
             mask = torch.cat([ONES, query_mask, ONES], dim=1)
             segment_ids = torch.cat([ONES] * (2 + QLEN), dim=1)
             # segment_ids = torch.cat([NILS] * (2 + QLEN), dim=1)
-            toks[toks == -1] = 0 # remove padding (will be masked anyway)
+            toks[toks == -1] = 0  # remove padding (will be masked anyway)
         elif self.args.mode in [1, 2, 3]:
             toks = torch.cat([CLSS, query_toks, SEPS, doc_toks, SEPS], dim=1)
             mask = torch.cat([ONES, query_mask, ONES, doc_mask, ONES], dim=1)
             segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
-            toks[toks == -1] = 0 # remove padding (will be masked anyway)
+            toks[toks == -1] = 0  # remove padding (will be masked anyway)
 
         # execute BERT model
         result = self.bert(toks, segment_ids.long(), mask)
@@ -619,26 +625,25 @@ class SentenceBert(BertRanker):
             cls_output = layer[:, 0]
             cls_result = []
             for i in range(cls_output.shape[0] // BATCH):
-                cls_result.append(cls_output[i*BATCH:(i+1)*BATCH])
+                cls_result.append(cls_output[i * BATCH:(i + 1) * BATCH])
             cls_result = torch.stack(cls_result, dim=2).mean(dim=2)
             cls_results.append(cls_result)
 
         # return cls_results, query_results, doc_results
         return cls_results
 
-
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
 
         if self.args.mode == 1:
-            # cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
-            # cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            # return self.cls(self.dropout(mul))
-
-            cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
-            cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
+            cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+            cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
             mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
             return self.cls(self.dropout(mul))
+
+            # cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
+            # cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
+            # mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            # return self.cls(self.dropout(mul))
 
             # cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
             # cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
@@ -649,10 +654,10 @@ class SentenceBert(BertRanker):
 
         elif self.args.mode == 2:
 
-            cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
-            cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
-            cls_wiki_doc_tok = self.encode_bert_ori(wiki_tok, wiki_mask, doc_tok, doc_mask)
-            cls_doc_wiki_tok = self.encode_bert_ori(doc_tok, doc_mask, wiki_tok, wiki_mask)
+            cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+            cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+            cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+            cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
 
             dif = cls_query_tok[-1] - cls_doc_tok[-1]
             mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
