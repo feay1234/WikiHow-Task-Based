@@ -1,0 +1,46 @@
+0-train epoch=0 loss=98.88184213638306
+0-validation epoch=0 score=0.29438813045447626 : 00:01:12
+0-new top validation score, 0.2099
+0-train epoch=1 loss=58.94439324736595
+0-validation epoch=1 score=0.23170670062937496 : 00:01:48
+0-validation epoch=1 score=0.23170670062937496 : 00:01:48
+1-train epoch=0 loss=41.983834594488144
+1-validation epoch=0 score=0.15767965800365358 : 00:02:07
+1-new top validation score, 0.2254
+1-train epoch=1 loss=27.40024933218956
+1-validation epoch=1 score=0.27995334553355594 : 00:03:08
+1-new top validation score, 0.2814
+1-train epoch=2 loss=21.529334396123886
+1-validation epoch=2 score=0.2937020017071484 : 00:02:09
+1-new top validation score, 0.2819
+1-train epoch=3 loss=18.89863356947899
+1-validation epoch=3 score=0.32267531840870917 : 00:01:42
+1-new top validation score, 0.3181
+1-train epoch=4 loss=17.281930088996887
+1-validation epoch=4 score=0.2829988299742927 : 00:01:35
+1-validation epoch=4 score=0.2829988299742927 : 00:01:35
+2-train epoch=0 loss=16.81410649418831
+2-validation epoch=0 score=0.464830531006668 : 00:01:32
+2-new top validation score, 0.4258
+2-train epoch=1 loss=13.083912253379822
+2-validation epoch=1 score=0.43481637787547917 : 00:01:33
+2-validation epoch=1 score=0.43481637787547917 : 00:01:33
+3-train epoch=0 loss=16.60879561305046
+3-validation epoch=0 score=0.2940133087689878 : 00:01:33
+3-new top validation score, 0.3842
+3-train epoch=1 loss=16.58682295680046
+3-validation epoch=1 score=0.29835646409013056 : 00:01:15
+3-new top validation score, 0.3810
+3-train epoch=2 loss=9.194482535123825
+3-validation epoch=2 score=0.3048890393572896 : 00:00:34
+3-new top validation score, 0.4151
+3-train epoch=3 loss=7.7056752145290375
+3-validation epoch=3 score=0.2953952035925138 : 00:00:25
+3-validation epoch=3 score=0.2953952035925138 : 00:00:25
+4-train epoch=0 loss=8.811143010854721
+4-validation epoch=0 score=0.47773789096695196 : 00:00:28
+4-new top validation score, 0.4048
+4-train epoch=1 loss=12.348529428243637
+4-validation epoch=1 score=0.4265941621489748 : 00:00:29
+4-validation epoch=1 score=0.4265941621489748 : 00:00:29
+4-total : 00:32:25
