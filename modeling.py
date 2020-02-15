@@ -395,7 +395,7 @@ class VanillaBirchtRanker(BirchRanker):
         return self.cls(self.dropout(mul))
 
 
-class CedrPacrrRanker(BertRanker):
+class CedrPacrrRanker(OriginalBertRanker):
     def __init__(self, args):
         super().__init__()
         # QLEN = 20
@@ -429,7 +429,7 @@ class CedrPacrrRanker(BertRanker):
         return rel
 
 
-class CedrKnrmRanker(BertRanker):
+class CedrKnrmRanker(OriginalBertRanker):
     def __init__(self, args):
         super().__init__()
         self.args = args
