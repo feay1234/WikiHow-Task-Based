@@ -554,6 +554,7 @@ class SentenceBert(BertRanker):
             # self.cls2 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
         elif self.args.mode == 2:
             self.cls = torch.nn.Linear(self.BERT_SIZE * 3, 1)
+            self.cls2 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
             self.clsAll = torch.nn.Linear(2, 1)
 
         elif self.args.mode == 5:
@@ -636,7 +637,9 @@ class SentenceBert(BertRanker):
 
             cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
             cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
-            dif = cls_query_tok[-1] - cls_doc_tok[-1]
+            # dif = cls_query_tok[-1] - cls_doc_tok[-1]
+
+            dif = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
             cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], dim=1)
             return self.cls(self.dropout(cat))
 
@@ -647,14 +650,16 @@ class SentenceBert(BertRanker):
             cls_wiki_doc_tok = self.encode_bert_ori(wiki_tok, wiki_mask, doc_tok, doc_mask)
             cls_doc_wiki_tok = self.encode_bert_ori(doc_tok, doc_mask, wiki_tok, wiki_mask)
 
-            dif = cls_query_tok[-1] - cls_doc_tok[-1]
+            # dif = cls_query_tok[-1] - cls_doc_tok[-1]
+            dif = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
             cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], dif], dim=1)
 
-            dif_wiki = cls_wiki_doc_tok[-1] - cls_doc_wiki_tok[-1]
+            # dif_wiki = cls_wiki_doc_tok[-1] - cls_doc_wiki_tok[-1]
+            dif_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
             cat_wiki = torch.cat([cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1], dif_wiki], dim=1)
 
             cat = self.cls(self.dropout(cat))
-            cat_wiki = self.cls(self.dropout(cat_wiki))
+            cat_wiki = self.cls2(self.dropout(cat_wiki))
 
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
@@ -725,60 +730,3 @@ class SentenceBert(BertRanker):
             mul_wiki = self.cls2(mul_wiki)
             mul_question = self.cls3(mul_question)
             return self.clsAll(torch.cat([mul, mul_wiki, mul_question], dim=1))
-
-class CrossBert(BertRanker):
-    def __init__(self, args):
-        super().__init__()
-
-        self.args = args
-
-        self.dropout = torch.nn.Dropout(0.1)
-        self.cls = torch.nn.Linear(self.BERT_SIZE * 3, 1)
-
-    def encode_bert_ori(self, query_tok, query_mask, doc_tok, doc_mask):
-        BATCH, QLEN = query_tok.shape
-        DIFF = 3 # = [CLS] and 2x[SEP]
-        maxlen = self.bert.config.max_position_embeddings
-        MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
-
-        doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
-        doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)
-
-        query_toks = torch.cat([query_tok] * sbcount, dim=0)
-        query_mask = torch.cat([query_mask] * sbcount, dim=0)
-
-        CLSS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[CLS]'])
-        SEPS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[SEP]'])
-        ONES = torch.ones_like(query_mask[:, :1])
-        NILS = torch.zeros_like(query_mask[:, :1])
-
-        # build BERT input sequences
-        toks = torch.cat([CLSS, query_toks, SEPS, doc_toks, SEPS], dim=1)
-        mask = torch.cat([ONES, query_mask, ONES, doc_mask, ONES], dim=1)
-        segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
-        toks[toks == -1] = 0 # remove padding (will be masked anyway)
-
-        # execute BERT model
-        result = self.bert(toks, segment_ids.long(), mask)
-
-        # build CLS representation
-        cls_results = []
-        for layer in result:
-            cls_output = layer[:, 0]
-            cls_result = []
-            for i in range(cls_output.shape[0] // BATCH):
-                cls_result.append(cls_output[i*BATCH:(i+1)*BATCH])
-            cls_result = torch.stack(cls_result, dim=2).mean(dim=2)
-            cls_results.append(cls_result)
-
-        return cls_results
-
-
-    def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
-
-        cls_query_tok = self.encode_bert_ori(query_tok, query_mask, doc_tok, doc_mask)
-        cls_doc_tok = self.encode_bert_ori(doc_tok, doc_mask, query_tok, query_mask)
-        mul = cls_query_tok[-1] - cls_doc_tok[-1]
-        cat = torch.cat([cls_query_tok[-1], cls_doc_tok[-1], mul], dim=1)
-        return self.cls(self.dropout(cat))
-
