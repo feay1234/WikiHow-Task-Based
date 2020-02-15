@@ -58,7 +58,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
 
         valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
                                                                 model_out_dir, data, args, "valid")
-        valid_score = np.mean(valid_results["ndcg@15"])
+        valid_score = np.mean(valid_results["rp"])
+        # valid_score = np.mean(valid_results["ndcg@15"])
         elapsed_time = time.time() - t2
         txt = f'validation epoch={epoch} score={valid_score} : {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}'
         print2file(args.out_dir, modelName, ".txt", txt, fold)
@@ -270,7 +271,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=1)
+    parser.add_argument('--mode', type=int, default=2)
     parser.add_argument('--maxlen', type=int, default=16)
     parser.add_argument('--earlystop', type=int, default=1)
 
