@@ -546,12 +546,6 @@ class MSRanker(OriginalBertRanker):
         return np.zeros(100)
 
 
-# Original
-# class SentenceBert(BertRanker):
-# mul, two cls , and clsAll
-# sbert use encode_bert_ori, mode = 4
-
-
 class SentenceBert(OriginalBertRanker):
     def __init__(self, args):
         super().__init__()
@@ -562,209 +556,19 @@ class SentenceBert(OriginalBertRanker):
         self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
         self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
         self.clsAll = torch.nn.Linear(2, 1)
-        self.clsAllWiki = torch.nn.Linear(2, 1)
-        self.clsCat2 = torch.nn.Linear(self.BERT_SIZE * 2, 1)
-        self.clsWikiCat2 = torch.nn.Linear(self.BERT_SIZE * 2, 1)
 
-        if self.args.mode == 3:
-            self.clsCat2 = torch.nn.Linear(self.BERT_SIZE * 2, 1)
-
-        elif self.args.mode == 4:
-            self.clsCat4 = torch.nn.Linear(self.BERT_SIZE * 4, 1)
-            self.clsWikiCat4 = torch.nn.Linear(self.BERT_SIZE * 4, 1)
-
-        elif self.args.mode in [5,6, 7, 8]:
-            self.clsCat3 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
-            self.clsWikiCat3 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
-
-
-    def encode_bert_ori(self, query_tok, query_mask, doc_tok, doc_mask):
-        BATCH, QLEN = query_tok.shape
-        DIFF = 3  # = [CLS] and 2x[SEP]
-        maxlen = self.bert.config.max_position_embeddings
-        MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
-
-        doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
-        doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)
-
-        query_toks = torch.cat([query_tok] * sbcount, dim=0)
-        query_mask = torch.cat([query_mask] * sbcount, dim=0)
-
-        CLSS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[CLS]'])
-        SEPS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[SEP]'])
-        ONES = torch.ones_like(query_mask[:, :1])
-        NILS = torch.zeros_like(query_mask[:, :1])
-
-        # build BERT input sequences
-        if self.args.mode in [4, 7, 8]:
-            toks = torch.cat([CLSS, query_toks, SEPS], dim=1)
-            mask = torch.cat([ONES, query_mask, ONES], dim=1)
-            segment_ids = torch.cat([ONES] * (2 + QLEN), dim=1)
-            # segment_ids = torch.cat([NILS] * (2 + QLEN), dim=1)
-            toks[toks == -1] = 0  # remove padding (will be masked anyway)
-        elif self.args.mode in [1, 2, 3]:
-            toks = torch.cat([CLSS, query_toks, SEPS, doc_toks, SEPS], dim=1)
-            mask = torch.cat([ONES, query_mask, ONES, doc_mask, ONES], dim=1)
-            segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
-            toks[toks == -1] = 0  # remove padding (will be masked anyway)
-
-        # execute BERT model
-        result = self.bert(toks, segment_ids.long(), mask)
-
-        # extract relevant subsequences for query and doc
-        # query_results = [r[:BATCH, 1:QLEN+1] for r in result]
-        # doc_results = [r[:, QLEN+2:-1] for r in result]
-        # doc_results = [modeling_util.un_subbatch(r, doc_tok, MAX_DOC_TOK_LEN) for r in doc_results]
-
-        # build CLS representation
-        cls_results = []
-        for layer in result:
-            cls_output = layer[:, 0]
-            cls_result = []
-            for i in range(cls_output.shape[0] // BATCH):
-                cls_result.append(cls_output[i * BATCH:(i + 1) * BATCH])
-            cls_result = torch.stack(cls_result, dim=2).mean(dim=2)
-            cls_results.append(cls_result)
-
-        # return cls_results, query_results, doc_results
-        return cls_results
+        if self.args.mode in [7, 8]:
+            self.cls = torch.nn.Linear(100, 1)
+            self.cls2 = torch.nn.Linear(100, 1)
+            self.q = torch.nn.Linear(self.BERT_SIZE, 100)
+            self.d = torch.nn.Linear(self.BERT_SIZE, 100)
+            self.w = torch.nn.Linear(self.BERT_SIZE, 100)
+            self.wd = torch.nn.Linear(self.BERT_SIZE, 100)
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
         cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
         cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-        if self.args.mode % 2 == 0:
-            cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
-            cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
-
-        if self.args.mode == 1:
-            mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
-            return self.cls(self.dropout(mul))
-            # return self.cls(mul)
-        #   1 original with dropout at cls
-        #   2 wihtout dropout at cls
-
-        elif self.args.mode == 2:
-            mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
-            mul_wiki = torch.mul(self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]))
-            cat = self.cls(self.dropout(mul))
-            cat_wiki = self.cls2(self.dropout(mul_wiki))
-            return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
-        #   1 original
-        #   2 add dropout at clasALL
-        #   3 add dropout to all
-        #   4 mul all
-        #   5 BertRank
-        #   6 share cls
-
-        elif self.args.mode == 3:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1])], dim=1)
-            return self.clsCat2(self.dropout(cat))
-
-        elif self.args.mode == 4:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1])], dim=1)
-            catWiki = torch.cat([self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1])], dim=1)
-            return self.clsCat4(self.dropout(torch.cat([cat, catWiki], dim=1)))
-
-        elif self.args.mode == 5:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]), self.dropout(cls_query_tok[-1]) - self.dropout(cls_doc_tok[-1])], dim=1)
-            return self.clsCat3(self.dropout(cat))
-
-        elif self.args.mode == 6:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]), self.dropout(cls_query_tok[-1]) - self.dropout(cls_doc_tok[-1])], dim=1)
-            catWiki = torch.cat([self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]), self.dropout(cls_wiki_doc_tok[-1]) - self.dropout(cls_doc_wiki_tok[-1])], dim=1)
-            return self.clsAll(self.dropout(torch.cat([self.clsCat3(cat), self.clsWikiCat3(catWiki)], dim=1)))
-
-        elif self.args.mode == 7:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]), torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))], dim=1)
-            return self.clsCat3(self.dropout(cat))
-
-        elif self.args.mode == 8:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]), torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))], dim=1)
-            catWiki = torch.cat([self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]), torch.mul(self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]))], dim=1)
-            return self.clsAll(self.dropout(torch.cat([self.clsCat3(cat), self.clsWikiCat3(catWiki)], dim=1)))
-
-
-class SentenceBert(OriginalBertRanker):
-    def __init__(self, args):
-        super().__init__()
-
-        self.args = args
-
-        self.dropout = torch.nn.Dropout(0.1)
-        self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
-        self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
-        self.clsAll = torch.nn.Linear(2, 1)
-        self.clsAllWiki = torch.nn.Linear(2, 1)
-        self.clsCat2 = torch.nn.Linear(self.BERT_SIZE * 2, 1)
-        self.clsWikiCat2 = torch.nn.Linear(self.BERT_SIZE * 2, 1)
-
-        if self.args.mode == 3:
-            self.clsCat2 = torch.nn.Linear(self.BERT_SIZE * 2, 1)
-
-        elif self.args.mode == 4:
-            self.clsCat4 = torch.nn.Linear(self.BERT_SIZE * 4, 1)
-            self.clsWikiCat4 = torch.nn.Linear(self.BERT_SIZE * 4, 1)
-
-        elif self.args.mode in [5,6, 7, 8]:
-            self.clsCat3 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
-            self.clsWikiCat3 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
-
-
-    def encode_bert_ori(self, query_tok, query_mask, doc_tok, doc_mask):
-        BATCH, QLEN = query_tok.shape
-        DIFF = 3  # = [CLS] and 2x[SEP]
-        maxlen = self.bert.config.max_position_embeddings
-        MAX_DOC_TOK_LEN = maxlen - QLEN - DIFF
-
-        doc_toks, sbcount = modeling_util.subbatch(doc_tok, MAX_DOC_TOK_LEN)
-        doc_mask, _ = modeling_util.subbatch(doc_mask, MAX_DOC_TOK_LEN)
-
-        query_toks = torch.cat([query_tok] * sbcount, dim=0)
-        query_mask = torch.cat([query_mask] * sbcount, dim=0)
-
-        CLSS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[CLS]'])
-        SEPS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[SEP]'])
-        ONES = torch.ones_like(query_mask[:, :1])
-        NILS = torch.zeros_like(query_mask[:, :1])
-
-        # build BERT input sequences
-        if self.args.mode in [4, 7, 8]:
-            toks = torch.cat([CLSS, query_toks, SEPS], dim=1)
-            mask = torch.cat([ONES, query_mask, ONES], dim=1)
-            segment_ids = torch.cat([ONES] * (2 + QLEN), dim=1)
-            # segment_ids = torch.cat([NILS] * (2 + QLEN), dim=1)
-            toks[toks == -1] = 0  # remove padding (will be masked anyway)
-        elif self.args.mode in [1, 2, 3]:
-            toks = torch.cat([CLSS, query_toks, SEPS, doc_toks, SEPS], dim=1)
-            mask = torch.cat([ONES, query_mask, ONES, doc_mask, ONES], dim=1)
-            segment_ids = torch.cat([NILS] * (2 + QLEN) + [ONES] * (1 + doc_toks.shape[1]), dim=1)
-            toks[toks == -1] = 0  # remove padding (will be masked anyway)
-
-        # execute BERT model
-        result = self.bert(toks, segment_ids.long(), mask)
-
-        # extract relevant subsequences for query and doc
-        # query_results = [r[:BATCH, 1:QLEN+1] for r in result]
-        # doc_results = [r[:, QLEN+2:-1] for r in result]
-        # doc_results = [modeling_util.un_subbatch(r, doc_tok, MAX_DOC_TOK_LEN) for r in doc_results]
-
-        # build CLS representation
-        cls_results = []
-        for layer in result:
-            cls_output = layer[:, 0]
-            cls_result = []
-            for i in range(cls_output.shape[0] // BATCH):
-                cls_result.append(cls_output[i * BATCH:(i + 1) * BATCH])
-            cls_result = torch.stack(cls_result, dim=2).mean(dim=2)
-            cls_results.append(cls_result)
-
-        # return cls_results, query_results, doc_results
-        return cls_results
-
-    def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
-        cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
-        cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-        if self.args.mode in [2, 4, 5, 6]:
+        if self.args.mode in [2, 4, 5, 6, 8]:
             cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
             cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
 
@@ -804,6 +608,17 @@ class SentenceBert(OriginalBertRanker):
             cat = self.cls(self.dropout(mul))
             cat_wiki = self.cls(self.dropout(mul_wiki))
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
+
+        elif self.args.mode == 7:
+            mul = torch.mul(self.q(cls_query_tok[-1]), self.d(cls_doc_tok[-1]))
+            return self.cls(self.dropout(mul))
+        elif self.args.mode == 8:
+            mul = torch.mul(self.q(cls_query_tok[-1]), self.d(cls_doc_tok[-1]))
+            mul_wiki = torch.mul(self.w(cls_wiki_doc_tok[-1]), self.wd(cls_doc_wiki_tok[-1]))
+            mul = self.cls(self.dropout(mul))
+            mul_wiki = self.cls(self.dropout(mul_wiki))
+            return self.clsAll(torch.cat([mul, mul_wiki], dim=1))
+
 
 class CrossBert(BertRanker):
     def __init__(self, args):
