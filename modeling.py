@@ -512,7 +512,7 @@ class MSRanker(OriginalBertRanker):
         self.MS_SIZE = 100
         self.args = args
 
-        self.text2MSvec = pickle.load(open("data/cedr/%s-ms%d" % (self.args.data, self.args.maxlen), "rb"))
+        self.text2MSvec = pickle.load(open("data/cedr/%s-ms%d" % (self.args.data.split("-")[0], self.args.maxlen), "rb"))
 
         self.dropout = torch.nn.Dropout(0.1)
         self.q = torch.nn.Linear(self.MS_SIZE, 100)

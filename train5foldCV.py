@@ -261,8 +261,8 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='crossbert')
-    parser.add_argument('--data', default='eai')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
+    parser.add_argument('--data', default='akgg-re')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikipedia")
     parser.add_argument('--questionfile', default="question-qq")
@@ -272,22 +272,22 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=8)
+    parser.add_argument('--mode', type=int, default=1)
     parser.add_argument('--maxlen', type=int, default=16)
     parser.add_argument('--earlystop', type=int, default=1)
 
     args = parser.parse_args()
 
-    args.queryfile = io.TextIOWrapper(io.open("%s%s-query.tsv" % (args.path, args.data),'rb'), 'UTF-8')
-    args.docfile = io.TextIOWrapper(io.open("%s%s-doc.tsv" % (args.path, args.data),'rb'), 'UTF-8')
-    args.wikifile = io.TextIOWrapper(io.open("%s%s-%s.tsv" % (args.path, args.data, args.wikifile),'rb'), 'UTF-8')
-    args.questionfile = io.TextIOWrapper(io.open("%s%s-%s.tsv" % (args.path, args.data, args.questionfile),'rb'), 'UTF-8')
+    args.queryfile = io.TextIOWrapper(io.open("%s%s-query.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
+    args.docfile = io.TextIOWrapper(io.open("%s%s-doc.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
+    args.wikifile = io.TextIOWrapper(io.open("%s%s-%s.tsv" % (args.path, args.data.split("-")[0], args.wikifile),'rb'), 'UTF-8')
+    args.questionfile = io.TextIOWrapper(io.open("%s%s-%s.tsv" % (args.path, args.data.split("-")[0], args.questionfile),'rb'), 'UTF-8')
 
     args.train_pairs = "%s%s-train" % (args.path, args.data)
     args.valid_run = "%s%s-valid" % (args.path, args.data)
     args.test_run = "%s%s-test" % (args.path, args.data)
 
-    args.qrels = io.TextIOWrapper(io.open("%s%s-qrel.tsv" % (args.path, args.data),'rb'), 'UTF-8')
+    args.qrels = io.TextIOWrapper(io.open("%s%s-qrel.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
 
     if args.model == "birch":
         if args.mode == 1:
@@ -364,7 +364,7 @@ def main_cli():
 
     print(modelName)
 
-    df = pd.read_csv("%s%s-qrel.tsv" % (args.path, args.data), sep="\t", names=["qid", "empty", "pid", "rele_label"])
+    df = pd.read_csv("%s%s-qrel.tsv" % (args.path, args.data.split("-")[0]), sep="\t", names=["qid", "empty", "pid", "rele_label"])
     qrelDict = collections.defaultdict(dict)
     for qid, prop, label in df[['qid', 'pid', 'rele_label']].values:
         qrelDict[str(qid)][str(prop)] = int(label)
