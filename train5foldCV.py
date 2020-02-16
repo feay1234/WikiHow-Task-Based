@@ -148,7 +148,7 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
         for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data, args):
-            if args.model in ["sbert", "crossbert", "crossbert2"]:
+            if args.model in ["sbert", "crossbert", "crossbert2", "mulbert"]:
                 scores = model(records['query_tok'],
                                records['query_mask'],
                                records['doc_tok'],
