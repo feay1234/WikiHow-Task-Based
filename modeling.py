@@ -832,3 +832,14 @@ class CrossBert(BertRanker):
             cat = self.cls(self.dropout(mul))
             cat_wiki = self.cls2(self.dropout(mul_wiki))
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
+
+        if self.args.mode == 3:
+            mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
+            return self.cls(self.dropout(mul))
+
+        elif self.args.mode == 4:
+            mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
+            mul_wiki = torch.mul(self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]))
+            cat = self.cls(self.dropout(mul))
+            cat_wiki = self.cls2(self.dropout(mul_wiki))
+            return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
