@@ -504,7 +504,8 @@ class CustomBertModel(pytorch_pretrained_bert.BertModel):
         return [embedding_output] + encoded_layers
 
 
-class MSRanker(BertRanker):
+# old version with BertRanker
+class MSRanker(OriginalBertRanker):
     def __init__(self, args):
         super().__init__()
 
