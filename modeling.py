@@ -721,3 +721,20 @@ class SBert(OriginalBertRanker):
             cat = self.cls(self.dropout(mul))
             cat_wiki = self.cls2(self.dropout(mul_wiki))
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
+
+class MulBert(OriginalBertRanker):
+    def __init__(self, args):
+        super().__init__()
+
+        self.args = args
+
+        self.dropout = torch.nn.Dropout(0.1)
+        self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
+        self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
+        self.clsAll = torch.nn.Linear(2, 1)
+
+    def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
+        cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+        cls_wiki_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+        mul = torch.mul(cls_query_tok[-1], cls_wiki_tok[-1])
+        return self.cls(self.dropout(mul))

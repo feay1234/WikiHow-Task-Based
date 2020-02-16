@@ -23,6 +23,7 @@ MODEL_MAP = {
     'vanilla_bert': modeling.VanillaBertRanker,
     'invert_bert': modeling.InvertBertRanker,
     'sbert': modeling.SBert,
+    'mulbert': modeling.MulBert,
     'crossbert': modeling.SentenceBert,
     'crossbert2' : modeling.CrossBert,
     'ms': modeling.MSRanker,
@@ -102,7 +103,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
-            if args.model in ["sbert", "crossbert", "crossbert2"]:
+            if args.model in ["sbert", "crossbert", "crossbert2", "mulbert"]:
                 scores = model(record['query_tok'],
                                record['query_mask'],
                                record['doc_tok'],
@@ -261,7 +262,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sbert')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='mulbert')
     parser.add_argument('--data', default='akgg')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikipedia")
@@ -272,7 +273,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=2)
+    parser.add_argument('--mode', type=int, default=1)
     parser.add_argument('--maxlen', type=int, default=16)
     parser.add_argument('--earlystop', type=int, default=1)
 
