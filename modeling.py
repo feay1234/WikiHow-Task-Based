@@ -763,16 +763,13 @@ class SentenceBert(OriginalBertRanker):
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
         cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
         cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-        if self.args.mode % 2 == 0:
+        if self.args.mode in [2, 4, 5, 6]:
             cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
             cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
 
         if self.args.mode == 1:
             mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
             return self.cls(self.dropout(mul))
-            # return self.cls(mul)
-        #   1 original with dropout at cls
-        #   2 wihtout dropout at cls
 
         elif self.args.mode == 2:
             mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
@@ -780,39 +777,32 @@ class SentenceBert(OriginalBertRanker):
             cat = self.cls(self.dropout(mul))
             cat_wiki = self.cls2(self.dropout(mul_wiki))
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
-        #   1 original
-        #   2 add dropout at clasALL
-        #   3 add dropout to all
-        #   4 mul all
-        #   5 BertRank
-        #   6 share cls
 
-        elif self.args.mode == 3:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1])], dim=1)
-            return self.clsCat2(self.dropout(cat))
+        if self.args.mode == 3:
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            return self.cls(self.dropout(mul))
 
         elif self.args.mode == 4:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1])], dim=1)
-            catWiki = torch.cat([self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1])], dim=1)
-            return self.clsCat4(self.dropout(torch.cat([cat, catWiki], dim=1)))
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
+            cat = self.cls(self.dropout(mul))
+            cat_wiki = self.cls2(self.dropout(mul_wiki))
+            return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
+        # share hidden layer
         elif self.args.mode == 5:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]), self.dropout(cls_query_tok[-1]) - self.dropout(cls_doc_tok[-1])], dim=1)
-            return self.clsCat3(self.dropout(cat))
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
+            cat = self.cls(self.dropout(mul))
+            cat_wiki = self.cls(self.dropout(mul_wiki))
+            return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
         elif self.args.mode == 6:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]), self.dropout(cls_query_tok[-1]) - self.dropout(cls_doc_tok[-1])], dim=1)
-            catWiki = torch.cat([self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]), self.dropout(cls_wiki_doc_tok[-1]) - self.dropout(cls_doc_wiki_tok[-1])], dim=1)
-            return self.clsAll(self.dropout(torch.cat([self.clsCat3(cat), self.clsWikiCat3(catWiki)], dim=1)))
-
-        elif self.args.mode == 7:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]), torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))], dim=1)
-            return self.clsCat3(self.dropout(cat))
-
-        elif self.args.mode == 8:
-            cat = torch.cat([self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]), torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))], dim=1)
-            catWiki = torch.cat([self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]), torch.mul(self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]))], dim=1)
-            return self.clsAll(self.dropout(torch.cat([self.clsCat3(cat), self.clsWikiCat3(catWiki)], dim=1)))
+            mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
+            mul_wiki = torch.mul(self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]))
+            cat = self.cls(self.dropout(mul))
+            cat_wiki = self.cls(self.dropout(mul_wiki))
+            return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
 class CrossBert(BertRanker):
     def __init__(self, args):
