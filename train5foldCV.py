@@ -60,8 +60,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
 
         valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
                                                                 model_out_dir, data, args, "valid")
-        valid_score = np.mean(valid_results["rp"])
-        # valid_score = np.mean(valid_results["ndcg@15"])
+        # valid_score = np.mean(valid_results["rp"])
+        valid_score = np.mean(valid_results["ndcg@10"])
         elapsed_time = time.time() - t2
         txt = f'validation epoch={epoch} score={valid_score} : {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}'
         print2file(args.out_dir, modelName, ".txt", txt, fold)
@@ -72,8 +72,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
                                                                  model_out_dir, data, args, "test")
 
             # print(test_results["ndcg@15"])
-            txt = 'new top validation score, %.4f' % np.mean(test_results["rp"])
-            # txt = 'new top validation score, %.4f' % np.mean(test_results["ndcg@15"])
+            txt = 'new top validation score, %.4f' % np.mean(test_results["ndcg@10"])
             print2file(args.out_dir, modelName, ".txt", txt, fold)
 
             bestResults = test_results
@@ -263,7 +262,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='crossbert')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='cedr_pacrr')
     parser.add_argument('--data', default='akgg')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikipedia")
@@ -274,7 +273,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=9)
+    parser.add_argument('--mode', type=int, default=1)
     parser.add_argument('--maxlen', type=int, default=16)
     parser.add_argument('--earlystop', type=int, default=1)
 
@@ -316,7 +315,7 @@ def main_cli():
 
 
     if args.model == "cedr_pacrr":
-        args.maxlen = 20 if args.mode == 1 else args.maxlen * args.mode
+        args.maxlen = 16 if args.mode == 1 else args.maxlen * args.mode
         model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](
             args)
 

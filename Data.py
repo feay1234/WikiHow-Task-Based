@@ -199,7 +199,7 @@ def _pack_n_ship(batch, data, args):
     else:
 
         if args.mode == 1:
-            QLEN = 20
+            QLEN = args.maxlen
             MAX_DLEN = 800
             DLEN = min(MAX_DLEN, max(len(b) for b in batch['doc_tok']))
             # QLEN = min(args.maxlen,
