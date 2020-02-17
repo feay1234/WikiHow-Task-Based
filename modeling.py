@@ -557,18 +557,10 @@ class SentenceBert(OriginalBertRanker):
         self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
         self.clsAll = torch.nn.Linear(2, 1)
 
-        if self.args.mode in [7, 8]:
-            self.cls = torch.nn.Linear(100, 1)
-            self.cls2 = torch.nn.Linear(100, 1)
-            self.q = torch.nn.Linear(self.BERT_SIZE, 100)
-            self.d = torch.nn.Linear(self.BERT_SIZE, 100)
-            self.w = torch.nn.Linear(self.BERT_SIZE, 100)
-            self.wd = torch.nn.Linear(self.BERT_SIZE, 100)
-
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
         cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
         cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-        if self.args.mode in [2, 3, 4, 5, 6, 7, 8]:
+        if self.args.mode in [2, 3, 4]:
             cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
             cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
 
@@ -589,6 +581,11 @@ class SentenceBert(OriginalBertRanker):
             cat = self.cls(self.dropout(mul))
             cat_wiki = self.cls2(self.dropout(mul_wiki))
             return self.clsAll(self.dropout(torch.cat([cat, cat_wiki], dim=1)))
+
+        elif self.args.mode == 4:
+            mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
+            mul_wiki = torch.mul(self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]))
+            return self.cls(self.dropout(torch.mul(mul, mul_wiki)))
 
 class CrossBert(BertRanker):
     def __init__(self, args):
