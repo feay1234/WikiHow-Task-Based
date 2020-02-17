@@ -179,14 +179,14 @@ def _pack_n_ship(batch, data, args):
         }
     elif args.model in ["sbert", "crossbert", "crossbert2", "mulbert"]:
 
-        # QLEN = min(args.maxlen, int(np.max([len(b) for b in batch['query_tok']])))
-        # DLEN = min(args.maxlen, int(np.max([len(b) for b in batch['doc_tok']])))
-        # WLEN = min(args.maxlen, int(np.max([len(b) for b in batch['wiki_tok']])))
-        # QQLEN = min(args.maxlen, int(np.max([len(b) for b in batch['question_tok']])))
-        QLEN = args.maxlen
-        DLEN = args.maxlen
-        WLEN = args.maxlen
-        QQLEN = args.maxlen
+        QLEN = min(args.maxlen, int(np.max([len(b) for b in batch['query_tok']])))
+        DLEN = min(args.maxlen, int(np.max([len(b) for b in batch['doc_tok']])))
+        WLEN = min(args.maxlen, int(np.max([len(b) for b in batch['wiki_tok']])))
+        QQLEN = min(args.maxlen, int(np.max([len(b) for b in batch['question_tok']])))
+        # QLEN = args.maxlen
+        # DLEN = args.maxlen
+        # WLEN = args.maxlen
+        # QQLEN = args.maxlen
 
         return {
             'query_id': batch['query_id'],
