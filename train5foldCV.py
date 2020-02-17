@@ -60,8 +60,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
 
         valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
                                                                 model_out_dir, data, args, "valid")
-        # valid_score = np.mean(valid_results["rp"])
-        valid_score = np.mean(valid_results["ndcg@15"])
+        valid_score = np.mean(valid_results["rp"])
+        # valid_score = np.mean(valid_results["ndcg@15"])
         elapsed_time = time.time() - t2
         txt = f'validation epoch={epoch} score={valid_score} : {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}'
         print2file(args.out_dir, modelName, ".txt", txt, fold)
@@ -72,7 +72,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
                                                                  model_out_dir, data, args, "test")
 
             # print(test_results["ndcg@15"])
-            txt = 'new top validation score, %.4f' % np.mean(test_results["ndcg@15"])
+            txt = 'new top validation score, %.4f' % np.mean(test_results["rp"])
+            # txt = 'new top validation score, %.4f' % np.mean(test_results["ndcg@15"])
             print2file(args.out_dir, modelName, ".txt", txt, fold)
 
             bestResults = test_results
