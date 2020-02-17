@@ -561,7 +561,7 @@ class SentenceBert(OriginalBertRanker):
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
         cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
         cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-        if self.args.mode in [2, 3, 4, 5, 6, 7]:
+        if self.args.mode in [2, 3, 4, 5, 6, 7, 9]:
             cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
             cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
 
@@ -604,6 +604,17 @@ class SentenceBert(OriginalBertRanker):
             cat = self.cls(mul)
             cat_wiki = self.cls2(mul_wiki)
             return self.clsAll(self.dropout(torch.cat([cat, cat_wiki], dim=1)))
+
+        if self.args.mode == 8:
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            return self.cls(mul)
+
+        elif self.args.mode == 9:
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
+            cat = self.cls(mul)
+            cat_wiki = self.cls2(mul_wiki)
+            return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
 class CrossBert(BertRanker):
     def __init__(self, args):
