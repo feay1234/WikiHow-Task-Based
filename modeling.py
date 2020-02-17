@@ -568,7 +568,7 @@ class SentenceBert(OriginalBertRanker):
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
         cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
         cls_doc_tok, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-        if self.args.mode in [2, 4, 5, 6, 8]:
+        if self.args.mode in [2, 3, 4, 5, 6, 7, 8]:
             cls_wiki_doc_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
             cls_doc_wiki_tok, _, _ = self.encode_bert(doc_tok, doc_mask, wiki_tok, wiki_mask)
 
@@ -583,42 +583,12 @@ class SentenceBert(OriginalBertRanker):
             cat_wiki = self.cls2(self.dropout(mul_wiki))
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
-        if self.args.mode == 3:
-            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            return self.cls(self.dropout(mul))
-
-        elif self.args.mode == 4:
-            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
-            cat = self.cls(self.dropout(mul))
-            cat_wiki = self.cls2(self.dropout(mul_wiki))
-            return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
-
-        # share hidden layer
-        elif self.args.mode == 5:
-            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
-            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
-            cat = self.cls(self.dropout(mul))
-            cat_wiki = self.cls(self.dropout(mul_wiki))
-            return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
-
-        elif self.args.mode == 6:
+        elif self.args.mode == 3:
             mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
             mul_wiki = torch.mul(self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]))
             cat = self.cls(self.dropout(mul))
-            cat_wiki = self.cls(self.dropout(mul_wiki))
-            return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
-
-        elif self.args.mode == 7:
-            mul = torch.mul(self.q(cls_query_tok[-1]), self.d(cls_doc_tok[-1]))
-            return self.cls(self.dropout(mul))
-        elif self.args.mode == 8:
-            mul = torch.mul(self.q(cls_query_tok[-1]), self.d(cls_doc_tok[-1]))
-            mul_wiki = torch.mul(self.w(cls_wiki_doc_tok[-1]), self.wd(cls_doc_wiki_tok[-1]))
-            mul = self.cls(self.dropout(mul))
-            mul_wiki = self.cls(self.dropout(mul_wiki))
-            return self.clsAll(torch.cat([mul, mul_wiki], dim=1))
-
+            cat_wiki = self.cls2(self.dropout(mul_wiki))
+            return self.clsAll(self.dropout(torch.cat([cat, cat_wiki], dim=1)))
 
 class CrossBert(BertRanker):
     def __init__(self, args):
