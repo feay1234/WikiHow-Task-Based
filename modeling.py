@@ -261,7 +261,7 @@ class VanillaBertRanker(OriginalBertRanker):
         return self.cls(self.dropout(cls_reps[-1]))
 
 
-class InvertBertRanker(OriginalBertRanker):
+class InvertBertRanker(BertRanker):
     def __init__(self, args):
         super().__init__()
         self.args = args
@@ -270,7 +270,8 @@ class InvertBertRanker(OriginalBertRanker):
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask):
         print(query_tok.shape)
-        cls_reps, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+        # cls_reps, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+        cls_reps, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
         return self.cls(self.dropout(cls_reps[-1]))
 
 
