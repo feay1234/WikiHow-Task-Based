@@ -205,7 +205,7 @@ class OriginalBertRanker(torch.nn.Module):
         toks = [self.tokenizer.vocab[t] for t in toks]
         return toks
 
-    def encode_bert(self, query_tok, query_mask, doc_tok, doc_mask):
+    def encode_bert(self, query_tok, query_mask, doc_tok, doc_mask, customBERT=None):
         BATCH, QLEN = query_tok.shape
         DIFF = 3  # = [CLS] and 2x[SEP]
         maxlen = self.bert.config.max_position_embeddings
@@ -229,7 +229,10 @@ class OriginalBertRanker(torch.nn.Module):
         toks[toks == -1] = 0  # remove padding (will be masked anyway)
 
         # execute BERT model
-        result = self.bert(toks, segment_ids.long(), mask)
+        if customBERT:
+            result = customBERT(toks, segment_ids.long(), mask)
+        else:
+            result = self.bert(toks, segment_ids.long(), mask)
 
         # extract relevant subsequences for query and doc
         query_results = [r[:BATCH, 1:QLEN + 1] for r in result]
@@ -671,18 +674,21 @@ class MulBert(OriginalBertRanker):
         self.w = torch.nn.Linear(1,1)
         self.clsAll = torch.nn.Linear(2, 1)
 
+        if self.args.mode in [9, 10, 11]:
+            self.bertWiki = CustomBertModel.from_pretrained(self.BERT_MODEL)
+
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
         cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
-        cls_wiki_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+        cls_wiki_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask, None if self.args.mode not in [9, 10, 11] else self.bertWiki)
 
-        if self.args.mode == 1:
+        if self.args.mode ==  1:
             mul = torch.mul(cls_query_tok[-1], cls_wiki_tok[-1])
             return self.cls(self.dropout(mul))
-        elif self.args.mode == 3:
+        elif self.args.mode in [3,9]:
             return self.cls(self.dropout(cls_query_tok[-1])) + self.cls(self.dropout(cls_wiki_tok[-1]))
-        elif self.args.mode == 4:
+        elif self.args.mode in [4, 10]:
             return self.cls(cls_query_tok[-1]) + self.cls(cls_wiki_tok[-1])
-        elif self.args.mode == 5:
+        elif self.args.mode in [5, 11]:
             return self.cls(cls_query_tok[-1]) + self.cls2(cls_wiki_tok[-1])
         elif self.args.mode == 6:
             return self.cls(self.dropout(cls_query_tok[-1])) + self.w(self.cls(self.dropout(cls_wiki_tok[-1])))
