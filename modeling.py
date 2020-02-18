@@ -504,7 +504,6 @@ class CustomBertModel(pytorch_pretrained_bert.BertModel):
         return [embedding_output] + encoded_layers
 
 
-# old version with BertRanker
 class MSRanker(OriginalBertRanker):
     def __init__(self, args):
         super().__init__()
@@ -644,16 +643,23 @@ class CrossBert(BertRanker):
             cat_wiki = self.cls2(self.dropout(mul_wiki))
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
-        if self.args.mode == 3:
-            mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
-            return self.cls(self.dropout(mul))
+        elif self.args.mode == 3:
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            return self.cls(mul)
 
         elif self.args.mode == 4:
-            mul = torch.mul(self.dropout(cls_query_tok[-1]), self.dropout(cls_doc_tok[-1]))
-            mul_wiki = torch.mul(self.dropout(cls_wiki_doc_tok[-1]), self.dropout(cls_doc_wiki_tok[-1]))
-            cat = self.cls(self.dropout(mul))
-            cat_wiki = self.cls2(self.dropout(mul_wiki))
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
+            cat = self.cls(mul)
+            cat_wiki = self.cls2(mul_wiki)
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
+
+        elif self.args.mode == 6:
+            mul = torch.mul(cls_query_tok[-1], cls_doc_tok[-1])
+            mul_wiki = torch.mul(cls_wiki_doc_tok[-1], cls_doc_wiki_tok[-1])
+            cat = self.cls(mul)
+            cat_wiki = self.cls2(mul_wiki)
+            return self.clsAll(self.dropout(torch.cat([cat, cat_wiki], dim=1)))
 
 class SBert(OriginalBertRanker):
     def __init__(self, args):
