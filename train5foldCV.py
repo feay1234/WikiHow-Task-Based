@@ -79,7 +79,8 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
             bestPredictions = test_predictions
             bestQids = test_qids
 
-        elif args.earlystop and epoch >=4:
+        # elif args.earlystop and epoch >=4:
+        elif args.earlystop:
             break
 
 
