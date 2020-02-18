@@ -97,7 +97,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
 
 def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     BATCH_SIZE = 16
-    BATCHES_PER_EPOCH = 32
+    BATCHES_PER_EPOCH = 32 if "eai" in args.data else 256
     GRAD_ACC_SIZE = 2
     total = 0
     model.train()
@@ -263,8 +263,8 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='mulbert')
-    parser.add_argument('--data', default='akgg')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
+    parser.add_argument('--data', default='akgg-r')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikipedia")
     parser.add_argument('--questionfile', default="question-qq")
@@ -274,7 +274,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=3)
+    parser.add_argument('--mode', type=int, default=1)
     parser.add_argument('--maxlen', type=int, default=16)
     parser.add_argument('--earlystop', type=int, default=1)
 
