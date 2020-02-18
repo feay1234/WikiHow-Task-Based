@@ -261,7 +261,7 @@ class VanillaBertRanker(OriginalBertRanker):
         return self.cls(self.dropout(cls_reps[-1]))
 
 
-class InvertBertRanker(BertRanker):
+class InvertBertRanker(OriginalBertRanker):
     def __init__(self, args):
         super().__init__()
         self.args = args
@@ -269,8 +269,8 @@ class InvertBertRanker(BertRanker):
         self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask):
-        # cls_reps, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
-        cls_reps, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+        cls_reps, _, _ = self.encode_bert(doc_tok, doc_mask, query_tok, query_mask)
+        # cls_reps, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
         return self.cls(self.dropout(cls_reps[-1]))
 
 
@@ -690,3 +690,4 @@ class MulBert(OriginalBertRanker):
             return self.cls(cls_query_tok[-1]) + self.w(self.cls(cls_wiki_tok[-1]))
         elif self.args.mode == 8:
             return self.cls(cls_query_tok[-1]) + self.w(self.cls2(cls_wiki_tok[-1]))
+
