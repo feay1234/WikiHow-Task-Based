@@ -1,0 +1,98 @@
+0-train epoch=0 loss=127.51469340920448
+0-validation epoch=0 score=0.4113840358502407 : 00:00:05
+0-new top validation score, 0.3989
+0-train epoch=1 loss=126.62997478246689
+0-validation epoch=1 score=0.40665677876805134 : 00:00:06
+0-train epoch=2 loss=123.16482961177826
+0-validation epoch=2 score=0.44145406398605236 : 00:00:06
+0-new top validation score, 0.4190
+0-train epoch=3 loss=115.55168497562408
+0-validation epoch=3 score=0.443553178591118 : 00:00:06
+0-new top validation score, 0.4138
+0-train epoch=4 loss=105.44173836708069
+0-validation epoch=4 score=0.47019725515571875 : 00:00:06
+0-new top validation score, 0.4453
+0-train epoch=5 loss=92.46228975057602
+0-validation epoch=5 score=0.4740505519286984 : 00:00:07
+0-new top validation score, 0.4599
+0-train epoch=6 loss=85.11202362179756
+0-validation epoch=6 score=0.4592822875835424 : 00:00:07
+0-validation epoch=6 score=0.4592822875835424 : 00:00:07
+1-train epoch=0 loss=88.10841125249863
+1-validation epoch=0 score=0.5643348459035376 : 00:00:11
+1-new top validation score, 0.5750
+1-train epoch=1 loss=84.27803182601929
+1-validation epoch=1 score=0.5736687612272356 : 00:00:11
+1-new top validation score, 0.5844
+1-train epoch=2 loss=84.23336374759674
+1-validation epoch=2 score=0.5808460420236674 : 00:00:10
+1-new top validation score, 0.5888
+1-train epoch=3 loss=83.67074686288834
+1-validation epoch=3 score=0.5851692255350318 : 00:00:11
+1-new top validation score, 0.5954
+1-train epoch=4 loss=78.24391201138496
+1-validation epoch=4 score=0.5896468385587376 : 00:00:11
+1-new top validation score, 0.6025
+1-train epoch=5 loss=76.91518947482109
+1-validation epoch=5 score=0.5978277760199064 : 00:00:11
+1-new top validation score, 0.6103
+1-train epoch=6 loss=74.89849445223808
+1-validation epoch=6 score=0.5958112860297267 : 00:00:11
+1-validation epoch=6 score=0.5958112860297267 : 00:00:11
+2-train epoch=0 loss=73.80240249633789
+2-validation epoch=0 score=0.6001074642628729 : 00:00:12
+2-new top validation score, 0.5935
+2-train epoch=1 loss=72.38525265455246
+2-validation epoch=1 score=0.6087444806905142 : 00:00:12
+2-new top validation score, 0.6030
+2-train epoch=2 loss=68.9391615986824
+2-validation epoch=2 score=0.6116471682298094 : 00:00:11
+2-new top validation score, 0.6103
+2-train epoch=3 loss=60.178371489048004
+2-validation epoch=3 score=0.6215415030522136 : 00:00:12
+2-new top validation score, 0.6158
+2-train epoch=4 loss=61.18633249402046
+2-validation epoch=4 score=0.6231264808319064 : 00:00:12
+2-new top validation score, 0.6194
+2-train epoch=5 loss=61.45331692695618
+2-validation epoch=5 score=0.6290237525003012 : 00:00:13
+2-new top validation score, 0.6191
+2-train epoch=6 loss=62.2530297935009
+2-validation epoch=6 score=0.6343476670997741 : 00:00:13
+2-new top validation score, 0.6228
+2-train epoch=7 loss=56.66943433880806
+2-validation epoch=7 score=0.6383732104755068 : 00:00:13
+2-new top validation score, 0.6293
+2-train epoch=8 loss=57.078245371580124
+2-validation epoch=8 score=0.6334351337309657 : 00:00:13
+2-validation epoch=8 score=0.6334351337309657 : 00:00:13
+3-train epoch=0 loss=55.38174816966057
+3-validation epoch=0 score=0.622303632601089 : 00:00:08
+3-new top validation score, 0.6540
+3-train epoch=1 loss=52.906053245067596
+3-validation epoch=1 score=0.6192478999500155 : 00:00:08
+3-train epoch=2 loss=48.845371037721634
+3-validation epoch=2 score=0.624498225486846 : 00:00:07
+3-new top validation score, 0.6466
+3-train epoch=3 loss=50.50041526556015
+3-validation epoch=3 score=0.6272605995007607 : 00:00:08
+3-new top validation score, 0.6439
+3-train epoch=4 loss=48.245944797992706
+3-validation epoch=4 score=0.6277958682349587 : 00:00:08
+3-new top validation score, 0.6447
+3-train epoch=5 loss=50.6225711107254
+3-validation epoch=5 score=0.6236423068252295 : 00:00:08
+3-validation epoch=5 score=0.6236423068252295 : 00:00:08
+4-train epoch=0 loss=53.294662684202194
+4-validation epoch=0 score=0.6075622981686263 : 00:00:08
+4-new top validation score, 0.6247
+4-train epoch=1 loss=48.326105415821075
+4-validation epoch=1 score=0.5986710802365388 : 00:00:08
+4-train epoch=2 loss=44.511218786239624
+4-validation epoch=2 score=0.5948754621489545 : 00:00:10
+4-train epoch=3 loss=43.98322772979736
+4-validation epoch=3 score=0.5833552399171087 : 00:00:10
+4-train epoch=4 loss=43.7024989426136
+4-validation epoch=4 score=0.5995007842422106 : 00:00:11
+4-validation epoch=4 score=0.5995007842422106 : 00:00:11
+4-total : 00:07:30
