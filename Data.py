@@ -177,12 +177,17 @@ def _pack_n_ship(batch, data, args):
             # 'question_tok': _pad_crop_np(batch['question_tok'], 5),
             'question_tok': toTensor(batch['question_tok'])
         }
-    elif args.model in ["sbert", "crossbert", "crossbert2", "mulbert"]:
+    elif args.model in ["sbert", "crossbert", "crossbert2", "mulbert", "mul_cedr_drmm", "mul_cedr_knrm", "mul_cedr_pacrr"]:
 
         QLEN = min(args.maxlen, int(np.max([len(b) for b in batch['query_tok']])))
         DLEN = min(args.maxlen, int(np.max([len(b) for b in batch['doc_tok']])))
         WLEN = min(args.maxlen, int(np.max([len(b) for b in batch['wiki_tok']])))
         QQLEN = min(args.maxlen, int(np.max([len(b) for b in batch['question_tok']])))
+
+        if args.model == "mul_cedr_pacrr":
+            QLEN = args.maxlen
+            DLEN = args.maxlen
+            WLEN = args.maxlen
         # QLEN = args.maxlen
         # DLEN = args.maxlen
         # WLEN = args.maxlen

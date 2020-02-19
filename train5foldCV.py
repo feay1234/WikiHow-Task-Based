@@ -30,7 +30,10 @@ MODEL_MAP = {
     'birch': modeling.VanillaBirchtRanker,
     'cedr_pacrr': modeling.CedrPacrrRanker,
     'cedr_knrm': modeling.CedrKnrmRanker,
-    'cedr_drmm': modeling.CedrDrmmRanker
+    'cedr_drmm': modeling.CedrDrmmRanker,
+    'mul_cedr_drmm': modeling.MulCedrDrmmRanker,
+    'mul_cedr_knrm': modeling.MulCedrKnrmRanker,
+    'mul_cedr_pacrr': modeling.CedrPacrrRanker,
 }
 
 
@@ -104,7 +107,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
-            if args.model in ["sbert", "crossbert", "crossbert2", "mulbert"]:
+            if args.model in ["sbert", "crossbert", "crossbert2", "mulbert", "mul_cedr_drmm", "mul_cedr_knrm", "mul_cedr_pacrr"]:
                 scores = model(record['query_tok'],
                                record['query_mask'],
                                record['doc_tok'],
@@ -149,7 +152,7 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
         for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data, args):
-            if args.model in ["sbert", "crossbert", "crossbert2", "mulbert"]:
+            if args.model in ["sbert", "crossbert", "crossbert2", "mulbert", "mul_cedr_drmm", "mul_cedr_knrm", "mul_cedr_pacrr"]:
                 scores = model(records['query_tok'],
                                records['query_mask'],
                                records['doc_tok'],
@@ -263,7 +266,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='mulbert')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='mul_cedr_pacrr')
     parser.add_argument('--data', default='akgg-r2')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikipedia")
@@ -274,7 +277,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=7)
+    parser.add_argument('--mode', type=int, default=1)
     parser.add_argument('--maxlen', type=int, default=16)
     parser.add_argument('--earlystop', type=int, default=1)
 
@@ -315,10 +318,10 @@ def main_cli():
                                    args.questionfile])
 
 
-    if args.model == "cedr_pacrr":
-        args.maxlen = 16 if args.mode == 1 else args.maxlen * args.mode
-        model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](
-            args)
+    # if args.model == "cedr_pacrr":
+    #     args.maxlen = 16 if args.mode == 1 else args.maxlen * args.mode
+    #     model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](
+    #         args)
 
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(pytorch_total_params)

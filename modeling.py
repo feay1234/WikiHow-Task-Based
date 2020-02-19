@@ -698,3 +698,135 @@ class MulBert(OriginalBertRanker):
             cat = torch.cat([cls_query_tok[-1], cls_wiki_tok[-1], dif], dim=1)
             return self.cls3(self.dropout(cat))
 
+
+class MulCedrDrmmRanker(OriginalBertRanker):
+    def __init__(self, args):
+        super().__init__()
+        self.args = args
+        NBINS = 11
+        HIDDEN = 5
+        self.simmat = modeling_util.SimmatModule()
+        self.histogram = modeling_util.DRMMLogCountHistogram(NBINS)
+        self.hidden_1 = torch.nn.Linear(NBINS * self.CHANNELS + self.BERT_SIZE, HIDDEN)
+        self.hidden_2 = torch.nn.Linear(HIDDEN, 1)
+        self.clsAll = torch.nn.Linear(2, 1)
+
+
+    def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
+        cls_reps, query_reps, doc_reps = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+        cls_wiki_reps, wiki_reps, doc_wiki_reps = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+
+        simmat = self.simmat(query_reps, doc_reps, query_tok, doc_tok)
+        histogram = self.histogram(simmat, doc_tok, query_tok)
+        BATCH, CHANNELS, QLEN, BINS = histogram.shape
+        histogram = histogram.permute(0, 2, 3, 1)
+        output = histogram.reshape(BATCH * QLEN, BINS * CHANNELS)
+        # repeat cls representation for each query token
+        cls_rep = cls_reps[-1].reshape(BATCH, 1, -1).expand(BATCH, QLEN, -1).reshape(BATCH * QLEN, -1)
+        output = torch.cat([output, cls_rep], dim=1)
+        term_scores = self.hidden_2(torch.relu(self.hidden_1(output))).reshape(BATCH, QLEN)
+
+        wiki_simmat = self.simmat(wiki_reps, doc_wiki_reps, wiki_tok, doc_tok)
+        wiki_histogram = self.histogram(wiki_simmat, doc_tok, wiki_tok)
+        BATCH, CHANNELS, QLEN, BINS = wiki_histogram.shape
+        wiki_histogram = wiki_histogram.permute(0, 2, 3, 1)
+        wiki_output = wiki_histogram.reshape(BATCH * QLEN, BINS * CHANNELS)
+        # repeat cls representation for each query token
+        cls_wiki_rep = cls_wiki_reps[-1].reshape(BATCH, 1, -1).expand(BATCH, QLEN, -1).reshape(BATCH * QLEN, -1)
+        wiki_output = torch.cat([wiki_output, cls_wiki_rep], dim=1)
+        wiki_term_scores = self.hidden_2(torch.relu(self.hidden_1(wiki_output))).reshape(BATCH, QLEN)
+        # print(torch.stack([term_scores.sum(dim=1), wiki_term_scores.sum(dim=1)], dim=1).shape)
+        return self.clsAll(torch.stack([term_scores.sum(dim=1), wiki_term_scores.sum(dim=1)], dim=1))
+
+class MulCedrKnrmRanker(OriginalBertRanker):
+    def __init__(self, args):
+        super().__init__()
+        self.args = args
+        MUS = [-0.9, -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]
+        SIGMAS = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.001]
+        # self.bert_ranker = VanillaBertRanker()
+        self.simmat = modeling_util.SimmatModule()
+        self.kernels = modeling_util.KNRMRbfKernelBank(MUS, SIGMAS)
+        self.combine = torch.nn.Linear(self.kernels.count() * self.CHANNELS + self.BERT_SIZE, 1)
+        self.clsAll = torch.nn.Linear(2, 1)
+
+
+    def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
+        cls_reps, query_reps, doc_reps = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+        cls_wiki_reps, wiki_reps, doc_wiki_reps = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+
+        simmat = self.simmat(query_reps, doc_reps, query_tok, doc_tok)
+        kernels = self.kernels(simmat)
+        BATCH, KERNELS, VIEWS, QLEN, DLEN = kernels.shape
+        kernels = kernels.reshape(BATCH, KERNELS * VIEWS, QLEN, DLEN)
+        simmat = simmat.reshape(BATCH, 1, VIEWS, QLEN, DLEN) \
+            .expand(BATCH, KERNELS, VIEWS, QLEN, DLEN) \
+            .reshape(BATCH, KERNELS * VIEWS, QLEN, DLEN)
+        result = kernels.sum(dim=3)  # sum over document
+        mask = (simmat.sum(dim=3) != 0.)  # which query terms are not padding?
+        result = torch.where(mask, (result + 1e-6).log(), mask.float())
+        result = result.sum(dim=2)  # sum over query terms
+        result = torch.cat([result, cls_reps[-1]], dim=1)
+        scores = self.combine(result)  # linear combination over kernels
+
+        wiki_simmat = self.simmat(query_reps, doc_reps, query_tok, doc_tok)
+        wiki_kernels = self.kernels(wiki_simmat)
+        BATCH, KERNELS, VIEWS, QLEN, DLEN = wiki_kernels.shape
+        wiki_kernels = wiki_kernels.reshape(BATCH, KERNELS * VIEWS, QLEN, DLEN)
+        wiki_simmat = wiki_simmat.reshape(BATCH, 1, VIEWS, QLEN, DLEN) \
+            .expand(BATCH, KERNELS, VIEWS, QLEN, DLEN) \
+            .reshape(BATCH, KERNELS * VIEWS, QLEN, DLEN)
+        wiki_result = wiki_kernels.sum(dim=3)  # sum over document
+        wiki_mask = (wiki_simmat.sum(dim=3) != 0.)  # which query terms are not padding?
+        wiki_result = torch.where(wiki_mask, (wiki_result + 1e-6).log(), wiki_mask.float())
+        wiki_result = wiki_result.sum(dim=2)  # sum over query terms
+        wiki_result = torch.cat([wiki_result, cls_wiki_reps[-1]], dim=1)
+        wiki_scores = self.combine(wiki_result)  # linear combination over kernels
+        return self.clsAll(torch.cat([scores, wiki_scores], dim=1))
+
+
+class CedrPacrrRanker(OriginalBertRanker):
+    def __init__(self, args):
+        super().__init__()
+        # QLEN = 20
+        self.args = args
+        QLEN = self.args.maxlen
+        KMAX = 1  # Original was 2, which causes unknown bug
+        NFILTERS = 32
+        MINGRAM = 1
+        MAXGRAM = 3
+        self.simmat = modeling_util.SimmatModule()
+        self.ngrams = torch.nn.ModuleList()
+        self.rbf_bank = None
+        for ng in range(MINGRAM, MAXGRAM + 1):
+            ng = modeling_util.PACRRConvMax2dModule(ng, NFILTERS, k=KMAX, channels=self.CHANNELS)
+            self.ngrams.append(ng)
+        qvalue_size = len(self.ngrams) * KMAX
+        self.linear1 = torch.nn.Linear(self.BERT_SIZE + QLEN * qvalue_size, 32)
+        self.linear2 = torch.nn.Linear(32, 32)
+        self.linear3 = torch.nn.Linear(32, 1)
+        self.clsAll = torch.nn.Linear(2, 1)
+
+
+    def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
+        cls_reps, query_reps, doc_reps = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
+        cls_wiki_reps, wiki_reps, doc_wiki_reps = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask)
+
+        simmat = self.simmat(query_reps, doc_reps, query_tok, doc_tok)
+        scores = [ng(simmat) for ng in self.ngrams]
+        scores = torch.cat(scores, dim=2)
+        scores = scores.reshape(scores.shape[0], scores.shape[1] * scores.shape[2])
+        scores = torch.cat([scores, cls_reps[-1]], dim=1)
+        rel = F.relu(self.linear1(scores))
+        rel = F.relu(self.linear2(rel))
+        rel = self.linear3(rel)
+
+        wiki_simmat = self.simmat(wiki_reps, doc_reps, wiki_tok, doc_tok)
+        wiki_scores = [ng(wiki_simmat) for ng in self.ngrams]
+        wiki_scores = torch.cat(wiki_scores, dim=2)
+        wiki_scores = wiki_scores.reshape(wiki_scores.shape[0], wiki_scores.shape[1] * wiki_scores.shape[2])
+        wiki_scores = torch.cat([wiki_scores, cls_wiki_reps[-1]], dim=1)
+        wiki_rel = F.relu(self.linear1(wiki_scores))
+        wiki_rel = F.relu(self.linear2(wiki_rel))
+        wiki_rel = self.linear3(wiki_rel)
+        return self.clsAll(torch.cat([rel, wiki_rel], dim=1))
