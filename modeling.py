@@ -549,6 +549,7 @@ class SentenceBert(OriginalBertRanker):
             cat_wiki = self.cls2(mul_wiki)
             return self.clsAll(torch.cat([cat, cat_wiki], dim=1))
 
+# crossbert2
 class CrossBert(BertRanker):
     def __init__(self, args):
         super().__init__()
@@ -670,30 +671,30 @@ class MulBert(OriginalBertRanker):
 
         self.dropout = torch.nn.Dropout(0.1)
         self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
-        self.cls2 = torch.nn.Linear(self.BERT_SIZE, 1)
+        self.cls2 = torch.nn.Linear(self.BERT_SIZE * 2, 1)
+        self.cls3 = torch.nn.Linear(self.BERT_SIZE * 3, 1)
         self.w = torch.nn.Linear(1,1)
         self.clsAll = torch.nn.Linear(2, 1)
 
-        if self.args.mode in [9, 10, 11]:
+        if self.args.mode in [5,6,7,8]:
             self.bertWiki = CustomBertModel.from_pretrained(self.BERT_MODEL)
 
     def forward(self, query_tok, query_mask, doc_tok, doc_mask, wiki_tok, wiki_mask, question_tok, question_mask):
         cls_query_tok, _, _ = self.encode_bert(query_tok, query_mask, doc_tok, doc_mask)
-        cls_wiki_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask, None if self.args.mode not in [9, 10, 11] else self.bertWiki)
+        cls_wiki_tok, _, _ = self.encode_bert(wiki_tok, wiki_mask, doc_tok, doc_mask, None if self.args.mode not in [5,6,7,8] else self.bertWiki)
 
-        if self.args.mode ==  1:
+        if self.args.mode in  [1,5]:
             mul = torch.mul(cls_query_tok[-1], cls_wiki_tok[-1])
             return self.cls(self.dropout(mul))
-        elif self.args.mode in [3,9]:
-            return self.cls(self.dropout(cls_query_tok[-1])) + self.cls(self.dropout(cls_wiki_tok[-1]))
-        elif self.args.mode in [4, 10]:
-            return self.cls(cls_query_tok[-1]) + self.cls(cls_wiki_tok[-1])
-        elif self.args.mode in [5, 11]:
-            return self.cls(cls_query_tok[-1]) + self.cls2(cls_wiki_tok[-1])
-        elif self.args.mode == 6:
-            return self.cls(self.dropout(cls_query_tok[-1])) + self.w(self.cls(self.dropout(cls_wiki_tok[-1])))
-        elif self.args.mode == 7:
-            return self.cls(cls_query_tok[-1]) + self.w(self.cls(cls_wiki_tok[-1]))
-        elif self.args.mode == 8:
-            return self.cls(cls_query_tok[-1]) + self.w(self.cls2(cls_wiki_tok[-1]))
+        elif self.args.mode in [2, 6]:
+            cat = torch.cat([cls_query_tok[-1], cls_wiki_tok[-1]], dim=1)
+            return self.cls2(self.dropout(cat))
+        elif self.args.mode in [3, 7]:
+            mul = torch.mul(cls_query_tok[-1], cls_wiki_tok[-1])
+            cat = torch.cat([cls_query_tok[-1], cls_wiki_tok[-1], mul], dim=1)
+            return self.cls3(self.dropout(cat))
+        elif self.args.mode in [4, 8]:
+            dif = cls_query_tok[-1] - cls_wiki_tok[-1]
+            cat = torch.cat([cls_query_tok[-1], cls_wiki_tok[-1], dif], dim=1)
+            return self.cls3(self.dropout(cat))
 

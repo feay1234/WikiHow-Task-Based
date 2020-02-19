@@ -263,8 +263,8 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
-    parser.add_argument('--data', default='akgg-r')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='mulbert')
+    parser.add_argument('--data', default='akgg-r2')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikipedia")
     parser.add_argument('--questionfile', default="question-qq")
@@ -274,7 +274,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=1)
+    parser.add_argument('--mode', type=int, default=7)
     parser.add_argument('--maxlen', type=int, default=16)
     parser.add_argument('--earlystop', type=int, default=1)
 
