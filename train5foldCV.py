@@ -34,6 +34,7 @@ MODEL_MAP = {
     'mul_cedr_drmm': modeling.MulCedrDrmmRanker,
     'mul_cedr_knrm': modeling.MulCedrKnrmRanker,
     'mul_cedr_pacrr': modeling.CedrPacrrRanker,
+    'sigir_sota': modeling.SIGIR_SOTA,
 }
 
 
@@ -121,6 +122,8 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['doc_tok'],
                                record['wiki_tok'],
                                record['question_tok'])
+            elif args.model == "sigir_sota":
+                scores = model(record['query_tok'], record['query_mask'])
             else:
                 scores = model(record['query_tok'],
                                record['query_mask'],
@@ -166,6 +169,9 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
                                records['doc_tok'],
                                records['wiki_tok'],
                                records['question_tok'])
+            elif args.model in ["sigir_sota"]:
+                # TODO
+                pass
             else:
                 scores = model(records['query_tok'],
                                records['query_mask'],
@@ -266,7 +272,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='mul_cedr_pacrr')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sigir_sota')
     parser.add_argument('--data', default='akgg-r2')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikipedia")
@@ -294,28 +300,11 @@ def main_cli():
 
     args.qrels = io.TextIOWrapper(io.open("%s%s-qrel.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
 
-    if args.model == "birch":
-        if args.mode == 1:
-            model = MODEL_MAP[args.model](True, False, False, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](True, False, False, args)
-        elif args.mode == 2:
-            model = MODEL_MAP[args.model](False, True, False, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](False, True, False, args)
-        elif args.mode == 3:
-            model = MODEL_MAP[args.model](True, False, True, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](True, False, True, args)
-        elif args.mode == 4:
-            model = MODEL_MAP[args.model](False, True, True, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](False, True, True, args)
-        elif args.mode == 5:
-            model = MODEL_MAP[args.model](True, True, True, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](True, True, True, args)
-        elif args.mode == 6:
-            model = MODEL_MAP[args.model](True, True, False, args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[
-                args.model](True, True, False, args)
-    model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args)
     dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile,
                                    args.questionfile])
+    args.dataset = dataset
+    model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args)
+
 
 
     # if args.model == "cedr_pacrr":
@@ -373,6 +362,7 @@ def main_cli():
     qrelDict = collections.defaultdict(dict)
     for qid, prop, label in df[['qid', 'pid', 'rele_label']].values:
         qrelDict[str(qid)][str(prop)] = int(label)
+
 
 
     metricKeys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}

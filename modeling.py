@@ -8,7 +8,7 @@ from pytorch_pretrained_bert import BertModel
 
 import modeling_util
 import numpy as np
-
+from Data import _mask, _pad_crop
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -201,6 +201,7 @@ class OriginalBertRanker(torch.nn.Module):
 
     @memoize_method
     def tokenize(self, text):
+        # print(text)
         toks = self.tokenizer.tokenize(text)
         toks = [self.tokenizer.vocab[t] for t in toks]
         return toks
@@ -830,3 +831,59 @@ class CedrPacrrRanker(OriginalBertRanker):
         wiki_rel = F.relu(self.linear2(wiki_rel))
         wiki_rel = self.linear3(wiki_rel)
         return self.clsAll(torch.cat([rel, wiki_rel], dim=1))
+
+class SIGIR_SOTA(OriginalBertRanker):
+    def __init__(self, args):
+        super().__init__()
+        self.args = args
+        self.dropout = torch.nn.Dropout(0.1)
+        self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
+
+        # generate prop matrix
+        props = self.args.dataset[1]
+        PLen = 10
+        self.propMatrix = []
+        for pid in props:
+            prop_tok = _pad_crop([self.tokenize(props[pid])], PLen)
+            prop_mask = _mask([self.tokenize(props[pid])], PLen)
+            self.propMatrix.append(self.encode_sentence_bert(prop_tok, prop_mask)[-1])
+
+        self.propMatrix = torch.cat(self.propMatrix, dim=0)
+
+    def encode_sentence_bert(self, query_tok, query_mask):
+        BATCH, QLEN = query_tok.shape
+
+        query_toks = torch.cat([query_tok] , dim=0)
+        query_mask = torch.cat([query_mask], dim=0)
+
+        CLSS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[CLS]'])
+        SEPS = torch.full_like(query_toks[:, :1], self.tokenizer.vocab['[SEP]'])
+        ONES = torch.ones_like(query_mask[:, :1])
+
+        # build BERT input sequences
+        toks = torch.cat([CLSS, query_toks, SEPS ], dim=1)
+        mask = torch.cat([ONES, query_mask, ONES], dim=1)
+        segment_ids = torch.cat([ONES] * (2 + QLEN), dim=1)
+        toks[toks == -1] = 0  # remove padding (will be masked anyway)
+
+        # print(MAX_DOC_TOK_LEN, doc_tok.shape)
+
+        # execute BERT model
+        result = self.bert(toks, segment_ids.long(), mask)
+
+        # build CLS representation
+        cls_results = []
+        for layer in result:
+            cls_output = layer[:, 0]
+            cls_result = []
+            for i in range(cls_output.shape[0] // BATCH):
+                cls_result.append(cls_output[i * BATCH:(i + 1) * BATCH])
+            cls_result = torch.stack(cls_result, dim=2).mean(dim=2)
+            cls_results.append(cls_result)
+
+        return cls_results
+
+    def forward(self, query_tok, query_mask):
+        cls_reps = self.encode_sentence_bert(query_tok, query_mask)
+        print(torch.dot(cls_reps[-1], self.propMatrix).size())
+        return self.cls(self.dropout(cls_reps[-1]))
