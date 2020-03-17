@@ -8,19 +8,20 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def read_datafiles(files):
-    queries, wikis, questions, docs = {}, {}, {}, {}
+    queries, wikis, questions, docs, qtypes = {}, {}, {}, {}, {}
     # for file in files:
     for idx, file in enumerate(files):
         for line in tqdm(file, desc='loading datafile (by line)', leave=False):
             cols = line.rstrip().split('\t')
-            if len(cols) != 3:
-                tqdm.write(f'skipping line: `{line.rstrip()}`')
-                continue
-            c_type, c_id, c_text = cols
+            if len(cols) == 3:
+                c_type, c_id, c_text = cols
+            elif len(cols) == 4:
+                c_type, c_id, c_text, c_qtype = cols
             # assert c_type in ('query', 'doc', 'wiki', 'question')
             # if c_type == 'query':
             if idx == 0:
                 queries[c_id] = c_text
+                qtypes[c_id] = c_qtype
             # elif c_type == 'doc':
             elif idx == 1:
                 docs[c_id] = c_text
@@ -60,16 +61,21 @@ def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data, args)
     batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
     for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_train_pairs(model, dataset, train_pairs, qrels,
                                                                                   args):
-        batch['query_id'].append(qid)
-        batch['doc_id'].append(did)
-        batch['query_tok'].append(query_tok)
-        batch['doc_tok'].append(doc_tok)
-        batch['wiki_tok'].append(wiki_tok)
-        batch['question_tok'].append(question_tok)
 
-        if len(batch['query_id']) // 2 == batch_size:
-            yield _pack_n_ship(batch, data, args)
-            batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
+        if args.model == "sigir_sota":
+            pass
+
+        else:
+            batch['query_id'].append(qid)
+            batch['doc_id'].append(did)
+            batch['query_tok'].append(query_tok)
+            batch['doc_tok'].append(doc_tok)
+            batch['wiki_tok'].append(wiki_tok)
+            batch['question_tok'].append(question_tok)
+
+            if len(batch['query_id']) // 2 == batch_size:
+                yield _pack_n_ship(batch, data, args)
+                batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
 
 
 def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
@@ -81,28 +87,33 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
             pos_ids = [did for did in train_pairs[qid] if qrels.get(qid, {}).get(did, 0) > 0]
             if len(pos_ids) == 0:
                 continue
-            pos_id = random.choice(pos_ids)
-            neg_ids = [did for did in train_pairs[qid] if qrels.get(qid, {}).get(did, 0) == 0]
 
-            if len(neg_ids) == 0:
-                print("No neg instances", qid)
-                continue
-            neg_id = random.choice(neg_ids)
-            query_tok = model.tokenize(ds_queries[qid])
-            wiki_tok = model.tokenize(ds_wikis[qid])
-            question_tok = model.tokenize(ds_questions[qid])
+            if args.model == "sigir_sota":
 
-            pos_doc = ds_docs.get(pos_id)
-            neg_doc = ds_docs.get(neg_id)
-            if pos_doc is None:
-                tqdm.write(f'missing doc {pos_id}! Skipping')
-                continue
-            if neg_doc is None:
-                tqdm.write(f'missing doc {neg_id}! Skipping')
-                continue
+                yield qid, pos_id, model.tokenize(ds_queries[qid])
+            else:
+                pos_id = random.choice(pos_ids)
+                neg_ids = [did for did in train_pairs[qid] if qrels.get(qid, {}).get(did, 0) == 0]
 
-            yield qid, pos_id, query_tok, model.tokenize(pos_doc), wiki_tok, question_tok
-            yield qid, neg_id, query_tok, model.tokenize(neg_doc), wiki_tok, question_tok
+                if len(neg_ids) == 0:
+                    print("No neg instances", qid)
+                    continue
+                neg_id = random.choice(neg_ids)
+                query_tok = model.tokenize(ds_queries[qid])
+                wiki_tok = model.tokenize(ds_wikis[qid])
+                question_tok = model.tokenize(ds_questions[qid])
+
+                pos_doc = ds_docs.get(pos_id)
+                neg_doc = ds_docs.get(neg_id)
+                if pos_doc is None:
+                    tqdm.write(f'missing doc {pos_id}! Skipping')
+                    continue
+                if neg_doc is None:
+                    tqdm.write(f'missing doc {neg_id}! Skipping')
+                    continue
+
+                yield qid, pos_id, query_tok, model.tokenize(pos_doc), wiki_tok, question_tok
+                yield qid, neg_id, query_tok, model.tokenize(neg_doc), wiki_tok, question_tok
 
         # break
 

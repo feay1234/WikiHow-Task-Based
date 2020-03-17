@@ -883,7 +883,9 @@ class SIGIR_SOTA(OriginalBertRanker):
 
         return cls_results
 
-    def forward(self, query_tok, query_mask):
+    def forward(self, query_tok, query_mask, cand_props):
         cls_reps = self.encode_sentence_bert(query_tok, query_mask)
+        print(cls_reps[-1].size())
+        print(torch.matmul(cls_reps[-1], self.propMatrix.t()).size())
         print(torch.dot(cls_reps[-1], self.propMatrix).size())
-        return self.cls(self.dropout(cls_reps[-1]))
+        return torch.sigmoid()

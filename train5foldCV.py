@@ -364,6 +364,9 @@ def main_cli():
         qrelDict[str(qid)][str(prop)] = int(label)
 
 
+    type2prop = df.groupby("")
+
+
 
     metricKeys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}
     metricKeys["rp"] = []
