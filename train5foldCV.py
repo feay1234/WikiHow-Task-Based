@@ -309,6 +309,7 @@ def main_cli():
     dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile,
                                    args.questionfile])
     args.dataset = dataset
+    print(Data.device.type)
     model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args)
 
 
