@@ -1,487 +1,487 @@
-INEX_LD-2009039	Q0	capital	1
-INEX_LD-2009039	Q0	governmentType	1
-INEX_LD-2009039	Q0	governmentType	1
-INEX_LD-2009061	Q0	place	1
-INEX_LD-2009063	Q0	commander	1
-INEX_LD-2009063	Q0	isPartOfMilitaryConflict	2
-INEX_LD-2009063	Q0	place	1
-INEX_LD-2009063	Q0	territory	1
-INEX_LD-2009063	Q0	combatant	1
-INEX_LD-2009063	Q0	commander	1
-INEX_LD-2009063	Q0	partof	2
-INEX_LD-2009096	Q0	mainContractor	2
-INEX_LD-2009096	Q0	structuralEngineer	1
-INEX_LD-2010004	Q0	fruit	2
-INEX_LD-2010057	Q0	knownFor	2
-INEX_LD-2010057	Q0	knownFor	2
-INEX_LD-20120112	Q0	commander	1
-INEX_LD-20120112	Q0	isPartOfMilitaryConflict	1
-INEX_LD-20120112	Q0	establishedEvent	2
-INEX_LD-20120221	Q0	instrument	2
-INEX_LD-20120221	Q0	instruments	2
-INEX_LD-20120221	Q0	otherTopics	1
-INEX_LD-20120232	Q0	derivative	1
-INEX_LD-20120232	Q0	musicFusionGenre	1
-INEX_LD-20120232	Q0	musicSubgenre	1
-INEX_LD-20120232	Q0	derivatives	1
-INEX_LD-20120311	Q0	musicSubgenre	1
-INEX_LD-20120311	Q0	subgenres	1
-INEX_LD-20120312	Q0	instrument	1
-INEX_LD-20120312	Q0	otherTopics	2
-INEX_LD-20120322	Q0	instrument	2
-INEX_LD-20120322	Q0	otherTopics	1
-INEX_LD-20120331	Q0	derivative	2
-INEX_LD-20120331	Q0	musicSubgenre	2
-INEX_LD-20120331	Q0	stylisticOrigin	2
-INEX_LD-20120331	Q0	derivatives	2
-INEX_LD-20120331	Q0	stylisticOrigins	2
-INEX_LD-20120331	Q0	subgenres	2
-INEX_LD-20120332	Q0	derivative	1
-INEX_LD-20120332	Q0	musicSubgenre	1
-INEX_LD-20120332	Q0	stylisticOrigin	1
-INEX_LD-20120332	Q0	derivatives	1
-INEX_LD-20120332	Q0	otherTopics	1
-INEX_LD-20120332	Q0	stylisticOrigins	1
-INEX_LD-20120332	Q0	subgenres	1
-INEX_LD-2012303	Q0	isPartOf	2
-INEX_LD-2012303	Q0	subdivisionName	1
-INEX_LD-2012307	Q0	child	1
-INEX_LD-2012311	Q0	album	2
-INEX_LD-2012311	Q0	musicalArtist	1
-INEX_LD-2012311	Q0	musicalBand	1
-INEX_LD-2012311	Q0	producer	2
-INEX_LD-2012311	Q0	spouse	1
-INEX_LD-2012311	Q0	writer	1
-INEX_LD-2012311	Q0	artist	1
-INEX_LD-2012311	Q0	fromAlbum	2
-INEX_LD-2012311	Q0	spouse	2
-INEX_LD-2012315	Q0	after	1
-INEX_LD-2012315	Q0	before	1
-INEX_LD-2012315	Q0	southwest	2
-INEX_LD-2012321	Q0	knownFor	1
-INEX_LD-2012325	Q0	successor	1
-INEX_LD-2012325	Q0	after	1
-INEX_LD-2012325	Q0	successor	1
-INEX_LD-2012329	Q0	currency	2
-INEX_LD-2012329	Q0	currency	2
-INEX_LD-2012333	Q0	leaderTitle	1
-INEX_LD-2012336	Q0	differentFrom	1
-INEX_LD-2012337	Q0	city	1
-INEX_LD-2012337	Q0	city	1
-INEX_LD-2012339	Q0	knownFor	1
-INEX_LD-2012339	Q0	party	1
-INEX_LD-2012339	Q0	party	1
-INEX_LD-2012339	Q0	title	2
-INEX_LD-2012345	Q0	location	1
-INEX_LD-2012345	Q0	perp	1
-INEX_LD-2012345	Q0	target	2
-INEX_LD-2012349	Q0	capital	1
-INEX_LD-2012349	Q0	capital	1
-INEX_LD-2012349	Q0	province	1
-INEX_LD-2012349	Q0	restingPlace	1
-INEX_LD-2012351	Q0	hasVariant	2
-INEX_LD-2012351	Q0	variations	2
-INEX_LD-2012353	Q0	languageFamily	2
-INEX_LD-2012353	Q0	spokenIn	2
-INEX_LD-2012353	Q0	fam	1
-INEX_LD-2012353	Q0	ld	1
-INEX_LD-2012353	Q0	nation	2
-INEX_LD-2012353	Q0	stand	1
-INEX_LD-2012355	Q0	captain	2
-INEX_LD-2012355	Q0	name	2
-INEX_LD-2012355	Q0	topScorer	2
-INEX_LD-2012387	Q0	river	2
-INEX_LD-2012387	Q0	damCrosses	1
-INEX_XER-100	Q0	board	1
-INEX_XER-100	Q0	occupation	1
-INEX_XER-100	Q0	boards	1
-INEX_XER-100	Q0	occupation	1
-INEX_XER-100	Q0	title	1
-INEX_XER-108	Q0	capital	2
-INEX_XER-108	Q0	capital	2
-INEX_XER-113	Q0	circuit	1
-INEX_XER-117	Q0	bandMember	2
-INEX_XER-117	Q0	formerBandMember	2
-INEX_XER-117	Q0	starring	2
-INEX_XER-117	Q0	writer	2
-INEX_XER-117	Q0	artist	1
-INEX_XER-117	Q0	currentMembers	2
-INEX_XER-117	Q0	pastMembers	2
-INEX_XER-117	Q0	starring	2
-INEX_XER-117	Q0	writer	2
-INEX_XER-119	Q0	capital	1
-INEX_XER-121	Q0	leaderTitle	1
-INEX_XER-130	Q0	basedOn	1
-INEX_XER-130	Q0	previousWork	1
-INEX_XER-130	Q0	films	1
-INEX_XER-130	Q0	tv	1
-INEX_XER-133	Q0	cctld	1
-INEX_XER-62	Q0	notableWork	2
-INEX_XER-64	Q0	notableWork	2
-INEX_XER-86	Q0	combatant	1
-INEX_XER-86	Q0	combatantsHeader	1
-INEX_XER-87	Q0	event	1
-INEX_XER-98	Q0	equipment	1
-INEX_XER-98	Q0	equipment	1
-QALD2_te-100	Q0	founder	2
-QALD2_te-14	Q0	bandMember	2
-QALD2_te-14	Q0	formerBandMember	2
-QALD2_te-14	Q0	recordLabel	1
-QALD2_te-14	Q0	currentMembers	2
-QALD2_te-14	Q0	pastMembers	1
-QALD2_te-21	Q0	capital	2
-QALD2_te-21	Q0	capital	2
-QALD2_te-22	Q0	inaugural	1
-QALD2_te-22	Q0	incumbent	2
-QALD2_te-22	Q0	lieutenantGovernor	1
-QALD2_te-24	Q0	parent	2
-QALD2_te-24	Q0	predecessor	2
-QALD2_te-24	Q0	as	1
-QALD2_te-24	Q0	before	2
-QALD2_te-24	Q0	corType	1
-QALD2_te-24	Q0	father	2
-QALD2_te-24	Q0	predecessor	2
-QALD2_te-24	Q0	title	1
-QALD2_te-3	Q0	inaugural	1
-QALD2_te-3	Q0	incumbent	2
-QALD2_te-34	Q0	battle	2
-QALD2_te-34	Q0	battles	2
-QALD2_te-35	Q0	author	1
-QALD2_te-35	Q0	developer	2
-QALD2_te-35	Q0	developer	2
-QALD2_te-41	Q0	foundedBy	2
-QALD2_te-41	Q0	founder	2
-QALD2_te-42	Q0	spouse	2
-QALD2_te-44	Q0	city	2
-QALD2_te-44	Q0	mouthMountain	2
-QALD2_te-44	Q0	mouthPlace	2
-QALD2_te-44	Q0	rightTributary	1
-QALD2_te-44	Q0	sourceMountain	2
-QALD2_te-44	Q0	sourcePlace	2
-QALD2_te-44	Q0	state	2
-QALD2_te-44	Q0	city	2
-QALD2_te-44	Q0	mouthLocation	2
-QALD2_te-44	Q0	state	2
-QALD2_te-44	Q0	tributaryRight	1
-QALD2_te-45	Q0	country	2
-QALD2_te-45	Q0	mouthCountry	2
-QALD2_te-48	Q0	capital	2
-QALD2_te-48	Q0	headquarter	2
-QALD2_te-48	Q0	location	2
-QALD2_te-48	Q0	capital	2
-QALD2_te-48	Q0	headquarters	2
-QALD2_te-57	Q0	crew1Up	2
-QALD2_te-57	Q0	crew2Up	2
-QALD2_te-57	Q0	crew3Up	2
-QALD2_te-57	Q0	crewMembers	2
-QALD2_te-57	Q0	programme	1
-QALD2_te-58	Q0	timeZone	2
-QALD2_te-58	Q0	timezone	2
-QALD2_te-58	Q0	timezoneDst	2
-QALD2_te-67	Q0	issue	1
-QALD2_te-72	Q0	location	2
-QALD2_te-72	Q0	location	2
-QALD2_te-76	Q0	child	2
-QALD2_te-76	Q0	children	2
-QALD2_te-8	Q0	country	2
-QALD2_te-8	Q0	country	2
-QALD2_te-81	Q0	notableWork	2
-QALD2_te-86	Q0	capital	1
-QALD2_te-86	Q0	largestCity	2
-QALD2_te-86	Q0	capital	1
-QALD2_te-86	Q0	largestCity	2
-QALD2_te-87	Q0	musicComposer	2
-QALD2_te-87	Q0	artist	2
-QALD2_te-87	Q0	music	2
-QALD2_te-90	Q0	leaderTitle	1
-QALD2_te-91	Q0	largestmetro	1
-QALD2_te-93	Q0	director	1
-QALD2_te-93	Q0	writer	1
-QALD2_te-93	Q0	director	1
-QALD2_te-95	Q0	author	2
-QALD2_te-97	Q0	author	2
-QALD2_te-97	Q0	artist	2
-QALD2_te-98	Q0	creator	1
-QALD2_te-98	Q0	creator	1
-QALD2_tr-10	Q0	city	1
-QALD2_tr-10	Q0	country	2
-QALD2_tr-10	Q0	mouthCountry	1
-QALD2_tr-10	Q0	sourceCountry	2
-QALD2_tr-10	Q0	city	1
-QALD2_tr-10	Q0	mouthCountry	1
-QALD2_tr-15	Q0	creator	2
-QALD2_tr-15	Q0	creators	2
-QALD2_tr-17	Q0	largestCity	2
-QALD2_tr-17	Q0	largestcity	2
-QALD2_tr-18	Q0	museum	2
-QALD2_tr-18	Q0	museum	2
-QALD2_tr-21	Q0	borderingstates	2
-QALD2_tr-22	Q0	country	2
-QALD2_tr-22	Q0	location	1
-QALD2_tr-22	Q0	location	1
-QALD2_tr-23	Q0	foundedBy	1
-QALD2_tr-23	Q0	presenter	1
-QALD2_tr-23	Q0	presenter	1
-QALD2_tr-23	Q0	title	2
-QALD2_tr-29	Q0	author	1
-QALD2_tr-29	Q0	author	1
-QALD2_tr-3	Q0	child	1
-QALD2_tr-3	Q0	relation	1
-QALD2_tr-3	Q0	children	1
-QALD2_tr-31	Q0	currency	2
-QALD2_tr-31	Q0	currency	2
-QALD2_tr-32	Q0	currency	1
-QALD2_tr-32	Q0	currency	1
-QALD2_tr-36	Q0	country	2
-QALD2_tr-36	Q0	rightTributary	1
-QALD2_tr-36	Q0	sourceCountry	2
-QALD2_tr-36	Q0	country	2
-QALD2_tr-36	Q0	mouthState	2
-QALD2_tr-36	Q0	sourceCountry	2
-QALD2_tr-36	Q0	tributaryRight	1
-QALD2_tr-4	Q0	crosses	2
-QALD2_tr-4	Q0	crosses	2
-QALD2_tr-41	Q0	club	2
-QALD2_tr-42	Q0	language	2
-QALD2_tr-42	Q0	officialLanguage	2
-QALD2_tr-42	Q0	demonym	2
-QALD2_tr-42	Q0	national	2
-QALD2_tr-42	Q0	officialLanguages	2
-QALD2_tr-42	Q0	regional	1
-QALD2_tr-43	Q0	leaderName	2
-QALD2_tr-43	Q0	incumbent	2
-QALD2_tr-44	Q0	architect	2
-QALD2_tr-44	Q0	designer	2
-QALD2_tr-50	Q0	deathCause	2
-QALD2_tr-50	Q0	deathCause	2
-QALD2_tr-53	Q0	leader	2
-QALD2_tr-53	Q0	inaugural	2
-QALD2_tr-53	Q0	incumbent	2
-QALD2_tr-53	Q0	leaderName	2
-QALD2_tr-53	Q0	leaderTitle	1
-QALD2_tr-54	Q0	restingPlace	1
-QALD2_tr-54	Q0	spouse	2
-QALD2_tr-54	Q0	restingplace	1
-QALD2_tr-54	Q0	spouse	2
-QALD2_tr-55	Q0	designer	1
-QALD2_tr-55	Q0	developer	2
-QALD2_tr-55	Q0	publisher	2
-QALD2_tr-55	Q0	series	1
-QALD2_tr-55	Q0	designer	1
-QALD2_tr-55	Q0	developer	2
-QALD2_tr-57	Q0	starring	1
-QALD2_tr-57	Q0	starring	1
-QALD2_tr-6	Q0	deathPlace	2
-QALD2_tr-6	Q0	deathPlace	2
-QALD2_tr-61	Q0	mountainRange	1
-QALD2_tr-61	Q0	range	1
-QALD2_tr-62	Q0	author	2
-QALD2_tr-62	Q0	author	2
-QALD2_tr-71	Q0	product	2
-QALD2_tr-72	Q0	language	2
-QALD2_tr-72	Q0	officialLanguage	2
-QALD2_tr-72	Q0	regionalLanguage	2
-QALD2_tr-72	Q0	regionalLanguages	2
-QALD2_tr-73	Q0	foundedBy	2
-QALD2_tr-74	Q0	cities	2
-QALD2_tr-75	Q0	leaderTitle	1
-QALD2_tr-77	Q0	album	2
-QALD2_tr-77	Q0	previousWork	2
-QALD2_tr-77	Q0	album	2
-QALD2_tr-82	Q0	programmingLanguage	2
-QALD2_tr-82	Q0	programmingLanguage	2
-QALD2_tr-87	Q0	story	2
-QALD2_tr-89	Q0	champions	2
-QALD2_tr-89	Q0	mostSuccessfulClub	2
-SemSearch_ES-10	Q0	isPartOf	1
-SemSearch_ES-10	Q0	subdivisionName	1
-SemSearch_ES-11	Q0	creator	1
-SemSearch_ES-11	Q0	portrayer	1
-SemSearch_ES-11	Q0	producer	1
-SemSearch_ES-11	Q0	relative	1
-SemSearch_ES-11	Q0	series	2
-SemSearch_ES-11	Q0	spouse	1
-SemSearch_ES-11	Q0	starring	1
-SemSearch_ES-11	Q0	writer	1
-SemSearch_ES-11	Q0	creator	1
-SemSearch_ES-11	Q0	family	1
-SemSearch_ES-11	Q0	portrayer	1
-SemSearch_ES-11	Q0	producer	1
-SemSearch_ES-11	Q0	relatives	1
-SemSearch_ES-11	Q0	series	2
-SemSearch_ES-11	Q0	significantother	2
-SemSearch_ES-11	Q0	spouse	1
-SemSearch_ES-11	Q0	starring	1
-SemSearch_ES-12	Q0	isPartOf	2
-SemSearch_ES-12	Q0	subdivisionName	1
-SemSearch_ES-12	Q0	subdivisionType	1
-SemSearch_ES-12	Q0	differentFrom	2
-SemSearch_ES-125	Q0	manufacturer	0
-SemSearch_ES-125	Q0	manufacturer	2
-SemSearch_ES-127	Q0	product	2
-SemSearch_ES-141	Q0	seat	2
-SemSearch_ES-16	Q0	architect	1
-SemSearch_ES-16	Q0	designer	1
-SemSearch_ES-18	Q0	related	1
-SemSearch_ES-2	Q0	knownFor	2
-SemSearch_ES-2	Q0	children	1
-SemSearch_ES-20	Q0	capital	1
-SemSearch_ES-20	Q0	capital	2
-SemSearch_ES-20	Q0	largestcounty	1
-SemSearch_ES-20	Q0	lowerhouse	1
-SemSearch_ES-20	Q0	upperhouse	1
-SemSearch_ES-21	Q0	knownFor	1
-SemSearch_ES-21	Q0	spouse	1
-SemSearch_ES-21	Q0	spouse	1
-SemSearch_ES-22	Q0	governingBody	1
-SemSearch_ES-22	Q0	isPartOf	1
-SemSearch_ES-22	Q0	governingBody	1
-SemSearch_ES-22	Q0	subdivisionName	1
-SemSearch_ES-23	Q0	isPartOf	2
-SemSearch_ES-23	Q0	subdivisionName	2
-SemSearch_ES-24	Q0	state	1
-SemSearch_ES-24	Q0	headcoachdisplay	1
-SemSearch_ES-24	Q0	location	1
-SemSearch_ES-24	Q0	state	1
-SemSearch_ES-26	Q0	owner	1
-SemSearch_ES-26	Q0	owningCompany	1
-SemSearch_ES-26	Q0	owner	1
-SemSearch_ES-28	Q0	anthem	2
-SemSearch_ES-28	Q0	capital	2
-SemSearch_ES-28	Q0	largestCity	1
-SemSearch_ES-28	Q0	capital	2
-SemSearch_ES-28	Q0	club	1
-SemSearch_ES-28	Q0	largestCity	1
-SemSearch_ES-28	Q0	location	2
-SemSearch_ES-33	Q0	basedOn	2
-SemSearch_ES-33	Q0	creator	1
-SemSearch_ES-33	Q0	lastAppearance	1
-SemSearch_ES-33	Q0	producer	1
-SemSearch_ES-33	Q0	relative	1
-SemSearch_ES-33	Q0	series	2
-SemSearch_ES-33	Q0	author	1
-SemSearch_ES-33	Q0	creator	1
-SemSearch_ES-33	Q0	series	2
-SemSearch_ES-34	Q0	basedOn	2
-SemSearch_ES-34	Q0	starring	1
-SemSearch_ES-34	Q0	starring	1
-SemSearch_ES-38	Q0	nonFictionSubject	2
-SemSearch_ES-38	Q0	subject	2
-SemSearch_ES-49	Q0	child	1
-SemSearch_ES-49	Q0	spouse	1
-SemSearch_ES-49	Q0	children	1
-SemSearch_ES-49	Q0	spouse	1
-SemSearch_ES-5	Q0	exImageCap	1
-SemSearch_ES-52	Q0	west	1
-SemSearch_ES-56	Q0	series	2
-SemSearch_ES-56	Q0	series	2
-SemSearch_ES-57	Q0	child	2
-SemSearch_ES-57	Q0	deathCause	1
-SemSearch_ES-57	Q0	knownFor	2
-SemSearch_ES-57	Q0	parent	2
-SemSearch_ES-57	Q0	children	2
-SemSearch_ES-57	Q0	deathCause	1
-SemSearch_ES-57	Q0	monuments	1
-SemSearch_ES-57	Q0	parents	1
-SemSearch_ES-6	Q0	headquarter	2
-SemSearch_ES-6	Q0	headquarters	2
-SemSearch_ES-60	Q0	parent	1
-SemSearch_ES-60	Q0	parents	1
-SemSearch_ES-7	Q0	manufacturer	1
-SemSearch_ES-71	Q0	isPartOf	1
-SemSearch_ES-71	Q0	south	1
-SemSearch_ES-71	Q0	differentFrom	1
-SemSearch_ES-76	Q0	leaderTitle	1
-SemSearch_ES-80	Q0	associatedBand	2
-SemSearch_ES-80	Q0	associatedMusicalArtist	2
-SemSearch_ES-80	Q0	formerBandMember	2
-SemSearch_ES-80	Q0	associatedActs	2
-SemSearch_ES-80	Q0	pastMembers	2
-SemSearch_ES-82	Q0	leaderTitle	1
-SemSearch_ES-83	Q0	city	1
-SemSearch_ES-84	Q0	starring	2
-SemSearch_ES-84	Q0	starring	2
-SemSearch_ES-88	Q0	child	1
-SemSearch_ES-88	Q0	restingPlace	1
-SemSearch_ES-89	Q0	affiliation	1
-SemSearch_ES-89	Q0	state	1
-SemSearch_ES-89	Q0	affiliations	1
-SemSearch_ES-89	Q0	state	1
-SemSearch_ES-93	Q0	assembly	1
-SemSearch_ES-93	Q0	manufacturer	1
-SemSearch_ES-93	Q0	manufacturer	1
-SemSearch_ES-95	Q0	isPartOf	1
-SemSearch_ES-95	Q0	subdivisionName	1
-SemSearch_ES-96	Q0	product	1
-SemSearch_ES-97	Q0	writer	1
-SemSearch_ES-97	Q0	screenplay	1
-SemSearch_ES-98	Q0	affiliation	1
-SemSearch_ES-98	Q0	affiliations	1
-SemSearch_LS-10	Q0	relative	2
-SemSearch_LS-10	Q0	relatives	2
-SemSearch_LS-17	Q0	house	2
-SemSearch_LS-17	Q0	politicalPartyInLegislature	2
-SemSearch_LS-17	Q0	house	2
-SemSearch_LS-17	Q0	houses	2
-SemSearch_LS-17	Q0	leader1Type	2
-SemSearch_LS-17	Q0	leader2Type	1
-SemSearch_LS-17	Q0	leaderTitle	1
-SemSearch_LS-17	Q0	legislature	1
-SemSearch_LS-17	Q0	lowerHouse	2
-SemSearch_LS-17	Q0	politicalGroups	2
-SemSearch_LS-17	Q0	upperHouse	2
-SemSearch_LS-19	Q0	currentCoach	2
-SemSearch_LS-2	Q0	country	2
-SemSearch_LS-20	Q0	predecessor	2
-SemSearch_LS-20	Q0	predecessor	2
-SemSearch_LS-25	Q0	bandMember	2
-SemSearch_LS-25	Q0	currentMembers	2
-SemSearch_LS-29	Q0	languageRegulator	1
-SemSearch_LS-29	Q0	spokenIn	2
-SemSearch_LS-29	Q0	ancestor	1
-SemSearch_LS-29	Q0	fam	1
-SemSearch_LS-34	Q0	formerBandMember	2
-SemSearch_LS-34	Q0	pastMembers	2
-SemSearch_LS-35	Q0	capital	1
-SemSearch_LS-35	Q0	capital	1
-SemSearch_LS-35	Q0	eventEnd	1
-SemSearch_LS-35	Q0	house	1
-SemSearch_LS-35	Q0	legislature	1
-SemSearch_LS-35	Q0	titleRepresentative	0
-SemSearch_LS-35	Q0	differentFrom	1
-SemSearch_LS-36	Q0	establishedEvent	2
-SemSearch_LS-4	Q0	event	1
-SemSearch_LS-4	Q0	eventStart	1
-SemSearch_LS-4	Q0	imageMap2Caption	1
-SemSearch_LS-44	Q0	language	2
-SemSearch_LS-44	Q0	languages	2
-SemSearch_LS-49	Q0	designer	2
-SemSearch_LS-49	Q0	developer	1
-SemSearch_LS-49	Q0	designer	2
-SemSearch_LS-49	Q0	developer	1
-SemSearch_LS-49	Q0	implementations	1
-SemSearch_LS-6	Q0	governingBody	1
-SemSearch_LS-6	Q0	isPartOf	2
-SemSearch_LS-6	Q0	blank1InfoSec	2
-SemSearch_LS-6	Q0	blankInfoSec	2
-SemSearch_LS-6	Q0	establishedTitle	1
-SemSearch_LS-6	Q0	governingBody	1
-SemSearch_LS-6	Q0	subdivisionName	2
-TREC_Entity-1	Q0	operatingSystem	1
-TREC_Entity-1	Q0	os	1
-TREC_Entity-10	Q0	affiliation	2
-TREC_Entity-10	Q0	affiliations	2
-TREC_Entity-10	Q0	differentFrom	2
-TREC_Entity-11	Q0	foundedBy	1
-TREC_Entity-11	Q0	founder	1
-TREC_Entity-18	Q0	associatedBand	1
-TREC_Entity-18	Q0	associatedMusicalArtist	1
-TREC_Entity-18	Q0	formerBandMember	2
-TREC_Entity-18	Q0	associatedActs	1
-TREC_Entity-18	Q0	pastMembers	2
-TREC_Entity-5	Q0	product	2
-TREC_Entity-5	Q0	products	2
-TREC_Entity-6	Q0	presenter	2
-TREC_Entity-7	Q0	developedInto	1
-TREC_Entity-7	Q0	moreUsers	2
-TREC_Entity-7	Q0	primaryUser	2
+INEX_LD-2009039	Q0	0	1	INEX_LD
+INEX_LD-2009039	Q0	1	1	INEX_LD
+INEX_LD-2009039	Q0	1	1	INEX_LD
+INEX_LD-2009061	Q0	2	1	INEX_LD
+INEX_LD-2009063	Q0	3	1	INEX_LD
+INEX_LD-2009063	Q0	4	2	INEX_LD
+INEX_LD-2009063	Q0	2	1	INEX_LD
+INEX_LD-2009063	Q0	5	1	INEX_LD
+INEX_LD-2009063	Q0	6	1	INEX_LD
+INEX_LD-2009063	Q0	3	1	INEX_LD
+INEX_LD-2009063	Q0	7	2	INEX_LD
+INEX_LD-2009096	Q0	8	2	INEX_LD
+INEX_LD-2009096	Q0	9	1	INEX_LD
+INEX_LD-2010004	Q0	10	2	INEX_LD
+INEX_LD-2010057	Q0	11	2	INEX_LD
+INEX_LD-2010057	Q0	11	2	INEX_LD
+INEX_LD-20120112	Q0	3	1	INEX_LD
+INEX_LD-20120112	Q0	4	1	INEX_LD
+INEX_LD-20120112	Q0	12	2	INEX_LD
+INEX_LD-20120221	Q0	13	2	INEX_LD
+INEX_LD-20120221	Q0	14	2	INEX_LD
+INEX_LD-20120221	Q0	15	1	INEX_LD
+INEX_LD-20120232	Q0	16	1	INEX_LD
+INEX_LD-20120232	Q0	17	1	INEX_LD
+INEX_LD-20120232	Q0	18	1	INEX_LD
+INEX_LD-20120232	Q0	19	1	INEX_LD
+INEX_LD-20120311	Q0	18	1	INEX_LD
+INEX_LD-20120311	Q0	20	1	INEX_LD
+INEX_LD-20120312	Q0	13	1	INEX_LD
+INEX_LD-20120312	Q0	15	2	INEX_LD
+INEX_LD-20120322	Q0	13	2	INEX_LD
+INEX_LD-20120322	Q0	15	1	INEX_LD
+INEX_LD-20120331	Q0	16	2	INEX_LD
+INEX_LD-20120331	Q0	18	2	INEX_LD
+INEX_LD-20120331	Q0	21	2	INEX_LD
+INEX_LD-20120331	Q0	19	2	INEX_LD
+INEX_LD-20120331	Q0	22	2	INEX_LD
+INEX_LD-20120331	Q0	20	2	INEX_LD
+INEX_LD-20120332	Q0	16	1	INEX_LD
+INEX_LD-20120332	Q0	18	1	INEX_LD
+INEX_LD-20120332	Q0	21	1	INEX_LD
+INEX_LD-20120332	Q0	19	1	INEX_LD
+INEX_LD-20120332	Q0	15	1	INEX_LD
+INEX_LD-20120332	Q0	22	1	INEX_LD
+INEX_LD-20120332	Q0	20	1	INEX_LD
+INEX_LD-2012303	Q0	23	2	INEX_LD
+INEX_LD-2012303	Q0	24	1	INEX_LD
+INEX_LD-2012307	Q0	25	1	INEX_LD
+INEX_LD-2012311	Q0	26	2	INEX_LD
+INEX_LD-2012311	Q0	27	1	INEX_LD
+INEX_LD-2012311	Q0	28	1	INEX_LD
+INEX_LD-2012311	Q0	29	2	INEX_LD
+INEX_LD-2012311	Q0	30	1	INEX_LD
+INEX_LD-2012311	Q0	31	1	INEX_LD
+INEX_LD-2012311	Q0	32	1	INEX_LD
+INEX_LD-2012311	Q0	33	2	INEX_LD
+INEX_LD-2012311	Q0	30	2	INEX_LD
+INEX_LD-2012315	Q0	34	1	INEX_LD
+INEX_LD-2012315	Q0	35	1	INEX_LD
+INEX_LD-2012315	Q0	36	2	INEX_LD
+INEX_LD-2012321	Q0	11	1	INEX_LD
+INEX_LD-2012325	Q0	37	1	INEX_LD
+INEX_LD-2012325	Q0	34	1	INEX_LD
+INEX_LD-2012325	Q0	37	1	INEX_LD
+INEX_LD-2012329	Q0	38	2	INEX_LD
+INEX_LD-2012329	Q0	38	2	INEX_LD
+INEX_LD-2012333	Q0	39	1	INEX_LD
+INEX_LD-2012336	Q0	40	1	INEX_LD
+INEX_LD-2012337	Q0	41	1	INEX_LD
+INEX_LD-2012337	Q0	41	1	INEX_LD
+INEX_LD-2012339	Q0	11	1	INEX_LD
+INEX_LD-2012339	Q0	42	1	INEX_LD
+INEX_LD-2012339	Q0	42	1	INEX_LD
+INEX_LD-2012339	Q0	43	2	INEX_LD
+INEX_LD-2012345	Q0	44	1	INEX_LD
+INEX_LD-2012345	Q0	45	1	INEX_LD
+INEX_LD-2012345	Q0	46	2	INEX_LD
+INEX_LD-2012349	Q0	0	1	INEX_LD
+INEX_LD-2012349	Q0	0	1	INEX_LD
+INEX_LD-2012349	Q0	47	1	INEX_LD
+INEX_LD-2012349	Q0	48	1	INEX_LD
+INEX_LD-2012351	Q0	49	2	INEX_LD
+INEX_LD-2012351	Q0	50	2	INEX_LD
+INEX_LD-2012353	Q0	51	2	INEX_LD
+INEX_LD-2012353	Q0	52	2	INEX_LD
+INEX_LD-2012353	Q0	53	1	INEX_LD
+INEX_LD-2012353	Q0	54	1	INEX_LD
+INEX_LD-2012353	Q0	55	2	INEX_LD
+INEX_LD-2012353	Q0	56	1	INEX_LD
+INEX_LD-2012355	Q0	57	2	INEX_LD
+INEX_LD-2012355	Q0	58	2	INEX_LD
+INEX_LD-2012355	Q0	59	2	INEX_LD
+INEX_LD-2012387	Q0	60	2	INEX_LD
+INEX_LD-2012387	Q0	61	1	INEX_LD
+INEX_XER-100	Q0	62	1	ListSerach
+INEX_XER-100	Q0	63	1	ListSerach
+INEX_XER-100	Q0	64	1	ListSerach
+INEX_XER-100	Q0	63	1	ListSerach
+INEX_XER-100	Q0	43	1	ListSerach
+INEX_XER-108	Q0	0	2	ListSerach
+INEX_XER-108	Q0	0	2	ListSerach
+INEX_XER-113	Q0	65	1	ListSerach
+INEX_XER-117	Q0	66	2	ListSerach
+INEX_XER-117	Q0	67	2	ListSerach
+INEX_XER-117	Q0	68	2	ListSerach
+INEX_XER-117	Q0	31	2	ListSerach
+INEX_XER-117	Q0	32	1	ListSerach
+INEX_XER-117	Q0	69	2	ListSerach
+INEX_XER-117	Q0	70	2	ListSerach
+INEX_XER-117	Q0	68	2	ListSerach
+INEX_XER-117	Q0	31	2	ListSerach
+INEX_XER-119	Q0	0	1	ListSerach
+INEX_XER-121	Q0	39	1	ListSerach
+INEX_XER-130	Q0	71	1	ListSerach
+INEX_XER-130	Q0	72	1	ListSerach
+INEX_XER-130	Q0	73	1	ListSerach
+INEX_XER-130	Q0	74	1	ListSerach
+INEX_XER-133	Q0	75	1	ListSerach
+INEX_XER-62	Q0	76	2	ListSerach
+INEX_XER-64	Q0	76	2	ListSerach
+INEX_XER-86	Q0	6	1	ListSerach
+INEX_XER-86	Q0	77	1	ListSerach
+INEX_XER-87	Q0	78	1	ListSerach
+INEX_XER-98	Q0	79	1	ListSerach
+INEX_XER-98	Q0	79	1	ListSerach
+QALD2_te-100	Q0	80	2	QALD2
+QALD2_te-14	Q0	66	2	QALD2
+QALD2_te-14	Q0	67	2	QALD2
+QALD2_te-14	Q0	81	1	QALD2
+QALD2_te-14	Q0	69	2	QALD2
+QALD2_te-14	Q0	70	1	QALD2
+QALD2_te-21	Q0	0	2	QALD2
+QALD2_te-21	Q0	0	2	QALD2
+QALD2_te-22	Q0	82	1	QALD2
+QALD2_te-22	Q0	83	2	QALD2
+QALD2_te-22	Q0	84	1	QALD2
+QALD2_te-24	Q0	85	2	QALD2
+QALD2_te-24	Q0	86	2	QALD2
+QALD2_te-24	Q0	87	1	QALD2
+QALD2_te-24	Q0	35	2	QALD2
+QALD2_te-24	Q0	88	1	QALD2
+QALD2_te-24	Q0	89	2	QALD2
+QALD2_te-24	Q0	86	2	QALD2
+QALD2_te-24	Q0	43	1	QALD2
+QALD2_te-3	Q0	82	1	QALD2
+QALD2_te-3	Q0	83	2	QALD2
+QALD2_te-34	Q0	90	2	QALD2
+QALD2_te-34	Q0	91	2	QALD2
+QALD2_te-35	Q0	92	1	QALD2
+QALD2_te-35	Q0	93	2	QALD2
+QALD2_te-35	Q0	93	2	QALD2
+QALD2_te-41	Q0	94	2	QALD2
+QALD2_te-41	Q0	80	2	QALD2
+QALD2_te-42	Q0	30	2	QALD2
+QALD2_te-44	Q0	41	2	QALD2
+QALD2_te-44	Q0	95	2	QALD2
+QALD2_te-44	Q0	96	2	QALD2
+QALD2_te-44	Q0	97	1	QALD2
+QALD2_te-44	Q0	98	2	QALD2
+QALD2_te-44	Q0	99	2	QALD2
+QALD2_te-44	Q0	100	2	QALD2
+QALD2_te-44	Q0	41	2	QALD2
+QALD2_te-44	Q0	101	2	QALD2
+QALD2_te-44	Q0	100	2	QALD2
+QALD2_te-44	Q0	102	1	QALD2
+QALD2_te-45	Q0	103	2	QALD2
+QALD2_te-45	Q0	104	2	QALD2
+QALD2_te-48	Q0	0	2	QALD2
+QALD2_te-48	Q0	105	2	QALD2
+QALD2_te-48	Q0	44	2	QALD2
+QALD2_te-48	Q0	0	2	QALD2
+QALD2_te-48	Q0	106	2	QALD2
+QALD2_te-57	Q0	107	2	QALD2
+QALD2_te-57	Q0	108	2	QALD2
+QALD2_te-57	Q0	109	2	QALD2
+QALD2_te-57	Q0	110	2	QALD2
+QALD2_te-57	Q0	111	1	QALD2
+QALD2_te-58	Q0	112	2	QALD2
+QALD2_te-58	Q0	113	2	QALD2
+QALD2_te-58	Q0	114	2	QALD2
+QALD2_te-67	Q0	115	1	QALD2
+QALD2_te-72	Q0	44	2	QALD2
+QALD2_te-72	Q0	44	2	QALD2
+QALD2_te-76	Q0	25	2	QALD2
+QALD2_te-76	Q0	116	2	QALD2
+QALD2_te-8	Q0	103	2	QALD2
+QALD2_te-8	Q0	103	2	QALD2
+QALD2_te-81	Q0	76	2	QALD2
+QALD2_te-86	Q0	0	1	QALD2
+QALD2_te-86	Q0	117	2	QALD2
+QALD2_te-86	Q0	0	1	QALD2
+QALD2_te-86	Q0	117	2	QALD2
+QALD2_te-87	Q0	118	2	QALD2
+QALD2_te-87	Q0	32	2	QALD2
+QALD2_te-87	Q0	119	2	QALD2
+QALD2_te-90	Q0	39	1	QALD2
+QALD2_te-91	Q0	120	1	QALD2
+QALD2_te-93	Q0	121	1	QALD2
+QALD2_te-93	Q0	31	1	QALD2
+QALD2_te-93	Q0	121	1	QALD2
+QALD2_te-95	Q0	92	2	QALD2
+QALD2_te-97	Q0	92	2	QALD2
+QALD2_te-97	Q0	32	2	QALD2
+QALD2_te-98	Q0	122	1	QALD2
+QALD2_te-98	Q0	122	1	QALD2
+QALD2_tr-10	Q0	41	1	QALD2
+QALD2_tr-10	Q0	103	2	QALD2
+QALD2_tr-10	Q0	104	1	QALD2
+QALD2_tr-10	Q0	123	2	QALD2
+QALD2_tr-10	Q0	41	1	QALD2
+QALD2_tr-10	Q0	104	1	QALD2
+QALD2_tr-15	Q0	122	2	QALD2
+QALD2_tr-15	Q0	124	2	QALD2
+QALD2_tr-17	Q0	117	2	QALD2
+QALD2_tr-17	Q0	125	2	QALD2
+QALD2_tr-18	Q0	126	2	QALD2
+QALD2_tr-18	Q0	126	2	QALD2
+QALD2_tr-21	Q0	127	2	QALD2
+QALD2_tr-22	Q0	103	2	QALD2
+QALD2_tr-22	Q0	44	1	QALD2
+QALD2_tr-22	Q0	44	1	QALD2
+QALD2_tr-23	Q0	94	1	QALD2
+QALD2_tr-23	Q0	128	1	QALD2
+QALD2_tr-23	Q0	128	1	QALD2
+QALD2_tr-23	Q0	43	2	QALD2
+QALD2_tr-29	Q0	92	1	QALD2
+QALD2_tr-29	Q0	92	1	QALD2
+QALD2_tr-3	Q0	25	1	QALD2
+QALD2_tr-3	Q0	129	1	QALD2
+QALD2_tr-3	Q0	116	1	QALD2
+QALD2_tr-31	Q0	38	2	QALD2
+QALD2_tr-31	Q0	38	2	QALD2
+QALD2_tr-32	Q0	38	1	QALD2
+QALD2_tr-32	Q0	38	1	QALD2
+QALD2_tr-36	Q0	103	2	QALD2
+QALD2_tr-36	Q0	97	1	QALD2
+QALD2_tr-36	Q0	123	2	QALD2
+QALD2_tr-36	Q0	103	2	QALD2
+QALD2_tr-36	Q0	130	2	QALD2
+QALD2_tr-36	Q0	123	2	QALD2
+QALD2_tr-36	Q0	102	1	QALD2
+QALD2_tr-4	Q0	131	2	QALD2
+QALD2_tr-4	Q0	131	2	QALD2
+QALD2_tr-41	Q0	132	2	QALD2
+QALD2_tr-42	Q0	133	2	QALD2
+QALD2_tr-42	Q0	134	2	QALD2
+QALD2_tr-42	Q0	135	2	QALD2
+QALD2_tr-42	Q0	136	2	QALD2
+QALD2_tr-42	Q0	137	2	QALD2
+QALD2_tr-42	Q0	138	1	QALD2
+QALD2_tr-43	Q0	139	2	QALD2
+QALD2_tr-43	Q0	83	2	QALD2
+QALD2_tr-44	Q0	140	2	QALD2
+QALD2_tr-44	Q0	141	2	QALD2
+QALD2_tr-50	Q0	142	2	QALD2
+QALD2_tr-50	Q0	142	2	QALD2
+QALD2_tr-53	Q0	143	2	QALD2
+QALD2_tr-53	Q0	82	2	QALD2
+QALD2_tr-53	Q0	83	2	QALD2
+QALD2_tr-53	Q0	139	2	QALD2
+QALD2_tr-53	Q0	39	1	QALD2
+QALD2_tr-54	Q0	48	1	QALD2
+QALD2_tr-54	Q0	30	2	QALD2
+QALD2_tr-54	Q0	144	1	QALD2
+QALD2_tr-54	Q0	30	2	QALD2
+QALD2_tr-55	Q0	141	1	QALD2
+QALD2_tr-55	Q0	93	2	QALD2
+QALD2_tr-55	Q0	145	2	QALD2
+QALD2_tr-55	Q0	146	1	QALD2
+QALD2_tr-55	Q0	141	1	QALD2
+QALD2_tr-55	Q0	93	2	QALD2
+QALD2_tr-57	Q0	68	1	QALD2
+QALD2_tr-57	Q0	68	1	QALD2
+QALD2_tr-6	Q0	147	2	QALD2
+QALD2_tr-6	Q0	147	2	QALD2
+QALD2_tr-61	Q0	148	1	QALD2
+QALD2_tr-61	Q0	149	1	QALD2
+QALD2_tr-62	Q0	92	2	QALD2
+QALD2_tr-62	Q0	92	2	QALD2
+QALD2_tr-71	Q0	150	2	QALD2
+QALD2_tr-72	Q0	133	2	QALD2
+QALD2_tr-72	Q0	134	2	QALD2
+QALD2_tr-72	Q0	151	2	QALD2
+QALD2_tr-72	Q0	152	2	QALD2
+QALD2_tr-73	Q0	94	2	QALD2
+QALD2_tr-74	Q0	153	2	QALD2
+QALD2_tr-75	Q0	39	1	QALD2
+QALD2_tr-77	Q0	26	2	QALD2
+QALD2_tr-77	Q0	72	2	QALD2
+QALD2_tr-77	Q0	26	2	QALD2
+QALD2_tr-82	Q0	154	2	QALD2
+QALD2_tr-82	Q0	154	2	QALD2
+QALD2_tr-87	Q0	155	2	QALD2
+QALD2_tr-89	Q0	156	2	QALD2
+QALD2_tr-89	Q0	157	2	QALD2
+SemSearch_ES-10	Q0	23	1	SemSearch_ES
+SemSearch_ES-10	Q0	24	1	SemSearch_ES
+SemSearch_ES-11	Q0	122	1	SemSearch_ES
+SemSearch_ES-11	Q0	158	1	SemSearch_ES
+SemSearch_ES-11	Q0	29	1	SemSearch_ES
+SemSearch_ES-11	Q0	159	1	SemSearch_ES
+SemSearch_ES-11	Q0	146	2	SemSearch_ES
+SemSearch_ES-11	Q0	30	1	SemSearch_ES
+SemSearch_ES-11	Q0	68	1	SemSearch_ES
+SemSearch_ES-11	Q0	31	1	SemSearch_ES
+SemSearch_ES-11	Q0	122	1	SemSearch_ES
+SemSearch_ES-11	Q0	160	1	SemSearch_ES
+SemSearch_ES-11	Q0	158	1	SemSearch_ES
+SemSearch_ES-11	Q0	29	1	SemSearch_ES
+SemSearch_ES-11	Q0	161	1	SemSearch_ES
+SemSearch_ES-11	Q0	146	2	SemSearch_ES
+SemSearch_ES-11	Q0	162	2	SemSearch_ES
+SemSearch_ES-11	Q0	30	1	SemSearch_ES
+SemSearch_ES-11	Q0	68	1	SemSearch_ES
+SemSearch_ES-12	Q0	23	2	SemSearch_ES
+SemSearch_ES-12	Q0	24	1	SemSearch_ES
+SemSearch_ES-12	Q0	163	1	SemSearch_ES
+SemSearch_ES-12	Q0	40	2	SemSearch_ES
+SemSearch_ES-125	Q0	164	0	SemSearch_ES
+SemSearch_ES-125	Q0	164	2	SemSearch_ES
+SemSearch_ES-127	Q0	150	2	SemSearch_ES
+SemSearch_ES-141	Q0	165	2	SemSearch_ES
+SemSearch_ES-16	Q0	140	1	SemSearch_ES
+SemSearch_ES-16	Q0	141	1	SemSearch_ES
+SemSearch_ES-18	Q0	166	1	SemSearch_ES
+SemSearch_ES-2	Q0	11	2	SemSearch_ES
+SemSearch_ES-2	Q0	116	1	SemSearch_ES
+SemSearch_ES-20	Q0	0	1	SemSearch_ES
+SemSearch_ES-20	Q0	0	2	SemSearch_ES
+SemSearch_ES-20	Q0	167	1	SemSearch_ES
+SemSearch_ES-20	Q0	168	1	SemSearch_ES
+SemSearch_ES-20	Q0	169	1	SemSearch_ES
+SemSearch_ES-21	Q0	11	1	SemSearch_ES
+SemSearch_ES-21	Q0	30	1	SemSearch_ES
+SemSearch_ES-21	Q0	30	1	SemSearch_ES
+SemSearch_ES-22	Q0	170	1	SemSearch_ES
+SemSearch_ES-22	Q0	23	1	SemSearch_ES
+SemSearch_ES-22	Q0	170	1	SemSearch_ES
+SemSearch_ES-22	Q0	24	1	SemSearch_ES
+SemSearch_ES-23	Q0	23	2	SemSearch_ES
+SemSearch_ES-23	Q0	24	2	SemSearch_ES
+SemSearch_ES-24	Q0	100	1	SemSearch_ES
+SemSearch_ES-24	Q0	171	1	SemSearch_ES
+SemSearch_ES-24	Q0	44	1	SemSearch_ES
+SemSearch_ES-24	Q0	100	1	SemSearch_ES
+SemSearch_ES-26	Q0	172	1	SemSearch_ES
+SemSearch_ES-26	Q0	173	1	SemSearch_ES
+SemSearch_ES-26	Q0	172	1	SemSearch_ES
+SemSearch_ES-28	Q0	174	2	SemSearch_ES
+SemSearch_ES-28	Q0	0	2	SemSearch_ES
+SemSearch_ES-28	Q0	117	1	SemSearch_ES
+SemSearch_ES-28	Q0	0	2	SemSearch_ES
+SemSearch_ES-28	Q0	132	1	SemSearch_ES
+SemSearch_ES-28	Q0	117	1	SemSearch_ES
+SemSearch_ES-28	Q0	44	2	SemSearch_ES
+SemSearch_ES-33	Q0	71	2	SemSearch_ES
+SemSearch_ES-33	Q0	122	1	SemSearch_ES
+SemSearch_ES-33	Q0	175	1	SemSearch_ES
+SemSearch_ES-33	Q0	29	1	SemSearch_ES
+SemSearch_ES-33	Q0	159	1	SemSearch_ES
+SemSearch_ES-33	Q0	146	2	SemSearch_ES
+SemSearch_ES-33	Q0	92	1	SemSearch_ES
+SemSearch_ES-33	Q0	122	1	SemSearch_ES
+SemSearch_ES-33	Q0	146	2	SemSearch_ES
+SemSearch_ES-34	Q0	71	2	SemSearch_ES
+SemSearch_ES-34	Q0	68	1	SemSearch_ES
+SemSearch_ES-34	Q0	68	1	SemSearch_ES
+SemSearch_ES-38	Q0	176	2	SemSearch_ES
+SemSearch_ES-38	Q0	177	2	SemSearch_ES
+SemSearch_ES-49	Q0	25	1	SemSearch_ES
+SemSearch_ES-49	Q0	30	1	SemSearch_ES
+SemSearch_ES-49	Q0	116	1	SemSearch_ES
+SemSearch_ES-49	Q0	30	1	SemSearch_ES
+SemSearch_ES-5	Q0	178	1	SemSearch_ES
+SemSearch_ES-52	Q0	179	1	SemSearch_ES
+SemSearch_ES-56	Q0	146	2	SemSearch_ES
+SemSearch_ES-56	Q0	146	2	SemSearch_ES
+SemSearch_ES-57	Q0	25	2	SemSearch_ES
+SemSearch_ES-57	Q0	142	1	SemSearch_ES
+SemSearch_ES-57	Q0	11	2	SemSearch_ES
+SemSearch_ES-57	Q0	85	2	SemSearch_ES
+SemSearch_ES-57	Q0	116	2	SemSearch_ES
+SemSearch_ES-57	Q0	142	1	SemSearch_ES
+SemSearch_ES-57	Q0	180	1	SemSearch_ES
+SemSearch_ES-57	Q0	181	1	SemSearch_ES
+SemSearch_ES-6	Q0	105	2	SemSearch_ES
+SemSearch_ES-6	Q0	106	2	SemSearch_ES
+SemSearch_ES-60	Q0	85	1	SemSearch_ES
+SemSearch_ES-60	Q0	181	1	SemSearch_ES
+SemSearch_ES-7	Q0	164	1	SemSearch_ES
+SemSearch_ES-71	Q0	23	1	SemSearch_ES
+SemSearch_ES-71	Q0	182	1	SemSearch_ES
+SemSearch_ES-71	Q0	40	1	SemSearch_ES
+SemSearch_ES-76	Q0	39	1	SemSearch_ES
+SemSearch_ES-80	Q0	183	2	SemSearch_ES
+SemSearch_ES-80	Q0	184	2	SemSearch_ES
+SemSearch_ES-80	Q0	67	2	SemSearch_ES
+SemSearch_ES-80	Q0	185	2	SemSearch_ES
+SemSearch_ES-80	Q0	70	2	SemSearch_ES
+SemSearch_ES-82	Q0	39	1	SemSearch_ES
+SemSearch_ES-83	Q0	41	1	SemSearch_ES
+SemSearch_ES-84	Q0	68	2	SemSearch_ES
+SemSearch_ES-84	Q0	68	2	SemSearch_ES
+SemSearch_ES-88	Q0	25	1	SemSearch_ES
+SemSearch_ES-88	Q0	48	1	SemSearch_ES
+SemSearch_ES-89	Q0	186	1	SemSearch_ES
+SemSearch_ES-89	Q0	100	1	SemSearch_ES
+SemSearch_ES-89	Q0	187	1	SemSearch_ES
+SemSearch_ES-89	Q0	100	1	SemSearch_ES
+SemSearch_ES-93	Q0	188	1	SemSearch_ES
+SemSearch_ES-93	Q0	164	1	SemSearch_ES
+SemSearch_ES-93	Q0	164	1	SemSearch_ES
+SemSearch_ES-95	Q0	23	1	SemSearch_ES
+SemSearch_ES-95	Q0	24	1	SemSearch_ES
+SemSearch_ES-96	Q0	150	1	SemSearch_ES
+SemSearch_ES-97	Q0	31	1	SemSearch_ES
+SemSearch_ES-97	Q0	189	1	SemSearch_ES
+SemSearch_ES-98	Q0	186	1	SemSearch_ES
+SemSearch_ES-98	Q0	187	1	SemSearch_ES
+SemSearch_LS-10	Q0	159	2	ListSerach
+SemSearch_LS-10	Q0	161	2	ListSerach
+SemSearch_LS-17	Q0	190	2	ListSerach
+SemSearch_LS-17	Q0	191	2	ListSerach
+SemSearch_LS-17	Q0	190	2	ListSerach
+SemSearch_LS-17	Q0	192	2	ListSerach
+SemSearch_LS-17	Q0	193	2	ListSerach
+SemSearch_LS-17	Q0	194	1	ListSerach
+SemSearch_LS-17	Q0	39	1	ListSerach
+SemSearch_LS-17	Q0	195	1	ListSerach
+SemSearch_LS-17	Q0	196	2	ListSerach
+SemSearch_LS-17	Q0	197	2	ListSerach
+SemSearch_LS-17	Q0	198	2	ListSerach
+SemSearch_LS-19	Q0	199	2	ListSerach
+SemSearch_LS-2	Q0	103	2	ListSerach
+SemSearch_LS-20	Q0	86	2	ListSerach
+SemSearch_LS-20	Q0	86	2	ListSerach
+SemSearch_LS-25	Q0	66	2	ListSerach
+SemSearch_LS-25	Q0	69	2	ListSerach
+SemSearch_LS-29	Q0	200	1	ListSerach
+SemSearch_LS-29	Q0	52	2	ListSerach
+SemSearch_LS-29	Q0	201	1	ListSerach
+SemSearch_LS-29	Q0	53	1	ListSerach
+SemSearch_LS-34	Q0	67	2	ListSerach
+SemSearch_LS-34	Q0	70	2	ListSerach
+SemSearch_LS-35	Q0	0	1	ListSerach
+SemSearch_LS-35	Q0	0	1	ListSerach
+SemSearch_LS-35	Q0	202	1	ListSerach
+SemSearch_LS-35	Q0	190	1	ListSerach
+SemSearch_LS-35	Q0	195	1	ListSerach
+SemSearch_LS-35	Q0	203	0	ListSerach
+SemSearch_LS-35	Q0	40	1	ListSerach
+SemSearch_LS-36	Q0	12	2	ListSerach
+SemSearch_LS-4	Q0	78	1	ListSerach
+SemSearch_LS-4	Q0	204	1	ListSerach
+SemSearch_LS-4	Q0	205	1	ListSerach
+SemSearch_LS-44	Q0	133	2	ListSerach
+SemSearch_LS-44	Q0	206	2	ListSerach
+SemSearch_LS-49	Q0	141	2	ListSerach
+SemSearch_LS-49	Q0	93	1	ListSerach
+SemSearch_LS-49	Q0	141	2	ListSerach
+SemSearch_LS-49	Q0	93	1	ListSerach
+SemSearch_LS-49	Q0	207	1	ListSerach
+SemSearch_LS-6	Q0	170	1	ListSerach
+SemSearch_LS-6	Q0	23	2	ListSerach
+SemSearch_LS-6	Q0	208	2	ListSerach
+SemSearch_LS-6	Q0	209	2	ListSerach
+SemSearch_LS-6	Q0	210	1	ListSerach
+SemSearch_LS-6	Q0	170	1	ListSerach
+SemSearch_LS-6	Q0	24	2	ListSerach
+TREC_Entity-1	Q0	211	1	ListSerach
+TREC_Entity-1	Q0	212	1	ListSerach
+TREC_Entity-10	Q0	186	2	ListSerach
+TREC_Entity-10	Q0	187	2	ListSerach
+TREC_Entity-10	Q0	40	2	ListSerach
+TREC_Entity-11	Q0	94	1	ListSerach
+TREC_Entity-11	Q0	80	1	ListSerach
+TREC_Entity-18	Q0	183	1	ListSerach
+TREC_Entity-18	Q0	184	1	ListSerach
+TREC_Entity-18	Q0	67	2	ListSerach
+TREC_Entity-18	Q0	185	1	ListSerach
+TREC_Entity-18	Q0	70	2	ListSerach
+TREC_Entity-5	Q0	150	2	ListSerach
+TREC_Entity-5	Q0	213	2	ListSerach
+TREC_Entity-6	Q0	128	2	ListSerach
+TREC_Entity-7	Q0	214	1	ListSerach
+TREC_Entity-7	Q0	215	2	ListSerach
+TREC_Entity-7	Q0	216	2	ListSerach

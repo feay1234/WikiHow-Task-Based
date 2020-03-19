@@ -58,19 +58,22 @@ def read_pairs_dict(file):
 
 
 def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data, args):
-    batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
+    batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': [], 'label': [], 'restriction': []}
     if args.model == "sigir_sota":
-        for qid, query_tok, etype in _iter_train_pairs(model, dataset, train_pairs, qrels,
+        for qid, query_tok, etype, label in _iter_train_pairs(model, dataset, train_pairs, qrels,
                                                                                       args):
             batch['query_id'].append(qid)
             batch['query_tok'].append(query_tok)
             tmp = np.zeros(model.propNum)
             tmp[list(args.type2pids[etype])] = 1
-            batch['doc_tok'].append(tmp)
+            batch['restriction'].append(tmp)
+            tmp = np.zeros(model.propNum)
+            tmp[[int(i) for i in label]] = 1
+            batch['label'].append(tmp)
 
             if len(batch['query_id']) // 2 == batch_size:
                 yield _pack_n_ship(batch, data, args)
-                batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
+                batch = {'query_id': [], 'query_tok': [], 'label': [], 'restriction': []}
     else:
         for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_train_pairs(model, dataset, train_pairs, qrels,
                                                                                       args):
@@ -97,7 +100,7 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 continue
 
             if args.model == "sigir_sota":
-                yield qid, model.tokenize(ds_queries[qid]), ds_qtypes[qid]
+                yield qid, model.tokenize(ds_queries[qid]), ds_qtypes[qid], pos_ids
             else:
                 pos_id = random.choice(pos_ids)
                 neg_ids = [did for did in train_pairs[qid] if qrels.get(qid, {}).get(did, 0) == 0]
@@ -126,23 +129,42 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
 
 
 def iter_valid_records(model, dataset, run, batch_size, data, args):
-    batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
+    batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': [], 'label': [], 'restriction':[] }
 
-    for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_valid_records(model, dataset, run, args):
-        batch['query_id'].append(qid)
-        batch['doc_id'].append(did)
-        batch['query_tok'].append(query_tok)
-        batch['doc_tok'].append(doc_tok)
-        batch['wiki_tok'].append(wiki_tok)
-        batch['question_tok'].append(question_tok)
+    if args.model == "sigir_sota":
+        for qid, query_tok, etype, label in _iter_valid_records(model, dataset, run, args):
+            batch['query_id'].append(qid)
+            batch['query_tok'].append(query_tok)
+            tmp = np.zeros(model.propNum)
+            tmp[list(args.type2pids[etype])] = 1
+            batch['restriction'].append(tmp)
+            tmp = np.zeros(model.propNum)
+            tmp[[int(i) for i in label]] = 1
+            batch['label'].append(tmp)
 
-        if len(batch['query_id']) == batch_size:
+            if len(batch['query_id']) == batch_size:
+                yield _pack_n_ship(batch, data, args)
+                batch = {'query_id': [], 'query_tok': [], 'label': [], 'restriction': []}
+        # final batch
+        if len(batch['query_id']) > 0:
             yield _pack_n_ship(batch, data, args)
-            batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
 
-    # final batch
-    if len(batch['query_id']) > 0:
-        yield _pack_n_ship(batch, data, args)
+    else:
+        for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_valid_records(model, dataset, run, args):
+            batch['query_id'].append(qid)
+            batch['doc_id'].append(did)
+            batch['query_tok'].append(query_tok)
+            batch['doc_tok'].append(doc_tok)
+            batch['wiki_tok'].append(wiki_tok)
+            batch['question_tok'].append(question_tok)
+
+            if len(batch['query_id']) == batch_size:
+                yield _pack_n_ship(batch, data, args)
+                batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
+
+        # final batch
+        if len(batch['query_id']) > 0:
+            yield _pack_n_ship(batch, data, args)
 
 
 def _iter_valid_records(model, dataset, run, args):
@@ -151,13 +173,17 @@ def _iter_valid_records(model, dataset, run, args):
         query_tok = model.tokenize(ds_queries[qid])
         wiki_tok = model.tokenize(ds_wikis[qid])
         question_tok = model.tokenize(ds_questions[qid])
-        for did in run[qid]:
-            doc = ds_docs.get(did)
-            if doc is None:
-                tqdm.write(f'missing doc {did}! Skipping')
-                continue
-            doc_tok = model.tokenize(doc)
-            yield qid, did, query_tok, doc_tok, wiki_tok, question_tok
+
+        if args.model == "sigir_sota":
+            yield qid, model.tokenize(ds_queries[qid]), ds_qtypes[qid], run[qid]
+        else:
+            for did in run[qid]:
+                doc = ds_docs.get(did)
+                if doc is None:
+                    tqdm.write(f'missing doc {did}! Skipping')
+                    continue
+                doc_tok = model.tokenize(doc)
+                yield qid, did, query_tok, doc_tok, wiki_tok, question_tok
 
 
 def _pack_n_ship(batch, data, args):
@@ -223,8 +249,16 @@ def _pack_n_ship(batch, data, args):
             'wiki_mask': _mask(batch['wiki_tok'], WLEN),
             'question_mask': _mask(batch['question_tok'], QQLEN),
         }
+    elif args.model == "sigir_sota":
+        QLEN = min(args.maxlen, int(np.max([len(b) for b in batch['query_tok']])))
+        return {
+            'query_id': batch['query_id'],
+            'query_tok': _pad_crop(batch['query_tok'], QLEN),
+            'query_mask': _mask(batch['query_tok'], QLEN),
+            'label': batch['label'],
+            'restriction': batch['restriction']
+        }
     else:
-
         if args.mode == 1:
             QLEN = args.maxlen
             MAX_DLEN = 800

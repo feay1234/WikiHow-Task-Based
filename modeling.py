@@ -839,6 +839,8 @@ class SIGIR_SOTA(OriginalBertRanker):
         self.dropout = torch.nn.Dropout(0.1)
         self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
 
+        self.criterion = torch.nn.BCELoss()
+
 
         # generate prop matrix
         props = self.args.dataset[1]
@@ -888,4 +890,5 @@ class SIGIR_SOTA(OriginalBertRanker):
     def forward(self, query_tok, query_mask, restriction):
         cls_reps = self.encode_sentence_bert(query_tok, query_mask)
         mul = torch.matmul(cls_reps[-1], self.propMatrix.t())
-        return torch.sigmoid(mul * restriction.float())
+        restriction = torch.FloatTensor(restriction)
+        return torch.sigmoid(mul * restriction)

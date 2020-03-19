@@ -64,6 +64,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
 
         valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
                                                                 model_out_dir, data, args, "valid")
+
         # valid_score = np.mean(valid_results["rp"])
         valid_score = np.mean(valid_results["ndcg@10"])
         elapsed_time = time.time() - t2
@@ -123,17 +124,21 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['wiki_tok'],
                                record['question_tok'])
             elif args.model == "sigir_sota":
-                scores = model(record['query_tok'], record['query_mask'], record['doc_tok'])
+                scores = model(record['query_tok'], record['query_mask'], record['restriction'])
             else:
                 scores = model(record['query_tok'],
                                record['query_mask'],
                                record['doc_tok'],
                                record['doc_mask'])
-            # print(scores)
+
             count = len(record['query_id']) // 2
-            scores = scores.reshape(count, 2)
-            loss = torch.mean(1. - scores.softmax(dim=1)[:, 0])  # pariwse softmax
-            loss.backward()
+            if args.model == "sigir_sota":
+                loss = model.criterion(scores, torch.FloatTensor(record['label']))
+                loss.backward(retain_graph=True)
+            else:
+                scores = scores.reshape(count, 2)
+                loss = torch.mean(1. - scores.softmax(dim=1)[:, 0])  # pariwse softmax
+                loss.backward()
             total_loss += loss.item()
             total += count
             if total % BATCH_SIZE == 0:
@@ -170,16 +175,20 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
                                records['wiki_tok'],
                                records['question_tok'])
             elif args.model in ["sigir_sota"]:
-                # TODO
-                pass
+                scores = model(records['query_tok'], records['query_mask'], records['restriction'])
             else:
                 scores = model(records['query_tok'],
                                records['query_mask'],
                                records['doc_tok'],
                                records['doc_mask'])
 
-            for qid, did, score in zip(records['query_id'], records['doc_id'], scores):
-                rerank_run.setdefault(qid, {})[did] = score.item()
+            if args.model in ["sigir_sota"]:
+                for qid, score in zip(records['query_id'], scores):
+                    for idx, sc in enumerate(score):
+                        rerank_run.setdefault(qid, {})[idx] = sc
+            else:
+                for qid, did, score in zip(records['query_id'], records['doc_id'], scores):
+                    rerank_run.setdefault(qid, {})[did] = score.item()
             pbar.update(len(records['query_id']))
             # break
 
@@ -267,7 +276,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sigir_sota')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
     # parser.add_argument('--data', default='akgg-r2')
     parser.add_argument('--data', default='eai')
     parser.add_argument('--path', default="data/cedr/")
