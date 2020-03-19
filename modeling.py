@@ -845,7 +845,9 @@ class SIGIR_SOTA(OriginalBertRanker):
         self.cls = torch.nn.Linear(self.BERT_SIZE, 1)
 
         self.criterion = torch.nn.BCELoss()
-
+        # generate prop matrix
+        props = self.args.dataset[1]
+        self.propNum = len(props)
 
 
 
@@ -888,9 +890,7 @@ class SIGIR_SOTA(OriginalBertRanker):
 
     def forward(self, query_tok, query_mask, restriction):
 
-        # generate prop matrix
-        props = self.args.dataset[1]
-        self.propNum = len(props)
+
         PLen = 10
         self.propMatrix = []
         for pid in props:
