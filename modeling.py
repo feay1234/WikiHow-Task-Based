@@ -429,6 +429,7 @@ class CustomBertModel(pytorch_pretrained_bert.BertModel):
         """
         Based on pytorch_pretrained_bert.BertModel
         """
+        print(input_ids, token_type_ids)
         embedding_output = self.embeddings(input_ids, token_type_ids)
 
         extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)
