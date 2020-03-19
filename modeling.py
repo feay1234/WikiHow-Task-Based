@@ -875,6 +875,9 @@ class SIGIR_SOTA(OriginalBertRanker):
         # print(MAX_DOC_TOK_LEN, doc_tok.shape)
 
         # execute BERT model
+        print(toks)
+        print(segment_ids.long())
+        print(mask)
         result = self.bert(toks, segment_ids.long(), mask)
 
         # build CLS representation
