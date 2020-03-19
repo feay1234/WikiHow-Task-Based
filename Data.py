@@ -30,13 +30,13 @@ def read_datafiles(files):
             elif idx == 3:
                 questions[c_id] = c_text
 
-    return queries, docs, wikis, questions
+    return queries, docs, wikis, questions, qtypes
 
 
 def read_qrels_dict(file):
     result = {}
     for line in tqdm(file, desc='loading qrels (by line)', leave=False):
-        qid, _, docid, score = line.split()
+        qid, _, docid, score, _ = line.split()
         result.setdefault(qid, {})[docid] = int(score)
     return result
 
@@ -59,13 +59,21 @@ def read_pairs_dict(file):
 
 def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data, args):
     batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
-    for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_train_pairs(model, dataset, train_pairs, qrels,
-                                                                                  args):
+    if args.model == "sigir_sota":
+        for qid, query_tok, etype in _iter_train_pairs(model, dataset, train_pairs, qrels,
+                                                                                      args):
+            batch['query_id'].append(qid)
+            batch['query_tok'].append(query_tok)
+            tmp = np.zeros(model.propNum)
+            tmp[list(args.type2pids[etype])] = 1
+            batch['doc_tok'].append(tmp)
 
-        if args.model == "sigir_sota":
-            pass
-
-        else:
+            if len(batch['query_id']) // 2 == batch_size:
+                yield _pack_n_ship(batch, data, args)
+                batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
+    else:
+        for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_train_pairs(model, dataset, train_pairs, qrels,
+                                                                                      args):
             batch['query_id'].append(qid)
             batch['doc_id'].append(did)
             batch['query_tok'].append(query_tok)
@@ -79,7 +87,7 @@ def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data, args)
 
 
 def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
-    ds_queries, ds_docs, ds_wikis, ds_questions = dataset
+    ds_queries, ds_docs, ds_wikis, ds_questions, ds_qtypes = dataset
     while True:
         qids = list(train_pairs.keys())
         random.shuffle(qids)
@@ -89,8 +97,7 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 continue
 
             if args.model == "sigir_sota":
-
-                yield qid, pos_id, model.tokenize(ds_queries[qid])
+                yield qid, model.tokenize(ds_queries[qid]), ds_qtypes[qid]
             else:
                 pos_id = random.choice(pos_ids)
                 neg_ids = [did for did in train_pairs[qid] if qrels.get(qid, {}).get(did, 0) == 0]
@@ -139,7 +146,7 @@ def iter_valid_records(model, dataset, run, batch_size, data, args):
 
 
 def _iter_valid_records(model, dataset, run, args):
-    ds_queries, ds_docs, ds_wikis, ds_questions = dataset
+    ds_queries, ds_docs, ds_wikis, ds_questions, ds_qtypes = dataset
     for qid in run:
         query_tok = model.tokenize(ds_queries[qid])
         wiki_tok = model.tokenize(ds_wikis[qid])

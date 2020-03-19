@@ -123,7 +123,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['wiki_tok'],
                                record['question_tok'])
             elif args.model == "sigir_sota":
-                scores = model(record['query_tok'], record['query_mask'])
+                scores = model(record['query_tok'], record['query_mask'], record['doc_tok'])
             else:
                 scores = model(record['query_tok'],
                                record['query_mask'],
@@ -265,15 +265,11 @@ def result2file(path, name, format, res, qids, fold):
         thefile.write("%d\t%s\t%f\n" % (fold, q, r))
     thefile.close()
 
-    # 'cedr_pacrr': modeling.CedrPacrrRanker,
-    # 'cedr_knrm': modeling.CedrKnrmRanker,
-    # 'cedr_drmm': modeling.CedrDrmmRanker
-
-
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sigir_sota')
-    parser.add_argument('--data', default='akgg-r2')
+    # parser.add_argument('--data', default='akgg-r2')
+    parser.add_argument('--data', default='eai')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikipedia")
     parser.add_argument('--questionfile', default="question-qq")
@@ -358,14 +354,13 @@ def main_cli():
 
     print(modelName)
 
-    df = pd.read_csv("%s%s-qrel.tsv" % (args.path, args.data.split("-")[0]), sep="\t", names=["qid", "empty", "pid", "rele_label"])
+    df = pd.read_csv("%s%s-qrel.tsv" % (args.path, args.data.split("-")[0]), sep="\t", names=["qid", "empty", "pid", "rele_label", "etype"])
     qrelDict = collections.defaultdict(dict)
-    for qid, prop, label in df[['qid', 'pid', 'rele_label']].values:
+    type2pids = collections.defaultdict(set)
+    for qid, prop, label, etype in df[['qid', 'pid', 'rele_label', 'etype']].values:
         qrelDict[str(qid)][str(prop)] = int(label)
-
-
-    type2prop = df.groupby("")
-
+        type2pids[str(etype)].add(prop)
+    args.type2pids = type2pids
 
 
     metricKeys = {"%s@%d" % (i, j): [] for i in ["p", "r", "ndcg", "nerr"] for j in [5, 10, 15, 20]}
