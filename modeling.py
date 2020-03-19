@@ -6,6 +6,7 @@ import torch.nn.functional as F
 import pytorch_pretrained_bert
 from pytorch_pretrained_bert import BertModel
 
+import Data
 import modeling_util
 import numpy as np
 from Data import _mask, _pad_crop
@@ -883,7 +884,8 @@ class SIGIR_SOTA(OriginalBertRanker):
         print(toks)
         print(segment_ids.long())
         print(mask)
-        result = self.bert(toks, segment_ids.long(), mask)
+
+        result = self.bert(toks.to(Data.device), segment_ids.long().to(Data.device), mask.to(Data.device))
 
         # build CLS representation
         cls_results = []
