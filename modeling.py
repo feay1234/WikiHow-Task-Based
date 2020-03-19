@@ -430,7 +430,6 @@ class CustomBertModel(pytorch_pretrained_bert.BertModel):
         """
         Based on pytorch_pretrained_bert.BertModel
         """
-        print(input_ids, token_type_ids)
         embedding_output = self.embeddings(input_ids, token_type_ids)
 
         extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)
@@ -634,9 +633,6 @@ class SBert(OriginalBertRanker):
         # print(MAX_DOC_TOK_LEN, doc_tok.shape)
 
         # execute BERT model
-        print(toks)
-        print(segment_ids.long())
-        print(mask)
         result = self.bert(toks, segment_ids.long(), mask)
 
         # build CLS representation
@@ -896,8 +892,6 @@ class SIGIR_SOTA(OriginalBertRanker):
         for pid in self.props:
             prop_tok = _pad_crop([self.tokenize(self.props[pid])], PLen)
             prop_mask = _mask([self.tokenize(self.props[pid])], PLen)
-            # print(prop_tok)
-            # print(prop_mask)
             tmp = self.encode_sentence_bert(prop_tok, prop_mask)[-1]
             self.propMatrix.append(tmp)
 
