@@ -884,9 +884,7 @@ class SIGIR_SOTA(OriginalBertRanker):
 
         return cls_results
 
-    def forward(self, query_tok, query_mask, restriction):
-
-
+    def init(self):
         PLen = 10
         self.propMatrix = []
         for pid in self.props:
@@ -896,6 +894,10 @@ class SIGIR_SOTA(OriginalBertRanker):
             self.propMatrix.append(tmp)
 
         self.propMatrix = torch.cat(self.propMatrix, dim=0)
+
+    def forward(self, query_tok, query_mask, restriction):
+
+
 
 
 

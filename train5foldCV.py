@@ -106,6 +106,8 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     GRAD_ACC_SIZE = 2
     total = 0
     model.train()
+    if args.model == "sigir_sota":
+        model.init()
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
