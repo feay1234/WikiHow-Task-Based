@@ -847,20 +847,7 @@ class SIGIR_SOTA(OriginalBertRanker):
         self.criterion = torch.nn.BCELoss()
 
 
-        # generate prop matrix
-        props = self.args.dataset[1]
-        self.propNum = len(props)
-        PLen = 10
-        self.propMatrix = []
-        for pid in props:
-            prop_tok = _pad_crop([self.tokenize(props[pid])], PLen)
-            prop_mask = _mask([self.tokenize(props[pid])], PLen)
-            print(prop_tok)
-            print(prop_mask)
-            tmp = self.encode_sentence_bert(prop_tok, prop_mask)[-1]
-            self.propMatrix.append(tmp)
 
-        self.propMatrix = torch.cat(self.propMatrix, dim=0)
 
     def encode_sentence_bert(self, query_tok, query_mask):
         BATCH, QLEN = query_tok.shape
@@ -881,9 +868,9 @@ class SIGIR_SOTA(OriginalBertRanker):
         # print(MAX_DOC_TOK_LEN, doc_tok.shape)
 
         # execute BERT model
-        print(toks)
-        print(segment_ids.long())
-        print(mask)
+        # print(toks)
+        # print(segment_ids.long())
+        # print(mask)
 
         result = self.bert(toks.to(Data.device), segment_ids.long().to(Data.device), mask.to(Data.device))
 
@@ -900,6 +887,24 @@ class SIGIR_SOTA(OriginalBertRanker):
         return cls_results
 
     def forward(self, query_tok, query_mask, restriction):
+
+        # generate prop matrix
+        props = self.args.dataset[1]
+        self.propNum = len(props)
+        PLen = 10
+        self.propMatrix = []
+        for pid in props:
+            prop_tok = _pad_crop([self.tokenize(props[pid])], PLen)
+            prop_mask = _mask([self.tokenize(props[pid])], PLen)
+            # print(prop_tok)
+            # print(prop_mask)
+            tmp = self.encode_sentence_bert(prop_tok, prop_mask)[-1]
+            self.propMatrix.append(tmp)
+
+        self.propMatrix = torch.cat(self.propMatrix, dim=0)
+
+
+
         cls_reps = self.encode_sentence_bert(query_tok, query_mask)
         mul = torch.matmul(cls_reps[-1], self.propMatrix.t())
         restriction = torch.FloatTensor(restriction)
