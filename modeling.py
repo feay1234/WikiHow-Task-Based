@@ -902,4 +902,6 @@ class SIGIR_SOTA(OriginalBertRanker):
         cls_reps = self.encode_sentence_bert(query_tok, query_mask)
         mul = torch.matmul(cls_reps[-1], self.propMatrix.t())
         restriction = torch.FloatTensor(restriction)
+        restriction =  torch.tensor(restriction).float().cuda() if device.type == 'cuda' else torch.tensor(restriction).float()
+
         return torch.sigmoid(mul * restriction)
