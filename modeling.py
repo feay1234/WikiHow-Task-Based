@@ -846,8 +846,8 @@ class SIGIR_SOTA(OriginalBertRanker):
 
         self.criterion = torch.nn.BCELoss()
         # generate prop matrix
-        props = self.args.dataset[1]
-        self.propNum = len(props)
+        self.props = self.args.dataset[1]
+        self.propNum = len(self.props)
 
 
 
@@ -893,9 +893,9 @@ class SIGIR_SOTA(OriginalBertRanker):
 
         PLen = 10
         self.propMatrix = []
-        for pid in props:
-            prop_tok = _pad_crop([self.tokenize(props[pid])], PLen)
-            prop_mask = _mask([self.tokenize(props[pid])], PLen)
+        for pid in self.props:
+            prop_tok = _pad_crop([self.tokenize(self.props[pid])], PLen)
+            prop_mask = _mask([self.tokenize(self.props[pid])], PLen)
             # print(prop_tok)
             # print(prop_mask)
             tmp = self.encode_sentence_bert(prop_tok, prop_mask)[-1]
