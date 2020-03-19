@@ -139,6 +139,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                 scores = scores.reshape(count, 2)
                 loss = torch.mean(1. - scores.softmax(dim=1)[:, 0])  # pariwse softmax
                 loss.backward()
+
             total_loss += loss.item()
             total += count
             if total % BATCH_SIZE == 0:
@@ -276,7 +277,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sigir_sota')
     # parser.add_argument('--data', default='akgg-r2')
     parser.add_argument('--data', default='eai')
     parser.add_argument('--path', default="data/cedr/")
