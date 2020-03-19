@@ -856,7 +856,8 @@ class SIGIR_SOTA(OriginalBertRanker):
             prop_mask = _mask([self.tokenize(props[pid])], PLen)
             print(prop_tok)
             print(prop_mask)
-            self.propMatrix.append(self.encode_sentence_bert(prop_tok, prop_mask)[-1])
+            tmp = self.encode_sentence_bert(prop_tok, prop_mask)[-1]
+            self.propMatrix.append(tmp)
 
         self.propMatrix = torch.cat(self.propMatrix, dim=0)
 
