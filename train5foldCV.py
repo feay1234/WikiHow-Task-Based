@@ -135,8 +135,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
 
             count = len(record['query_id']) // 2
             if args.model == "sigir_sota":
-                label =  torch.FloatTensor(record['label'])
-                label = torch.tensor(label).float().cuda() if Data.device.type == 'cuda' else torch.tensor(label).float()
+                label = torch.tensor(record['label']).float().cuda() if Data.device.type == 'cuda' else torch.tensor(record['label']).float()
                 loss = model.criterion(scores, label)
                 loss.backward(retain_graph=True)
             else:

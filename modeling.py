@@ -863,13 +863,6 @@ class SIGIR_SOTA(OriginalBertRanker):
         segment_ids = torch.cat([ONES] * (2 + QLEN), dim=1)
         toks[toks == -1] = 0  # remove padding (will be masked anyway)
 
-        # print(MAX_DOC_TOK_LEN, doc_tok.shape)
-
-        # execute BERT model
-        # print(toks)
-        # print(segment_ids.long())
-        # print(mask)
-
         result = self.bert(toks.to(Data.device), segment_ids.long().to(Data.device), mask.to(Data.device))
 
         # build CLS representation
@@ -896,14 +889,8 @@ class SIGIR_SOTA(OriginalBertRanker):
         self.propMatrix = torch.cat(self.propMatrix, dim=0)
 
     def forward(self, query_tok, query_mask, restriction):
-
-
-
-
-
         cls_reps = self.encode_sentence_bert(query_tok, query_mask)
         mul = torch.matmul(cls_reps[-1], self.propMatrix.t())
-        restriction = torch.FloatTensor(restriction)
-        restriction =  torch.tensor(restriction).float().cuda() if device.type == 'cuda' else torch.tensor(restriction).float()
+        restriction = torch.tensor(restriction).float().cuda() if device.type == 'cuda' else torch.tensor(restriction).float()
 
         return torch.sigmoid(mul * restriction)
