@@ -29,11 +29,11 @@ pretrain = {'albert':'albert-xlarge-v2', 'bert':'bert-large-uncased', 'distilber
 pretrainSQUAD = {'albert':'ktrapeznikov/albert-xlarge-v2-squad-v2', 'bert':'bert-large-uncased-whole-word-masking-finetuned-squad', 'distilbert':'distilbert-base-uncased-distilled-squad'}
 pretrainFile = pretrain[args.model] if args.pre == "" else pretrainSQUAD[args.model]
 
-modelName = "%s_%s_%s" % (args.model, pretrainFile, args.train)
+modelName = "%s_%s_%s" % (args.model, pretrainFile.replace("/","-"), args.train)
 
 
 # Create the QuestionAnsweringModel
-model = QuestionAnsweringModel(args.model, pretrainFile.replace("/","-"), use_cuda=torch.cuda.is_available(), args={'reprocess_input_data': True, 'overwrite_output_dir': True})
+model = QuestionAnsweringModel(args.model, pretrainFile, use_cuda=torch.cuda.is_available(), args={'reprocess_input_data': True, 'overwrite_output_dir': True})
 
 # Train the model with JSON file
 model.train_model('data/dialog/%s.json' % args.train)
