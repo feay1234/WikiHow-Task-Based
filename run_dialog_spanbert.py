@@ -14,7 +14,7 @@ parser.add_argument('--pre', type=str, default="")
 args = parser.parse_args()
 
 pretrain = {'albert':'albert-xlarge-v2', 'bert':'bert-large-uncased', 'distilbert':'distilbert-base-uncased'}
-pretrainSQUAD = {'albert':'albert-xlarge-v2-squad-v2', 'bert':'bert-large-uncased-whole-word-masking-finetuned-squad', 'distilbert':'distilbert-base-uncased-distilled-squad'}
+pretrainSQUAD = {'albert':'ktrapeznikov/albert-xlarge-v2-squad-v2', 'bert':'bert-large-uncased-whole-word-masking-finetuned-squad', 'distilbert':'distilbert-base-uncased-distilled-squad'}
 pretrainFile = pretrain[args.model] if args.pre == "" else pretrainSQUAD[args.model]
 
 
