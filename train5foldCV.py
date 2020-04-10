@@ -151,6 +151,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
             pbar.update(count)
             if total >= BATCH_SIZE * BATCHES_PER_EPOCH:
                 return total_loss
+            # break
 
 
 def validate(model, dataset, run, qrel, epoch, model_out_dir, data, args, desc):
