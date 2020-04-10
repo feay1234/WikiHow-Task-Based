@@ -4,8 +4,9 @@ from simpletransformers.question_answering import QuestionAnsweringModel
 import logging
 import torch, os
 
-def print2file(path, name, format, printout):
-    print(printout)
+def print2file(path, name, format, printout,enablePrint=True):
+    if enablePrint:
+        print(printout)
     if not os.path.exists(path):
         os.makedirs(path)
     thefile = open(path + name + format, 'a')
@@ -40,9 +41,8 @@ model.train_model('data/dialog/%s.json' % args.train)
 # Evaluate the model. (Being lazy and evaluating on the train data itself)
 result, text = model.eval_model('data/dialog/%s.json' % args.test)
 
-print(result)
-print(text)
-print2file(args.out_dir, modelName, ".res", result)
+print2file(args.out_dir, modelName, ".res", result, True)
+print2file(args.out_dir, modelName, ".out", text, False)
 
 print('-------------------')
 
