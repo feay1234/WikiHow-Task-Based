@@ -47,8 +47,8 @@ if __name__ == "__main__":
     model = baseline()
     for i in range(3):
         model.fit(x_train, y_train, batch_size=32)
-        results = model.evaluate(x_test, y_test, batch_size=128, verbose=0)
+        #results = model.evaluate(x_test, y_test, batch_size=128, verbose=0)
         print("mse:", results)
-        #y_pred = model.predict(x_train)
-        #print('Mean squared error: %.2f'
-        #      % mean_squared_error(y_train, y_pred))
+        y_pred = model.predict(x_train)
+        print('Mean squared error: %.2f'
+              % mean_squared_error(y_train, y_pred))
