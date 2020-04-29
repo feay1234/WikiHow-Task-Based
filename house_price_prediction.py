@@ -3,38 +3,36 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 import argparse
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.preprocessing import OneHotEncoder
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.callbacks import ModelCheckpoint, CSVLogger, EarlyStopping
-from keras import backend as K
+from tabulate import tabulate
 
-def rmsle_error(y_true, y_pred):
-    return K.mean(K.square(y_pred - y_true), axis=-1)
+timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
 
 def main():
-
     # get parameters
     parser = argparse.ArgumentParser('Amazon - House Price Prediction')
-    parser.add_argument('--dir', type=str, help="Directory to dataset", required=False, default="data/pp-complete.csv") #"data/pp-complete.csv"
+    parser.add_argument('--dir', type=str, help="Directory to dataset", required=False, default="data/pp-complete.csv")  # "data/pp-complete.csv"
     parser.add_argument('--dim', type=int, help="Dimension of hidden layer.", default=32)
     parser.add_argument('--epoch', type=int, help="Total number of training epochs to perform.", default=100)
     parser.add_argument("--seed", type=int, help="Random seed for initialization", default=2020)
     parser.add_argument("--batch_size", type=int, help="Batch size", default=256)
     parser.add_argument("--verbose", type=int, help="Verbose (0: disable, 1: enable 2: partially enable)", default=1)
-
+    parser.add_argument("--train_on", type=str, help="Train the model on the purchases on particular time", default="2015-1-1")
+    parser.add_argument("--test_on", type=str, help="Test the model on the purchases on particular time", default="2016-1-1")
     args = parser.parse_args()
 
-    timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
+    # Model name
     model_name = "house_nn_d%d_%s" % (args.dim, timestamp)
 
     # fix random seed for reproducibility
     set_seed(args)
 
     # Load Data
-    x_train, y_train, x_val, y_val, x_test, y_test = load_data(args)
-    # x_train, y_train, x_val, y_val, x_test, y_test = x_train[:10], y_train[:10], x_val[:10], y_val[:10], x_test[:10], y_test[:10]
+    x_train, y_train, x_val, y_val, x_test, y_test, df_test = load_data(args)
 
     FEATURE_NUMBER = x_train.shape[-1]
 
@@ -46,21 +44,37 @@ def main():
     early_stop = EarlyStopping(monitor='val_loss', patience=2, verbose=args.verbose)
     checkpointer = ModelCheckpoint(filepath='%s.hdf5' % model_name, verbose=args.verbose, save_best_only=True)
 
-    for i in range(10):
+    # Train the model and validate the model on the validation set. Early Stopping: the model will stop training if the loss on the validation increases
+    model.fit(x_train, y_train, batch_size=args.batch_size, epochs=args.epoch, verbose=args.verbose, validation_data=(x_val, y_val), callbacks=[checkpointer, csv_logger, early_stop])
 
-        # Train the model and validate the model on the validation set.
-        # Early Stopping: the model will stop training if the loss on the validation increases
-        model.fit(x_train, y_train, batch_size=args.batch_size, epochs=1, verbose=args.verbose,
-                  validation_data=(x_val, y_val), callbacks=[checkpointer, csv_logger, early_stop])
+    # Use the trained model to predict the price of houses in the test set.
+    y_pred = model.predict(x_test, batch_size=args.batch_size)
 
-        # Evaluate the model on the test set.
-        # Use the trained model to predict the price of houses in the test set.
-        y_pred = model.predict(x_test, batch_size=args.batch_size)
-        # print('MAE = ' + str(mean_absolute_error(np.expm1(y_test), np.expm1(y_pred))))
-        print('MALE = ' + str(mean_absolute_error(y_test, y_pred)))
-        # print('RMSE = ' + str(np.sqrt(mean_squared_error(np.expm1(y_test), np.expm1(y_pred)))))
-        print('RMSLE = ' + str(np.sqrt(mean_squared_error(y_test, y_pred))))
-        print('R2 square ' + str(r2_score(y_test, y_pred)))
+    # Evaluation
+    all_results = []
+    results = evaluate(y_test, y_pred)
+    results["Model"] = "NueralModel"
+    all_results.append(results)
+
+    # Compare with naive baselines
+    baselines = ['mean_price', 'mean_price_propertyType', 'mean_price_duration', 'mean_price_isLondon']
+    for b in baselines:
+        y_pred = df_test[b]
+        results = evaluate(y_test, y_pred)
+        results["Model"] = b
+        all_results.append(results)
+
+    print(tabulate(pd.DataFrame(all_results)[["Model", "MAE", "MALE", "RMSE", "RMSLE"]], headers='keys', tablefmt='psql'))
+
+def evaluate(y_test, y_pred):
+    """
+    Evaluate the model on the test set using multiple metrices.
+    """
+    MAE = mean_absolute_error(np.expm1(y_test), np.expm1(y_pred))
+    MALE = mean_absolute_error(y_test, y_pred)
+    RMSE = np.sqrt(mean_squared_error(np.expm1(y_test), np.expm1(y_pred)))
+    RMSLE = np.sqrt(mean_squared_error(y_test, y_pred))
+    return {"MAE": MAE, "MALE": MALE, "RMSE": RMSE, "RMSLE": RMSLE}
 
 def generate_model(args, feature_number):
     """
@@ -84,28 +98,36 @@ def preprocessing(df):
     # remove properties that cost less than £100
     df = df[df.price > 100]
     # log
-    df = np.log1p(df['price'])
-    # year
-    df = df[(df.date >= "2014-1-1") & (df.date <= "2018-1-1")]
+    df['price'] = np.log1p(df['price'])
     return df
 
-def feature_exaction(df):
+
+def feature_exaction(args, df):
     """
     Generate a binary feature that indicates whether or not the property is in London.
     """
-
     df['isLondon'] = [1 if i == "LONDON" else 0 for i in df['town']]
+    df['year'] = df.date.dt.year
+
+    df_train = df[df.date < args.train_on]
+
+    for c in ["isLondon", 'propertyType', 'duration']:
+        meanPrice = df_train.groupby(c)['price'].mean().to_dict()
+        df["mean_price_%s" % c] = [meanPrice[i] for i in df[c]]
+
+    df['mean_price'] = [df_train.price.mean()] * len(df)
+
     return df
 
 def load_data(args):
     """
     Read the dataset, perform data prepropessing, extract feature
     """
-
     # We only consider price, date of the purchase, property type, lease duration and town.
-    SELECT_COLUMNS = [1,2,4,6,11]
-    # Categorical features that we use to train model
+    SELECT_COLUMNS = [1, 2, 4, 6, 11]
+    # Feature name that we use to train our model
     CATEGORY_FEATURES = ['propertyType', 'duration', 'isLondon']
+    MEAN_FEATURES = ['year', 'mean_price', 'mean_price_propertyType', 'mean_price_duration', 'mean_price_isLondon']
 
     # Read data from a given file
     df = pd.read_csv(args.dir, names=["price", "date", "propertyType", "duration", "town"], sep=",", usecols=SELECT_COLUMNS)
@@ -117,12 +139,12 @@ def load_data(args):
     df = preprocessing(df)
 
     # Feature Extraction
-    df = feature_exaction(df)
+    df = feature_exaction(args, df)
 
     # Split the data into train, validation and test sets
-    df_train = df[df.date < "2015-1-1"]
-    df_val = df[(df.date >= "2015-1-1") & (df.date < "2016-1-1")]
-    df_test = df[df.date >= "2016-1-1"]
+    df_train = df[df.date < args.train_on]
+    df_val = df[(df.date >= args.train_on) & (df.date < args.test_on)]
+    df_test = df[df.date >= args.test_on]
 
     # Create one-hot encoder and train it on the dataset
     encoder = OneHotEncoder()
@@ -133,6 +155,11 @@ def load_data(args):
     x_val = encoder.transform(df_val[CATEGORY_FEATURES].values).toarray()
     x_test = encoder.transform(df_test[CATEGORY_FEATURES].values).toarray()
 
+    # Combine categorical features and hand-crafted features
+    x_train = np.concatenate([x_train, df_train[MEAN_FEATURES].values], axis=1)
+    x_val = np.concatenate([x_val, df_val[MEAN_FEATURES].values], axis=1)
+    x_test = np.concatenate([x_test, df_test[MEAN_FEATURES].values], axis=1)
+
     # We use property's price as ground truth
     y_train = df_train['price'].values
     y_val = df_val['price'].values
@@ -141,15 +168,11 @@ def load_data(args):
     # check consistency of feature number across the train, val and test sets.
     assert x_train.shape[-1] == x_val.shape[-1] == x_test.shape[-1]
 
-    return x_train, y_train, x_val, y_val, x_test, y_test
+    return x_train, y_train, x_val, y_val, x_test, y_test, df_test
 
 def set_seed(args):
-    """
-    Set the random seed.
-    """
-
     np.random.seed(args.seed)
-    tf.random.set_seed(args.seed)
+    tf.compat.v1.set_random_seed(args.seed)
 
 if __name__ == "__main__":
     main()
