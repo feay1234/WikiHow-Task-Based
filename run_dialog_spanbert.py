@@ -1,4 +1,5 @@
 import argparse
+import json
 
 from simpletransformers.question_answering import QuestionAnsweringModel
 import logging
@@ -18,10 +19,10 @@ transformers_logger = logging.getLogger("transformers")
 transformers_logger.setLevel(logging.WARNING)
 
 parser = argparse.ArgumentParser('Dialog System with Transformers')
-parser.add_argument('--model', type=str)
-parser.add_argument('--pre', type=str, default="")
-parser.add_argument('--train', type=str)
-parser.add_argument('--test', type=str)
+parser.add_argument('--model', type=str, default="bert")
+parser.add_argument('--pre', type=str, default="squad")
+parser.add_argument('--train', type=str, default="unseenTrain")
+parser.add_argument('--test', type=str, default="unseenTest")
 parser.add_argument('--out_dir', type=str, default="data/dialog/out/")
 args = parser.parse_args()
 
@@ -39,10 +40,12 @@ model = QuestionAnsweringModel(args.model, pretrainFile, use_cuda=torch.cuda.is_
 model.train_model('data/dialog/%s.json' % args.train)
 
 # Evaluate the model. (Being lazy and evaluating on the train data itself)
-result, text = model.eval_model('data/dialog/%s.json' % args.test)
+result, out = model.eval_model('data/dialog/%s.json' % args.test)
 
 print2file(args.out_dir, modelName, ".res", result, True)
-print2file(args.out_dir, modelName, ".out", text, False)
+# save output to file
+with open('%s%s.out' % (args.out_dir, modelName), 'w') as f:
+    json.dump(out, f)
 
 print('-------------------')
 
