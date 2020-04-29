@@ -1,38 +1,26 @@
+from time import strftime, localtime
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 import argparse
 from sklearn.preprocessing import OneHotEncoder
-
-from sklearn.metrics import mean_squared_error
-import keras
-from pandas import read_csv
 from keras.models import Sequential
 from keras.layers import Dense
-from keras.wrappers.scikit_learn import KerasRegressor
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-
-# TODO
-# 1) logger
-# 2) save model
-# 3) validation
-# 4) grid search
-# 5) experiment
-# 6) abeition
+from keras.callbacks import ModelCheckpoint, CSVLogger, EarlyStopping
 
 def main():
 
     # get parameters
     parser = argparse.ArgumentParser('Amazon - House Price Prediction')
-    parser.add_argument('--dir', type=str, help="Directory to dataset", required=True) #"data/pp-complete.csv"
+    parser.add_argument('--dir', type=str, help="Directory to dataset", required=True, default="data/pp-complete.csv") #"data/pp-complete.csv"
     parser.add_argument('--dim', type=int, help="Dimension of hidden layer.", default=32)
-    parser.add_argument('--epoch', type=int, help="Total number of training epochs to perform.", default=32)
+    parser.add_argument('--epoch', type=int, help="Total number of training epochs to perform.", default=100)
     parser.add_argument("--seed", type=int, help="Random seed for initialization", default=2020)
 
     args = parser.parse_args()
+
+    timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
+    model_name = "house_nn_d%d_%s" % (args.dim, timestamp)
 
     # fix random seed for reproducibility
     set_seed(args)
@@ -44,12 +32,21 @@ def main():
 
     # Genearte a simple neural network model
     model = generate_model(args, FEATURE_NUMBER)
-    model.fit(x_train, y_train, batch_size=32)
-    results = model.evaluate(x_test, y_test, batch_size=128, verbose=0)
-    print("mse:", results)
-        #y_pred = model.predict(x_train)
-        #print('Mean squared error: %.2f'
-        #      % mean_squared_error(y_train, y_pred))
+
+    # Generate Keras callbacks for logging, early stopping and saving the model's parameters
+    csv_logger = CSVLogger('%s.log' % model_name)
+    early_stop = EarlyStopping(monitor='val_loss', patience=2, verbose=1)
+    checkpointer = ModelCheckpoint(filepath='%s.hdf5' % model_name, verbose=1, save_best_only=True)
+
+    # Train the model and validate the model on the validation set.
+    # Early Stopping: the model will stop training if the loss on the validation increases
+    model.fit(x_train[:10], y_train[:10], batch_size=128, epochs=args.epoch, verbose=1,
+              validation_data=(x_val[:10], y_val[:10]), callbacks=[checkpointer, csv_logger, early_stop])
+
+    # Evaluate the model on the test set.
+    print('\n# Evaluate on test data')
+    results = model.evaluate(x_test[:10], y_test[:10], batch_size=128)
+    print('test loss, test acc:', results)
 
 
 def generate_model(args, feature_number):
@@ -126,7 +123,6 @@ def load_data(args):
     assert x_train.shape[-1] == x_val.shape[-1] == x_test.shape[-1]
 
     return x_train, y_train, x_val, y_val, x_test, y_test
-
 
 def set_seed(args):
     """
