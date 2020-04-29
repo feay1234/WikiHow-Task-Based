@@ -3,12 +3,12 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 import argparse
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.preprocessing import OneHotEncoder
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.callbacks import ModelCheckpoint, CSVLogger, EarlyStopping
 from keras import backend as K
-
 
 def rmsle_error(y_true, y_pred):
     return K.mean(K.square(y_pred - y_true), axis=-1)
@@ -22,7 +22,7 @@ def main():
     parser.add_argument('--epoch', type=int, help="Total number of training epochs to perform.", default=100)
     parser.add_argument("--seed", type=int, help="Random seed for initialization", default=2020)
     parser.add_argument("--batch_size", type=int, help="Batch size", default=256)
-    parser.add_argument("--verbose", type=int, help="Verbose", default=1)
+    parser.add_argument("--verbose", type=int, help="Verbose (0: disable, 1: enable 2: partially enable)", default=1)
 
     args = parser.parse_args()
 
@@ -34,6 +34,7 @@ def main():
 
     # Load Data
     x_train, y_train, x_val, y_val, x_test, y_test = load_data(args)
+    # x_train, y_train, x_val, y_val, x_test, y_test = x_train[:10], y_train[:10], x_val[:10], y_val[:10], x_test[:10], y_test[:10]
 
     FEATURE_NUMBER = x_train.shape[-1]
 
@@ -45,15 +46,21 @@ def main():
     early_stop = EarlyStopping(monitor='val_loss', patience=2, verbose=args.verbose)
     checkpointer = ModelCheckpoint(filepath='%s.hdf5' % model_name, verbose=args.verbose, save_best_only=True)
 
-    # Train the model and validate the model on the validation set.
-    # Early Stopping: the model will stop training if the loss on the validation increases
-    model.fit(x_train, y_train, batch_size=args.batch_size, epochs=args.epoch, verbose=args.verbose,
-              validation_data=(x_val, y_val), callbacks=[checkpointer, csv_logger, early_stop])
+    for i in range(10):
 
-    # Evaluate the model on the test set.
-    print('\n# Evaluate on test data')
-    results = model.evaluate(x_test, y_test, batch_size=args.batch_size, verbose=args.verbose)
-    print('test loss, test acc:', results)
+        # Train the model and validate the model on the validation set.
+        # Early Stopping: the model will stop training if the loss on the validation increases
+        model.fit(x_train, y_train, batch_size=args.batch_size, epochs=1, verbose=args.verbose,
+                  validation_data=(x_val, y_val), callbacks=[checkpointer, csv_logger, early_stop])
+
+        # Evaluate the model on the test set.
+        # Use the trained model to predict the price of houses in the test set.
+        y_pred = model.predict(x_test, batch_size=args.batch_size)
+        # print('MAE = ' + str(mean_absolute_error(np.expm1(y_test), np.expm1(y_pred))))
+        print('MALE = ' + str(mean_absolute_error(y_test, y_pred)))
+        # print('RMSE = ' + str(np.sqrt(mean_squared_error(np.expm1(y_test), np.expm1(y_pred)))))
+        print('RMSLE = ' + str(np.sqrt(mean_squared_error(y_test, y_pred))))
+        print('R2 square ' + str(r2_score(y_test, y_pred)))
 
 def generate_model(args, feature_number):
     """
