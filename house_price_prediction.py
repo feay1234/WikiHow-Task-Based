@@ -83,6 +83,10 @@ def preprocessing(df):
     df = df.drop_duplicates()
     # remove properties that cost less than £100
     df = df[df.price > 100]
+    # log
+    df = np.log1p(df['price'])
+    # year
+    df = df[(df.date >= "2014-1-1") & (df.date <= "2018-1-1")]
     return df
 
 def feature_exaction(df):
