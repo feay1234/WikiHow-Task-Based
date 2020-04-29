@@ -7,15 +7,22 @@ from sklearn.preprocessing import OneHotEncoder
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.callbacks import ModelCheckpoint, CSVLogger, EarlyStopping
+from keras import backend as K
+
+
+def rmsle_error(y_true, y_pred):
+    return K.mean(K.square(y_pred - y_true), axis=-1)
 
 def main():
 
     # get parameters
     parser = argparse.ArgumentParser('Amazon - House Price Prediction')
-    parser.add_argument('--dir', type=str, help="Directory to dataset", required=True, default="data/pp-complete.csv") #"data/pp-complete.csv"
+    parser.add_argument('--dir', type=str, help="Directory to dataset", required=False, default="data/pp-complete.csv") #"data/pp-complete.csv"
     parser.add_argument('--dim', type=int, help="Dimension of hidden layer.", default=32)
     parser.add_argument('--epoch', type=int, help="Total number of training epochs to perform.", default=100)
     parser.add_argument("--seed", type=int, help="Random seed for initialization", default=2020)
+    parser.add_argument("--batch_size", type=int, help="Batch size", default=256)
+    parser.add_argument("--verbose", type=int, help="Verbose", default=1)
 
     args = parser.parse_args()
 
@@ -35,19 +42,18 @@ def main():
 
     # Generate Keras callbacks for logging, early stopping and saving the model's parameters
     csv_logger = CSVLogger('%s.log' % model_name)
-    early_stop = EarlyStopping(monitor='val_loss', patience=2, verbose=1)
-    checkpointer = ModelCheckpoint(filepath='%s.hdf5' % model_name, verbose=1, save_best_only=True)
+    early_stop = EarlyStopping(monitor='val_loss', patience=2, verbose=args.verbose)
+    checkpointer = ModelCheckpoint(filepath='%s.hdf5' % model_name, verbose=args.verbose, save_best_only=True)
 
     # Train the model and validate the model on the validation set.
     # Early Stopping: the model will stop training if the loss on the validation increases
-    model.fit(x_train[:10], y_train[:10], batch_size=128, epochs=args.epoch, verbose=1,
-              validation_data=(x_val[:10], y_val[:10]), callbacks=[checkpointer, csv_logger, early_stop])
+    model.fit(x_train, y_train, batch_size=args.batch_size, epochs=args.epoch, verbose=args.verbose,
+              validation_data=(x_val, y_val), callbacks=[checkpointer, csv_logger, early_stop])
 
     # Evaluate the model on the test set.
     print('\n# Evaluate on test data')
-    results = model.evaluate(x_test[:10], y_test[:10], batch_size=128)
+    results = model.evaluate(x_test, y_test, batch_size=args.batch_size, verbose=args.verbose)
     print('test loss, test acc:', results)
-
 
 def generate_model(args, feature_number):
     """
@@ -70,11 +76,13 @@ def preprocessing(df):
     df = df.drop_duplicates()
     # remove properties that cost less than £100
     df = df[df.price > 100]
-
     return df
 
 def feature_exaction(df):
-    # Generate a binary feature that indicates whether or not the property is in London.
+    """
+    Generate a binary feature that indicates whether or not the property is in London.
+    """
+
     df['isLondon'] = [1 if i == "LONDON" else 0 for i in df['town']]
     return df
 
@@ -110,7 +118,7 @@ def load_data(args):
     encoder.fit(df[CATEGORY_FEATURES])
 
     # We convert categorical features into one-hot features
-    x_train, y_train = encoder.transform(df_train[CATEGORY_FEATURES].values).toarray()
+    x_train = encoder.transform(df_train[CATEGORY_FEATURES].values).toarray()
     x_val = encoder.transform(df_val[CATEGORY_FEATURES].values).toarray()
     x_test = encoder.transform(df_test[CATEGORY_FEATURES].values).toarray()
 
@@ -128,13 +136,9 @@ def set_seed(args):
     """
     Set the random seed.
     """
+
     np.random.seed(args.seed)
     tf.random.set_seed(args.seed)
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
