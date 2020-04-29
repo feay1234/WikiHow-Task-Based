@@ -30,7 +30,7 @@ pretrain = {'albert':'albert-xlarge-v2', 'bert':'bert-large-uncased', 'distilber
 pretrainSQUAD = {'albert':'ktrapeznikov/albert-xlarge-v2-squad-v2', 'bert':'bert-large-uncased-whole-word-masking-finetuned-squad', 'distilbert':'distilbert-base-uncased-distilled-squad'}
 pretrainFile = pretrain[args.model] if args.pre == "" else pretrainSQUAD[args.model]
 
-modelName = "%s_%s_%s" % (args.model, pretrainFile.replace("/","-"), args.train)
+modelName = "%s_%s_%s_%s" % (args.model, pretrainFile.replace("/","-"), args.train, args.test)
 
 
 # Create the QuestionAnsweringModel
