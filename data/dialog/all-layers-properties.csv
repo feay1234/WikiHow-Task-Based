@@ -1024,7 +1024,7 @@
 "http://schema.org/releaseOf","releaseOf","The album this is a release of.","","","","http://schema.org/MusicRelease","http://schema.org/MusicAlbum","http://schema.org/albumRelease","",""
 "http://schema.org/releasedEvent","releasedEvent","The place and time the release was issued, expressed as a PublicationEvent.","","","","http://schema.org/CreativeWork","http://schema.org/PublicationEvent","","",""
 "http://schema.org/relevantOccupation","relevantOccupation","The Occupation for the JobPosting.","","","","http://schema.org/JobPosting","http://schema.org/Occupation","","",""
-"http://schema.org/relevantSpecialty","relevantSpecialty","If applicable, a medical specialty in which this entity is relevant.","","","","http://schema.org/MedicalEntity","http://schema.org/MedicalSpecialty","","",""
+"http://schema.org/relevantSpeciality","relevantSpeciality","If applicable, a medical specialty in which this entity is relevant.","","","","http://schema.org/MedicalEntity","http://schema.org/MedicalSpecialty","","",""
 "http://schema.org/remainingAttendeeCapacity","remainingAttendeeCapacity","The number of attendee places for an event that remain unallocated.","","","","http://schema.org/Event","http://schema.org/Integer","","",""
 "http://schema.org/renegotiableLoan","renegotiableLoan","Whether the terms for payment of interest can be renegotiated during the life of the loan.","","","","http://schema.org/LoanOrCredit","http://schema.org/Boolean","","",""
 "http://schema.org/repeatCount","repeatCount","Defines the number of times a recurring <a class=""localLink"" href=""http://schema.org/Event"">Event</a> will take place","","","","http://schema.org/Schedule","http://schema.org/Integer","","",""
