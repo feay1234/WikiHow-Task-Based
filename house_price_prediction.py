@@ -34,47 +34,42 @@ def main():
     # Load Data
     x_train, y_train, x_val, y_val, x_test, y_test, df_test = load_data(args)
 
-    FEATURE_NUMBER = x_train.shape[-1]
+    feature_number = x_train.shape[-1]
 
     # Genearte a simple neural network model
-    model = generate_model(args, FEATURE_NUMBER)
+    model = generate_model(args, feature_number)
 
     # Generate Keras callbacks for logging, early stopping and saving the model's parameters
     csv_logger = CSVLogger('%s.log' % model_name)
     early_stop = EarlyStopping(monitor='val_loss', patience=2, verbose=args.verbose)
     checkpointer = ModelCheckpoint(filepath='%s.hdf5' % model_name, verbose=args.verbose, save_best_only=True)
 
-    # Train the model and validate the model on the validation set. Early Stopping: the model will stop training if the loss on the validation increases
+    all_results = [] # to save models' results
+
+    # Train and evaluate neural model. We train the model and validate the model on the validation set. Early Stopping is applied and the model will stop training if the loss on the validation increases
     model.fit(x_train, y_train, batch_size=args.batch_size, epochs=args.epoch, verbose=args.verbose, validation_data=(x_val, y_val), callbacks=[checkpointer, csv_logger, early_stop])
-
-    # Use the trained model to predict the price of houses in the test set.
     y_pred = model.predict(x_test, batch_size=args.batch_size)
-
-    # Evaluation
-    all_results = []
-    results = evaluate(y_test, y_pred)
-    results["Model"] = "NueralModel"
+    results = evaluate(y_test, y_pred, "Neural model")
     all_results.append(results)
 
-    # Compare with naive baselines
+    # Train and evaluate unsupervised baselines
     baselines = ['mean_price', 'mean_price_propertyType', 'mean_price_duration', 'mean_price_isLondon']
     for b in baselines:
         y_pred = df_test[b]
-        results = evaluate(y_test, y_pred)
-        results["Model"] = b
+        results = evaluate(y_test, y_pred, b)
         all_results.append(results)
 
     print(tabulate(pd.DataFrame(all_results)[["Model", "MAE", "MALE", "RMSE", "RMSLE"]], headers='keys', tablefmt='psql'))
 
-def evaluate(y_test, y_pred):
+def evaluate(y_test, y_pred, name):
     """
-    Evaluate the model on the test set using multiple metrices.
+    Evaluate the model's prediction on the test set using multiple metrices.
     """
     MAE = mean_absolute_error(np.expm1(y_test), np.expm1(y_pred))
     MALE = mean_absolute_error(y_test, y_pred)
     RMSE = np.sqrt(mean_squared_error(np.expm1(y_test), np.expm1(y_pred)))
     RMSLE = np.sqrt(mean_squared_error(y_test, y_pred))
-    return {"MAE": MAE, "MALE": MALE, "RMSE": RMSE, "RMSLE": RMSLE}
+    return {"Model": name, "MAE": MAE, "MALE": MALE, "RMSE": RMSE, "RMSLE": RMSLE}
 
 def generate_model(args, feature_number):
     """
@@ -83,7 +78,6 @@ def generate_model(args, feature_number):
     model = Sequential()
     model.add(Dense(args.dim, input_dim=feature_number, activation='relu', kernel_initializer='normal'))
     model.add(Dense(1, kernel_initializer='normal'))
-    # Compile model
     model.compile(loss='mean_squared_error', optimizer='adam')
     return model
 
@@ -91,13 +85,13 @@ def preprocessing(df):
     """
     Perform a simple preprocessing on the dataset
     """
-    # remove rows with missing values
+    # Remove rows with missing values
     df = df.dropna()
-    # remove duplicate rows
+    # Remove duplicate rows
     df = df.drop_duplicates()
-    # remove properties that cost less than £100
+    # Remove properties that cost less than £100
     df = df[df.price > 100]
-    # log
+    # Convert price into log scale
     df['price'] = np.log1p(df['price'])
     return df
 
