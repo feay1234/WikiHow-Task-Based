@@ -210,7 +210,7 @@ def _pack_n_ship(batch, data, args):
             'question_mask': _mask(batch['question_tok'], QQLEN),
         }
 
-    elif args.model == "ms":
+    elif args.model in ["ms", "sent_transformer"]:
 
         return {
             'query_id': batch['query_id'],
