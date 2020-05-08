@@ -463,7 +463,6 @@ class UnsupRanker(OriginalBertRanker):
         res = np.array(res)
         res = res.reshape((len(res), 1))
 
-        # return cosine_similarity(query_tok, doc_tok)[0][0]
         return Data.toTensor(res)
 
     @memoize_method
@@ -493,7 +492,6 @@ class SentenceTransformerRanker(OriginalBertRanker):
 
     @memoize_method
     def tokenize(self, text):
-
         return self.encoder.encode([text])[0]
 
 class MSRanker(OriginalBertRanker):
