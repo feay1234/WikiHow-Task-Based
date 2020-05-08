@@ -441,6 +441,35 @@ class CustomBertModel(pytorch_pretrained_bert.BertModel):
 
         return [embedding_output] + encoded_layers
 
+from sklearn.metrics.pairwise import cosine_similarity
+
+class UnsupRanker(OriginalBertRanker):
+    def __init__(self, args):
+        super().__init__()
+
+        self.args = args
+        self.encoder = SentenceTransformer('bert-base-nli-stsb-mean-tokens')
+
+    def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
+
+
+        res = []
+        for i in range(query_tok.shape[0]):
+            if self.args.mode == 1:
+                res.append(cosine_similarity(query_tok, doc_tok)[0][0])
+            elif self.args.mode == 2:
+                res.append((cosine_similarity(query_tok, doc_tok)[0][0] + cosine_similarity(wiki_tok, doc_tok)[0][0])/2.0)
+
+        res = np.array(res)
+        res = res.reshape((len(res), 1))
+
+        # return cosine_similarity(query_tok, doc_tok)[0][0]
+        return Data.toTensor(res)
+
+    @memoize_method
+    def tokenize(self, text):
+        return self.encoder.encode([text])[0]
+
 class SentenceTransformerRanker(OriginalBertRanker):
     def __init__(self, args):
         super().__init__()

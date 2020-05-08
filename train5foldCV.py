@@ -36,6 +36,7 @@ MODEL_MAP = {
     'mul_cedr_pacrr': modeling.CedrPacrrRanker,
     'sigir_sota': modeling.SIGIR_SOTA,
     'sent_transformer': modeling.SentenceTransformerRanker,
+    'unsup': modeling.UnsupRanker,
 }
 
 
@@ -57,37 +58,51 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
 
     print("Fold: %d" % fold)
 
-    for epoch in range(MAX_EPOCH):
-        t2 = time.time()
-        loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args)
-        txt = f'train epoch={epoch} loss={loss}'
+    if args.model in ["unsup"]:
+
+        test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, 0,
+                                                             model_out_dir, data, args, "test")
+
+        print(test_results["ndcg@15"])
+        txt = 'new top validation score, %.4f' % np.mean(test_results["ndcg@10"])
         print2file(args.out_dir, modelName, ".txt", txt, fold)
 
-        valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
-                                                                model_out_dir, data, args, "valid")
-
-        # valid_score = np.mean(valid_results["rp"])
-        valid_score = np.mean(valid_results["ndcg@10"])
-        elapsed_time = time.time() - t2
-        txt = f'validation epoch={epoch} score={valid_score} : {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}'
-        print2file(args.out_dir, modelName, ".txt", txt, fold)
-        if top_valid_score is None or valid_score > top_valid_score:
-            top_valid_score = valid_score
-            # model.save(os.path.join(model_out_dir, 'weights.p'))
-            test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch,
-                                                                 model_out_dir, data, args, "test")
-
-            # print(test_results["ndcg@15"])
-            txt = 'new top validation score, %.4f' % np.mean(test_results["ndcg@10"])
+        bestResults = test_results
+        bestPredictions = test_predictions
+        bestQids = test_qids
+        pass
+    else:
+        for epoch in range(MAX_EPOCH):
+            t2 = time.time()
+            loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args)
+            txt = f'train epoch={epoch} loss={loss}'
             print2file(args.out_dir, modelName, ".txt", txt, fold)
 
-            bestResults = test_results
-            bestPredictions = test_predictions
-            bestQids = test_qids
+            valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
+                                                                    model_out_dir, data, args, "valid")
 
-        # elif args.earlystop and epoch >=4:
-        elif args.earlystop:
-            break
+            # valid_score = np.mean(valid_results["rp"])
+            valid_score = np.mean(valid_results["ndcg@10"])
+            elapsed_time = time.time() - t2
+            txt = f'validation epoch={epoch} score={valid_score} : {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}'
+            print2file(args.out_dir, modelName, ".txt", txt, fold)
+            if top_valid_score is None or valid_score > top_valid_score:
+                top_valid_score = valid_score
+                # model.save(os.path.join(model_out_dir, 'weights.p'))
+                test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, epoch,
+                                                                     model_out_dir, data, args, "test")
+
+                # print(test_results["ndcg@15"])
+                txt = 'new top validation score, %.4f' % np.mean(test_results["ndcg@10"])
+                print2file(args.out_dir, modelName, ".txt", txt, fold)
+
+                bestResults = test_results
+                bestPredictions = test_predictions
+                bestQids = test_qids
+
+            # elif args.earlystop and epoch >=4:
+            elif args.earlystop:
+                break
 
 
     #   save outputs to files
@@ -121,7 +136,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['wiki_mask'],
                                record['question_tok'],
                                record['question_mask'])
-            elif args.model in ["ms", "sent_transformer"]:
+            elif args.model in ["ms", "sent_transformer", "unsup"]:
                 scores = model(record['query_tok'],
                                record['doc_tok'],
                                record['wiki_tok'],
@@ -175,7 +190,7 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
                                records['wiki_mask'],
                                records['question_tok'],
                                records['question_mask'])
-            elif args.model in ["ms", "sent_transformer"]:
+            elif args.model in ["ms", "sent_transformer", "unsup"]:
                 scores = model(records['query_tok'],
                                records['doc_tok'],
                                records['wiki_tok'],
@@ -281,7 +296,7 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sent_transformer')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='unsup')
     # parser.add_argument('--data', default='akgg-r2')
     parser.add_argument('--data', default='akgg')
     parser.add_argument('--path', default="data/cedr/")
@@ -293,7 +308,7 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=1)
+    parser.add_argument('--mode', type=int, default=2)
     parser.add_argument('--maxlen', type=int, default=16)
     parser.add_argument('--earlystop', type=int, default=1)
 
