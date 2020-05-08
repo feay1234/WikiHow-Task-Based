@@ -15,14 +15,14 @@ timestamp = strftime('%Y_%m_%d_%H_%M_%S', localtime())
 def main():
     # get parameters
     parser = argparse.ArgumentParser('Amazon - House Price Prediction')
-    parser.add_argument('--dir', type=str, help="Directory to dataset", required=False, default="data/pp-complete.csv")  # "data/pp-complete.csv"
+    parser.add_argument('--dir', type=str, help="Directory to dataset", required=True)
     parser.add_argument('--dim', type=int, help="Dimension of hidden layer.", default=32)
     parser.add_argument('--epoch', type=int, help="Total number of training epochs to perform.", default=100)
     parser.add_argument("--seed", type=int, help="Random seed for initialization", default=2020)
     parser.add_argument("--batch_size", type=int, help="Batch size", default=256)
     parser.add_argument("--verbose", type=int, help="Verbose (0: disable, 1: enable 2: partially enable)", default=1)
-    parser.add_argument("--train_on", type=str, help="Train the model on the purchases on particular time", default="2015-1-1")
-    parser.add_argument("--test_on", type=str, help="Test the model on the purchases on particular time", default="2016-1-1")
+    parser.add_argument("--train_on", type=str, help="Train the model on the houses sold before a particular time", default="2015-1-1")
+    parser.add_argument("--test_on", type=str, help="Test the model on the houses sold after a particular time", default="2016-1-1")
     args = parser.parse_args()
 
     # Model name
@@ -105,6 +105,7 @@ def feature_exaction(args, df):
 
     df_train = df[df.date < args.train_on]
 
+    # Mean-price features
     for c in ["isLondon", 'propertyType', 'duration']:
         meanPrice = df_train.groupby(c)['price'].mean().to_dict()
         df["mean_price_%s" % c] = [meanPrice[i] for i in df[c]]
@@ -121,7 +122,7 @@ def load_data(args):
     SELECT_COLUMNS = [1, 2, 4, 6, 11]
     # Feature name that we use to train our model
     CATEGORY_FEATURES = ['propertyType', 'duration', 'isLondon']
-    MEAN_FEATURES = ['year', 'mean_price', 'mean_price_propertyType', 'mean_price_duration', 'mean_price_isLondon']
+    NUMERICAL_FEATURES = ['year', 'mean_price', 'mean_price_propertyType', 'mean_price_duration', 'mean_price_isLondon']
 
     # Read data from a given file
     df = pd.read_csv(args.dir, names=["price", "date", "propertyType", "duration", "town"], sep=",", usecols=SELECT_COLUMNS)
@@ -150,9 +151,9 @@ def load_data(args):
     x_test = encoder.transform(df_test[CATEGORY_FEATURES].values).toarray()
 
     # Combine categorical features and hand-crafted features
-    x_train = np.concatenate([x_train, df_train[MEAN_FEATURES].values], axis=1)
-    x_val = np.concatenate([x_val, df_val[MEAN_FEATURES].values], axis=1)
-    x_test = np.concatenate([x_test, df_test[MEAN_FEATURES].values], axis=1)
+    x_train = np.concatenate([x_train, df_train[NUMERICAL_FEATURES].values], axis=1)
+    x_val = np.concatenate([x_val, df_val[NUMERICAL_FEATURES].values], axis=1)
+    x_test = np.concatenate([x_test, df_test[NUMERICAL_FEATURES].values], axis=1)
 
     # We use property's price as ground truth
     y_train = df_train['price'].values

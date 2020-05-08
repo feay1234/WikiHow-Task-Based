@@ -5,6 +5,7 @@ import torch
 import torch.nn.functional as F
 import pytorch_pretrained_bert
 from pytorch_pretrained_bert import BertModel
+from sentence_transformers import SentenceTransformer
 
 import Data
 import modeling_util
@@ -440,6 +441,31 @@ class CustomBertModel(pytorch_pretrained_bert.BertModel):
 
         return [embedding_output] + encoded_layers
 
+class SentenceTransformerRanker(OriginalBertRanker):
+    def __init__(self, args):
+        super().__init__()
+
+        self.args = args
+
+        self.dropout = torch.nn.Dropout(0.1)
+        self.cls = torch.nn.Linear(768, 1)
+
+        self.encoder = SentenceTransformer('bert-base-nli-stsb-mean-tokens')
+
+
+    def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
+        if self.args.mode == 1:
+            mul = torch.mul(query_tok, doc_tok)
+        elif self.args.mode == 2:
+            mul = torch.mul(query_tok, doc_tok)
+            mul = torch.mul(mul, wiki_tok)
+
+        return self.cls(self.dropout(mul))
+
+    @memoize_method
+    def tokenize(self, text):
+
+        return self.encoder.encode([text])[0]
 
 class MSRanker(OriginalBertRanker):
     def __init__(self, args):

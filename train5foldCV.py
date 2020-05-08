@@ -35,6 +35,7 @@ MODEL_MAP = {
     'mul_cedr_knrm': modeling.MulCedrKnrmRanker,
     'mul_cedr_pacrr': modeling.CedrPacrrRanker,
     'sigir_sota': modeling.SIGIR_SOTA,
+    'sent_transformer': modeling.SentenceTransformerRanker,
 }
 
 
@@ -120,7 +121,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['wiki_mask'],
                                record['question_tok'],
                                record['question_mask'])
-            elif args.model in ["ms"]:
+            elif args.model in ["ms", "sent_transformer"]:
                 scores = model(record['query_tok'],
                                record['doc_tok'],
                                record['wiki_tok'],
@@ -174,7 +175,7 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
                                records['wiki_mask'],
                                records['question_tok'],
                                records['question_mask'])
-            elif args.model in ["ms"]:
+            elif args.model in ["ms", "sent_transformer"]:
                 scores = model(records['query_tok'],
                                records['doc_tok'],
                                records['wiki_tok'],
@@ -204,7 +205,6 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
     predictions = []
     qids = []
     for qid in rerank_run:
-
         ranked_list_scores = sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)
         ranked_list = [i[0] for i in ranked_list_scores]
         for (pid, score) in ranked_list_scores:
@@ -281,9 +281,9 @@ def result2file(path, name, format, res, qids, fold):
 
 def main_cli():
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sigir_sota')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='sent_transformer')
     # parser.add_argument('--data', default='akgg-r2')
-    parser.add_argument('--data', default='eai')
+    parser.add_argument('--data', default='akgg')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikipedia")
     parser.add_argument('--questionfile', default="question-qq")
@@ -385,8 +385,10 @@ def main_cli():
 
     results = []
 
-
     t1 = time.time()
+
+
+    args.isUnsupervised = True if args.model in ["sen_emb"] else False
 
 
     for fold in range(len(train_pairs)):
@@ -396,6 +398,7 @@ def main_cli():
     elapsed_time = time.time() - t1
     txt = f'total : {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}'
     print2file(args.out_dir, modelName, ".txt", txt, fold)
+
 
     #   average results across 5 folds
     output = []

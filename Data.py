@@ -259,6 +259,7 @@ def _pack_n_ship(batch, data, args):
             'restriction': batch['restriction']
         }
     else:
+
         if args.mode == 1:
             QLEN = args.maxlen
             MAX_DLEN = 800
