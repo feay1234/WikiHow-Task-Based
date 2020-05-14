@@ -181,11 +181,21 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
                                records['wiki_mask'],
                                records['question_tok'],
                                records['question_mask'])
-            elif args.model in ["ms", "sent_transformer", "unsup"]:
+            elif args.model in ["ms", "sent_transformer"]:
                 scores = model(records['query_tok'],
                                records['doc_tok'],
                                records['wiki_tok'],
                                records['question_tok'])
+
+            elif args.model in ["unsup"]:
+                scores = model(records['query_tok'],
+                               records['doc_tok'],
+                               records['wiki_tok'],
+                               records['question_tok'],
+                               records['query_raw'],
+                               records['doc_raw'],
+                               records['wiki_raw'])
+
             else:
                 scores = model(records['query_tok'],
                                records['query_mask'],

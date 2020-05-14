@@ -58,35 +58,22 @@ def read_pairs_dict(file):
 
 
 def iter_train_pairs(model, dataset, train_pairs, qrels, batch_size, data, args):
-    batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': [], 'label': [], 'restriction': []}
-    if args.model == "sigir_sota":
-        for qid, query_tok, etype, label in _iter_train_pairs(model, dataset, train_pairs, qrels,
-                                                                                      args):
-            batch['query_id'].append(qid)
-            batch['query_tok'].append(query_tok)
-            tmp = np.zeros(model.propNum)
-            tmp[list(args.type2pids[etype])] = 1
-            batch['restriction'].append(tmp)
-            tmp = np.zeros(model.propNum)
-            tmp[[int(i) for i in label]] = 1
-            batch['label'].append(tmp)
+    batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': [], 'label': [], 'query_raw':[], 'doc_raw':[], 'wiki_raw':[]}
+    for qid, did, query_tok, doc_tok, wiki_tok, question_tok, query, doc, wiki in _iter_train_pairs(model, dataset, train_pairs, qrels,
+                                                                                  args):
+        batch['query_id'].append(qid)
+        batch['doc_id'].append(did)
+        batch['query_tok'].append(query_tok)
+        batch['doc_tok'].append(doc_tok)
+        batch['wiki_tok'].append(wiki_tok)
+        batch['question_tok'].append(question_tok)
+        batch['query_raw'].append(query)
+        batch['doc_raw'].append(doc)
+        batch['wiki_raw'].append(wiki)
 
-            if len(batch['query_id']) // 2 == batch_size:
-                yield _pack_n_ship(batch, data, args)
-                batch = {'query_id': [], 'query_tok': [], 'label': [], 'restriction': []}
-    else:
-        for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_train_pairs(model, dataset, train_pairs, qrels,
-                                                                                      args):
-            batch['query_id'].append(qid)
-            batch['doc_id'].append(did)
-            batch['query_tok'].append(query_tok)
-            batch['doc_tok'].append(doc_tok)
-            batch['wiki_tok'].append(wiki_tok)
-            batch['question_tok'].append(question_tok)
-
-            if len(batch['query_id']) // 2 == batch_size:
-                yield _pack_n_ship(batch, data, args)
-                batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
+        if len(batch['query_id']) // 2 == batch_size:
+            yield _pack_n_ship(batch, data, args)
+            batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': [], 'query_raw':[], 'doc_raw':[], 'wiki_raw':[]}
 
 
 def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
@@ -99,49 +86,50 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
             if len(pos_ids) == 0:
                 continue
 
-            if args.model == "sigir_sota":
-                yield qid, model.tokenize(ds_queries[qid]), ds_qtypes[qid], pos_ids
-            else:
-                pos_id = random.choice(pos_ids)
-                neg_ids = [did for did in train_pairs[qid] if qrels.get(qid, {}).get(did, 0) == 0]
+            pos_id = random.choice(pos_ids)
+            neg_ids = [did for did in train_pairs[qid] if qrels.get(qid, {}).get(did, 0) == 0]
 
-                if len(neg_ids) == 0:
-                    print("No neg instances", qid)
-                    continue
-                neg_id = random.choice(neg_ids)
-                query_tok = model.tokenize(ds_queries[qid])
-                wiki_tok = model.tokenize(ds_wikis[qid])
-                question_tok = model.tokenize(ds_questions[qid])
+            if len(neg_ids) == 0:
+                print("No neg instances", qid)
+                continue
 
-                pos_doc = ds_docs.get(pos_id)
-                neg_doc = ds_docs.get(neg_id)
-                if pos_doc is None:
-                    tqdm.write(f'missing doc {pos_id}! Skipping')
-                    continue
-                if neg_doc is None:
-                    tqdm.write(f'missing doc {neg_id}! Skipping')
-                    continue
+            neg_id = random.choice(neg_ids)
+            query_tok = model.tokenize(ds_queries[qid])
+            wiki_tok = model.tokenize(ds_wikis[qid])
+            question_tok = model.tokenize(ds_questions[qid])
 
-                yield qid, pos_id, query_tok, model.tokenize(pos_doc), wiki_tok, question_tok
-                yield qid, neg_id, query_tok, model.tokenize(neg_doc), wiki_tok, question_tok
+            pos_doc = ds_docs.get(pos_id)
+            neg_doc = ds_docs.get(neg_id)
+            if pos_doc is None:
+                tqdm.write(f'missing doc {pos_id}! Skipping')
+                continue
+            if neg_doc is None:
+                tqdm.write(f'missing doc {neg_id}! Skipping')
+                continue
+
+            yield qid, pos_id, query_tok, model.tokenize(pos_doc), wiki_tok, question_tok, ds_queries[qid], pos_doc, ds_wikis[qid]
+            yield qid, neg_id, query_tok, model.tokenize(neg_doc), wiki_tok, question_tok, ds_queries[qid], neg_doc, ds_wikis[qid]
 
         # break
 
 
 def iter_valid_records(model, dataset, run, batch_size, data, args):
-    batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': [], 'label': [], 'restriction':[] }
+    batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': [], 'label': [], 'query_raw':[], 'doc_raw':[], 'wiki_raw':[] }
 
-    for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_valid_records(model, dataset, run, args):
+    for qid, did, query_tok, doc_tok, wiki_tok, question_tok, query, doc, wiki, in _iter_valid_records(model, dataset, run, args):
         batch['query_id'].append(qid)
         batch['doc_id'].append(did)
         batch['query_tok'].append(query_tok)
         batch['doc_tok'].append(doc_tok)
         batch['wiki_tok'].append(wiki_tok)
         batch['question_tok'].append(question_tok)
+        batch['query_raw'].append(query)
+        batch['doc_raw'].append(doc)
+        batch['wiki_raw'].append(wiki)
 
         if len(batch['query_id']) == batch_size:
             yield _pack_n_ship(batch, data, args)
-            batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
+            batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': [], 'query_raw':[], 'doc_raw':[], 'wiki_raw':[]}
 
     # final batch
     if len(batch['query_id']) > 0:
@@ -155,16 +143,13 @@ def _iter_valid_records(model, dataset, run, args):
         wiki_tok = model.tokenize(ds_wikis[qid])
         question_tok = model.tokenize(ds_questions[qid])
 
-        if args.model == "sigir_sota":
-            yield qid, model.tokenize(ds_queries[qid]), ds_qtypes[qid], run[qid]
-        else:
-            for did in run[qid]:
-                doc = ds_docs.get(did)
-                if doc is None:
-                    tqdm.write(f'missing doc {did}! Skipping')
-                    continue
-                doc_tok = model.tokenize(doc)
-                yield qid, did, query_tok, doc_tok, wiki_tok, question_tok
+        for did in run[qid]:
+            doc = ds_docs.get(did)
+            if doc is None:
+                tqdm.write(f'missing doc {did}! Skipping')
+                continue
+            doc_tok = model.tokenize(doc)
+            yield qid, did, query_tok, doc_tok, wiki_tok, question_tok, ds_queries[qid], doc, ds_wikis[qid]
 
 
 def _pack_n_ship(batch, data, args):
@@ -199,8 +184,10 @@ def _pack_n_ship(batch, data, args):
             'query_tok': toTensor(batch['query_tok']),
             'doc_tok': toTensor(batch['doc_tok']),
             'wiki_tok': toTensor(batch['wiki_tok']),
-            # 'question_tok': _pad_crop_np(batch['question_tok'], 5),
-            'question_tok': toTensor(batch['question_tok'])
+            'question_tok': toTensor(batch['question_tok']),
+            'query_raw': batch['query_raw'],
+            'doc_raw': batch['doc_raw'],
+            'wiki_raw': batch['wiki_raw'],
         }
     elif args.model in ["sbert", "crossbert", "crossbert2", "mulbert", "mul_cedr_drmm", "mul_cedr_knrm", "mul_cedr_pacrr"]:
 
@@ -229,15 +216,6 @@ def _pack_n_ship(batch, data, args):
             'doc_mask': _mask(batch['doc_tok'], DLEN),
             'wiki_mask': _mask(batch['wiki_tok'], WLEN),
             'question_mask': _mask(batch['question_tok'], QQLEN),
-        }
-    elif args.model == "sigir_sota":
-        QLEN = min(args.maxlen, int(np.max([len(b) for b in batch['query_tok']])))
-        return {
-            'query_id': batch['query_id'],
-            'query_tok': _pad_crop(batch['query_tok'], QLEN),
-            'query_mask': _mask(batch['query_tok'], QLEN),
-            'label': batch['label'],
-            'restriction': batch['restriction']
         }
     else:
 

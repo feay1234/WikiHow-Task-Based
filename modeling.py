@@ -450,8 +450,7 @@ class UnsupRanker(OriginalBertRanker):
         self.args = args
         self.encoder = SentenceTransformer('bert-base-nli-stsb-mean-tokens')
 
-    def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
-
+    def forward(self, query_tok, doc_tok, wiki_tok, question_tok, query_raw, doc_raw, wiki_raw):
 
         res = []
         for i in range(query_tok.shape[0]):
