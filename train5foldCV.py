@@ -34,7 +34,6 @@ MODEL_MAP = {
     'mul_cedr_drmm': modeling.MulCedrDrmmRanker,
     'mul_cedr_knrm': modeling.MulCedrKnrmRanker,
     'mul_cedr_pacrr': modeling.CedrPacrrRanker,
-    'sigir_sota': modeling.SIGIR_SOTA,
     'sent_transformer': modeling.SentenceTransformerRanker,
     'unsup': modeling.UnsupRanker,
 }
@@ -122,8 +121,6 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     GRAD_ACC_SIZE = 2
     total = 0
     model.train()
-    if args.model == "sigir_sota":
-        model.init()
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
@@ -141,8 +138,6 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['doc_tok'],
                                record['wiki_tok'],
                                record['question_tok'])
-            elif args.model == "sigir_sota":
-                scores = model(record['query_tok'], record['query_mask'], record['restriction'])
             else:
                 scores = model(record['query_tok'],
                                record['query_mask'],
@@ -150,14 +145,9 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
                                record['doc_mask'])
 
             count = len(record['query_id']) // 2
-            if args.model == "sigir_sota":
-                label = torch.tensor(record['label']).float().cuda() if Data.device.type == 'cuda' else torch.tensor(record['label']).float()
-                loss = model.criterion(scores, label)
-                loss.backward(retain_graph=True)
-            else:
-                scores = scores.reshape(count, 2)
-                loss = torch.mean(1. - scores.softmax(dim=1)[:, 0])  # pariwse softmax
-                loss.backward()
+            scores = scores.reshape(count, 2)
+            loss = torch.mean(1. - scores.softmax(dim=1)[:, 0])  # pariwse softmax
+            loss.backward()
 
             total_loss += loss.item()
             total += count
@@ -180,6 +170,7 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
     rerank_run = {}
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
+        # 1234
         for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data, args):
             if args.model in ["sbert", "crossbert", "crossbert2", "mulbert", "mul_cedr_drmm", "mul_cedr_knrm", "mul_cedr_pacrr"]:
                 scores = model(records['query_tok'],
@@ -195,21 +186,15 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
                                records['doc_tok'],
                                records['wiki_tok'],
                                records['question_tok'])
-            elif args.model in ["sigir_sota"]:
-                scores = model(records['query_tok'], records['query_mask'], records['restriction'])
             else:
                 scores = model(records['query_tok'],
                                records['query_mask'],
                                records['doc_tok'],
                                records['doc_mask'])
 
-            if args.model in ["sigir_sota"]:
-                for qid, score in zip(records['query_id'], scores):
-                    for idx, sc in enumerate(score):
-                        rerank_run.setdefault(qid, {})[idx] = sc
-            else:
-                for qid, did, score in zip(records['query_id'], records['doc_id'], scores):
-                    rerank_run.setdefault(qid, {})[did] = score.item()
+
+            for qid, did, score in zip(records['query_id'], records['doc_id'], scores):
+                rerank_run.setdefault(qid, {})[did] = score.item()
             pbar.update(len(records['query_id']))
             # break
 
@@ -219,7 +204,11 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
     res['rp'] = []
     predictions = []
     qids = []
+    # 1234
+    selectTopics = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 149, 151, 160, 161, 164, 168, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229]
     for qid in rerank_run:
+        if int(qid) not in selectTopics:
+            continue
         ranked_list_scores = sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)
         ranked_list = [i[0] for i in ranked_list_scores]
         for (pid, score) in ranked_list_scores:
@@ -295,11 +284,12 @@ def result2file(path, name, format, res, qids, fold):
     thefile.close()
 
 def main_cli():
+    # argument
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='unsup')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
     # parser.add_argument('--data', default='akgg-r2')
-    # parser.add_argument('--data', default='akgg')
-    parser.add_argument('--data', default='eai')
+    parser.add_argument('--data', default='akgg')
+    # parser.add_argument('--data', default='eai')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikipedia")
     parser.add_argument('--questionfile', default="question-qq")
@@ -330,8 +320,6 @@ def main_cli():
                                    args.questionfile])
     args.dataset = dataset
     model = MODEL_MAP[args.model](args).cuda() if Data.device.type == 'cuda' else MODEL_MAP[args.model](args)
-
-
 
 
     # if args.model == "cedr_pacrr":

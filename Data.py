@@ -131,40 +131,21 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
 def iter_valid_records(model, dataset, run, batch_size, data, args):
     batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': [], 'label': [], 'restriction':[] }
 
-    if args.model == "sigir_sota":
-        for qid, query_tok, etype, label in _iter_valid_records(model, dataset, run, args):
-            batch['query_id'].append(qid)
-            batch['query_tok'].append(query_tok)
-            tmp = np.zeros(model.propNum)
-            tmp[list(args.type2pids[etype])] = 1
-            batch['restriction'].append(tmp)
-            tmp = np.zeros(model.propNum)
-            tmp[[int(i) for i in label]] = 1
-            batch['label'].append(tmp)
+    for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_valid_records(model, dataset, run, args):
+        batch['query_id'].append(qid)
+        batch['doc_id'].append(did)
+        batch['query_tok'].append(query_tok)
+        batch['doc_tok'].append(doc_tok)
+        batch['wiki_tok'].append(wiki_tok)
+        batch['question_tok'].append(question_tok)
 
-            if len(batch['query_id']) == batch_size:
-                yield _pack_n_ship(batch, data, args)
-                batch = {'query_id': [], 'query_tok': [], 'label': [], 'restriction': []}
-        # final batch
-        if len(batch['query_id']) > 0:
+        if len(batch['query_id']) == batch_size:
             yield _pack_n_ship(batch, data, args)
+            batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
 
-    else:
-        for qid, did, query_tok, doc_tok, wiki_tok, question_tok in _iter_valid_records(model, dataset, run, args):
-            batch['query_id'].append(qid)
-            batch['doc_id'].append(did)
-            batch['query_tok'].append(query_tok)
-            batch['doc_tok'].append(doc_tok)
-            batch['wiki_tok'].append(wiki_tok)
-            batch['question_tok'].append(question_tok)
-
-            if len(batch['query_id']) == batch_size:
-                yield _pack_n_ship(batch, data, args)
-                batch = {'query_id': [], 'doc_id': [], 'query_tok': [], 'doc_tok': [], 'wiki_tok': [], 'question_tok': []}
-
-        # final batch
-        if len(batch['query_id']) > 0:
-            yield _pack_n_ship(batch, data, args)
+    # final batch
+    if len(batch['query_id']) > 0:
+        yield _pack_n_ship(batch, data, args)
 
 
 def _iter_valid_records(model, dataset, run, args):
