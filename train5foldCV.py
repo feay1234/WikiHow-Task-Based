@@ -217,8 +217,8 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
     # 1234
     selectTopics = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 149, 151, 160, 161, 164, 168, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229]
     for qid in rerank_run:
-        if int(qid) not in selectTopics:
-            continue
+        # if int(qid) not in selectTopics:
+        #     continue
         ranked_list_scores = sorted(rerank_run[qid].items(), key=lambda x: x[1], reverse=True)
         ranked_list = [i[0] for i in ranked_list_scores]
         for (pid, score) in ranked_list_scores:
@@ -296,12 +296,12 @@ def result2file(path, name, format, res, qids, fold):
 def main_cli():
     # argument
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='ms')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='unsup')
     # parser.add_argument('--data', default='akgg-r2')
-    parser.add_argument('--data', default='akgg')
+    parser.add_argument('--data', default='akgg-r')
     # parser.add_argument('--data', default='eai')
     parser.add_argument('--path', default="data/cedr/")
-    parser.add_argument('--wikifile', default="wikipedia")
+    parser.add_argument('--wikifile', default="wikihowb")
     parser.add_argument('--questionfile', default="question-qq")
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
     parser.add_argument('--model_out_dir', default="models/vbert")
