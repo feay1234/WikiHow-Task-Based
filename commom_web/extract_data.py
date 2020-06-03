@@ -39,8 +39,11 @@ for file in files:
             continue
 
     for website in memo:
-        title = getTitle(website)
-        if detect(title) == "en":
-            with open(file.replace(".gz", ".tsv"), 'a') as the_file:
-                for p in memo[website]:
-                    the_file.write('%s\t%s\n' % (title, p))
+        try:
+            title = getTitle(website)
+            if detect(title) == "en":
+                with open(file.replace(".gz", ".tsv"), 'a') as the_file:
+                    for p in memo[website]:
+                        the_file.write('%s\t%s\n' % (title, p))
+        except:
+            continue
