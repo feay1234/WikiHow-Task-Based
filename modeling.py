@@ -461,23 +461,20 @@ class UnsupRanker(OriginalBertRanker):
                 res.append(cosine_similarity([query_tok[i].numpy()], [doc_tok[i].numpy()])[0])
                 # res.append(cosine_similarity(query_tok, doc_tok)[0][0])
             elif self.args.mode == 2:
-                if query_raw[i] not in memo:
-                    wikis = self.encoder.encode(wiki_raw[i].split(". "))
-                    memo[query_raw[i]] = wikis
-                else:
-                    wikis = memo[query_raw[i]]
-
-                # wikis = self.encoder.encode(wiki_raw[i].split(". "))
-                # print(len(wikis))
-                qp = cosine_similarity([query_tok[i].numpy()], [doc_tok[i].numpy()])[0]
-                tmp = 0
-                for j in range(len(wikis)):
-                    wp = cosine_similarity([wikis[j]], [doc_tok[i].numpy()])[0]
-                    tmp = max(tmp, (qp + wp) / 2.0)
-                res.append(tmp if tmp > 0 else np.array([0.0]))
+                # if query_raw[i] not in memo:
+                #     wikis = self.encoder.encode(wiki_raw[i].split(". "))
+                #     memo[query_raw[i]] = wikis
+                # else:
+                #     wikis = memo[query_raw[i]]
+                # qp = cosine_similarity([query_tok[i].numpy()], [doc_tok[i].numpy()])[0]
+                # tmp = 0
+                # for j in range(len(wikis)):
+                #     wp = cosine_similarity([wikis[j]], [doc_tok[i].numpy()])[0]
+                #     tmp = max(tmp, (qp + wp) / 2.0)
+                # res.append(tmp if tmp > 0 else np.array([0.0]))
 
                 # Fast
-                # res.append((cosine_similarity([query_tok[i].numpy()], [doc_tok[i].numpy()])[0] + cosine_similarity([wiki_tok[i].numpy()], [doc_tok[i].numpy()])[0])/2.0)
+                res.append((cosine_similarity([query_tok[i].numpy()], [doc_tok[i].numpy()])[0] + cosine_similarity([wiki_tok[i].numpy()], [doc_tok[i].numpy()])[0])/2.0)
                 # res.append((cosine_similarity([query_tok[i].numpy()], [doc_tok[i].numpy()])[0] + cosine_similarity([wiki_tok[i].numpy()], [doc_tok[i].numpy()])[0])/2.0)
 
         # print(res)
