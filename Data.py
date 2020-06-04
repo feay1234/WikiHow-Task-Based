@@ -85,7 +85,6 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
             pos_ids = [did for did in train_pairs[qid] if qrels.get(qid, {}).get(did, 0) > 0]
             if len(pos_ids) == 0:
                 continue
-
             pos_id = random.choice(pos_ids)
             neg_ids = [did for did in train_pairs[qid] if qrels.get(qid, {}).get(did, 0) == 0]
 
@@ -95,8 +94,9 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
 
             neg_id = random.choice(neg_ids)
             query_tok = model.tokenize(ds_queries[qid])
-            wiki_tok = model.tokenize(ds_wikis[qid])
-            question_tok = model.tokenize(ds_questions[qid])
+            if args.mode == 2:
+                wiki_tok = model.tokenize(ds_wikis[qid])
+                question_tok = model.tokenize(ds_questions[qid])
 
             pos_doc = ds_docs.get(pos_id)
             neg_doc = ds_docs.get(neg_id)
@@ -107,8 +107,12 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 tqdm.write(f'missing doc {neg_id}! Skipping')
                 continue
 
-            yield qid, pos_id, query_tok, model.tokenize(pos_doc), wiki_tok, question_tok, ds_queries[qid], pos_doc, ds_wikis[qid]
-            yield qid, neg_id, query_tok, model.tokenize(neg_doc), wiki_tok, question_tok, ds_queries[qid], neg_doc, ds_wikis[qid]
+            if args.mode == 2:
+                yield qid, pos_id, query_tok, model.tokenize(pos_doc), wiki_tok, question_tok, ds_queries[qid], pos_doc, ds_wikis[qid]
+                yield qid, neg_id, query_tok, model.tokenize(neg_doc), wiki_tok, question_tok, ds_queries[qid], neg_doc, ds_wikis[qid]
+            else:
+                yield qid, pos_id, query_tok, model.tokenize(pos_doc), [], [], ds_queries[qid], pos_doc, ""
+                yield qid, neg_id, query_tok, model.tokenize(neg_doc), [], [], ds_queries[qid], neg_doc, ""
 
         # break
 

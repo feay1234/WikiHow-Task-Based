@@ -308,14 +308,16 @@ def main_cli():
     parser.add_argument('--fold', type=int, default=5)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
-    parser.add_argument('--mode', type=int, default=2)
+    parser.add_argument('--mode', type=int, default=1)
     parser.add_argument('--maxlen', type=int, default=16)
     parser.add_argument('--earlystop', type=int, default=1)
 
     args = parser.parse_args()
 
-    args.queryfile = io.TextIOWrapper(io.open("%s%s-query.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
-    args.docfile = io.TextIOWrapper(io.open("%s%s-doc.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
+    args.queryfile = io.TextIOWrapper(io.open("%s%s-query.tsv" % (args.path, args.data),'rb'), 'UTF-8')
+    args.docfile = io.TextIOWrapper(io.open("%s%s-doc.tsv" % (args.path, args.data),'rb'), 'UTF-8')
+    # args.queryfile = io.TextIOWrapper(io.open("%s%s-query.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
+    # args.docfile = io.TextIOWrapper(io.open("%s%s-doc.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
     args.wikifile = io.TextIOWrapper(io.open("%s%s-%s.tsv" % (args.path, args.data.split("-")[0], args.wikifile),'rb'), 'UTF-8')
     args.questionfile = io.TextIOWrapper(io.open("%s%s-%s.tsv" % (args.path, args.data.split("-")[0], args.questionfile),'rb'), 'UTF-8')
 
@@ -323,7 +325,9 @@ def main_cli():
     args.valid_run = "%s%s-valid" % (args.path, args.data)
     args.test_run = "%s%s-test" % (args.path, args.data)
 
-    args.qrels = io.TextIOWrapper(io.open("%s%s-qrel.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
+    # for akgg-r and akgg-r2
+    # args.qrels = io.TextIOWrapper(io.open("%s%s-qrel.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
+    args.qrels = io.TextIOWrapper(io.open("%s%s-qrel.tsv" % (args.path, args.data),'rb'), 'UTF-8')
 
     dataset = Data.read_datafiles([args.queryfile, args.docfile, args.wikifile,
                                    args.questionfile])
