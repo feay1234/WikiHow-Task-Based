@@ -296,12 +296,11 @@ def result2file(path, name, format, res, qids, fold):
 def main_cli():
     # argument
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='unsup')
-    # parser.add_argument('--data', default='akgg-r2')
-    parser.add_argument('--data', default='akgg-r')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
+    parser.add_argument('--data', default='akgg-wdc')
     # parser.add_argument('--data', default='eai')
     parser.add_argument('--path', default="data/cedr/")
-    parser.add_argument('--wikifile', default="wikihowb")
+    parser.add_argument('--wikifile', default="wikihow")
     parser.add_argument('--questionfile', default="question-qq")
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
     parser.add_argument('--model_out_dir', default="models/vbert")
