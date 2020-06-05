@@ -5,10 +5,18 @@ from langdetect import detect
 import gzip, argparse, glob
 from collections import defaultdict
 
+
 def getTitle(url):
     r = requests.get(url)
     soup = bs(r.content, 'lxml')
     return soup.select_one('title').text
+
+
+def cleanhtml(raw_html):
+    cleantext = bs(raw_html, "lxml").text
+    cleantext = cleantext.replace("\n", " ").replace("\t", "")
+    return cleantext
+
 
 parser = argparse.ArgumentParser('Common Web Data Preprocessing')
 parser.add_argument('--dir', type=str)
@@ -24,26 +32,37 @@ for file in files:
         gzip_fd = gzip.GzipFile(fileobj=fd)
         df = pd.read_csv(gzip_fd, nrows=args.nrows, names=['text'], error_bad_lines=False)
 
-    memo = defaultdict(set)
+    entityType = file.split("/")[-1].replace(".gz", "").replace("schema_", "")
+    memo = defaultdict(dict)
     for idx, row in df.iterrows():
 
         l = row.text.split()
         try:
             if "schema.org" in l[1]:
-                website = l[-2].replace("<","").replace(">","")
+                website = l[-2].replace("<", "").replace(">", "")
                 if "https://www" not in website:
                     continue
-                p = l[1].split("/")[-1].replace(">","")
-                memo[website].add(p)
+                # p = l[1].split("/")[-1].replace(">","")
+                # memo[website].add(p)
+                p = l[1].split("/")[-1].replace(">", "")
+                val = row.text.split("\"")[1]
+                if p not in memo[website]:
+                    memo[website][p] = val
         except:
             continue
 
     for website in memo:
         try:
-            title = getTitle(website)
-            if detect(title) == "en":
+            if "name" in memo[website]:
+                title = cleanhtml(memo[website]['name']) + " " + entityType
                 with open(file.replace(".gz", ".tsv"), 'a') as the_file:
                     for p in memo[website]:
                         the_file.write('%s\t%s\n' % (title, p))
+            # Get title from website
+            # title = getTitle(website)
+            # if detect(title) == "en":
+            #     with open(file.replace(".gz", ".tsv"), 'a') as the_file:
+            #         for p in memo[website]:
+            #             the_file.write('%s\t%s\n' % (title, p))
         except:
             continue
