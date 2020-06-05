@@ -124,6 +124,7 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
+            print(len(record['query_tok']))
             if args.model in ["sbert", "crossbert", "crossbert2", "mulbert", "mul_cedr_drmm", "mul_cedr_knrm", "mul_cedr_pacrr"]:
                 scores = model(record['query_tok'],
                                record['query_mask'],
@@ -297,7 +298,7 @@ def main_cli():
     # argument
     parser = argparse.ArgumentParser('CEDR model training and validation')
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
-    parser.add_argument('--data', default='akgg-wdc')
+    parser.add_argument('--data', default='akgg-wdc-1m')
     # parser.add_argument('--data', default='eai')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikihow")
@@ -322,8 +323,9 @@ def main_cli():
     args.questionfile = io.TextIOWrapper(io.open("%s%s-%s.tsv" % (args.path, args.data.split("-")[0], args.questionfile),'rb'), 'UTF-8')
 
     args.train_pairs = "%s%s-train" % (args.path, args.data)
-    args.valid_run = "%s%s-valid" % (args.path, args.data)
-    args.test_run = "%s%s-test" % (args.path, args.data)
+    # We use the same valid and test sets
+    args.valid_run = "%s%s-valid" % (args.path, args.data.split("-")[0])
+    args.test_run = "%s%s-test" % (args.path, args.data.split("-")[0])
 
     # for akgg-r and akgg-r2
     # args.qrels = io.TextIOWrapper(io.open("%s%s-qrel.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
