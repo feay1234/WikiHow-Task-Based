@@ -54,7 +54,7 @@ for file in files:
     for website in memo:
         try:
             if "name" in memo[website]:
-                title = cleanhtml(memo[website]['name']) + " " + entityType
+                title = memo[website]['name'].encode('ascii', 'ignore').decode('unicode_escape') + " " + entityType
                 with open(file.replace(".gz", ".tsv"), 'a') as the_file:
                     for p in memo[website]:
                         the_file.write('%s\t%s\n' % (title, p))
