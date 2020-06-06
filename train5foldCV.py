@@ -124,7 +124,6 @@ def train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args):
     total_loss = 0.
     with tqdm('training', total=BATCH_SIZE * BATCHES_PER_EPOCH, ncols=80, desc='train', leave=False) as pbar:
         for record in Data.iter_train_pairs(model, dataset, train_pairs, qrels, GRAD_ACC_SIZE, data, args):
-            print(len(record['query_tok']))
             if args.model in ["sbert", "crossbert", "crossbert2", "mulbert", "mul_cedr_drmm", "mul_cedr_knrm", "mul_cedr_pacrr"]:
                 scores = model(record['query_tok'],
                                record['query_mask'],
@@ -355,6 +354,7 @@ def main_cli():
 
     foldNum = args.fold
     for fold in range(foldNum):
+        # TODO support overlaped properties here
         f = open(args.train_pairs + "%d.tsv" % fold, "r")
         train_pairs.append(Data.read_pairs_dict(f))
         f = open(args.valid_run + "%d.tsv" % fold, "r")
