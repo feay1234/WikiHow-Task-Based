@@ -92,7 +92,7 @@ def _iter_train_pairs(model, dataset, train_pairs, qrels, args):
                 print("No neg instances", qid)
                 continue
 
-            print(ds_queries[223339])
+            # print(ds_queries[223339])
 
             neg_id = random.choice(neg_ids)
             query_tok = model.tokenize(ds_queries[qid])
