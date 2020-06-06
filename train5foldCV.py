@@ -297,7 +297,7 @@ def main_cli():
     # argument
     parser = argparse.ArgumentParser('CEDR model training and validation')
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
-    parser.add_argument('--data', default='akgg-wdc-1m')
+    parser.add_argument('--data', default='akgg-wdc-10m')
     # parser.add_argument('--data', default='eai')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikihow")
