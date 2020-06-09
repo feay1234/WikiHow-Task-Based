@@ -323,8 +323,10 @@ def main_cli():
 
     args.train_pairs = "%s%s-train" % (args.path, args.data)
     # We use the same valid and test sets
-    args.valid_run = "%s%s-valid" % (args.path, args.data.split("-")[0])
-    args.test_run = "%s%s-test" % (args.path, args.data.split("-")[0])
+    # args.valid_run = "%s%s-valid" % (args.path, args.data.split("-")[0])
+    # args.test_run = "%s%s-test" % (args.path, args.data.split("-")[0])
+    args.valid_run = "%s%s-valid" % (args.path, args.data)
+    args.test_run = "%s%s-test" % (args.path, args.data)
 
     # for akgg-r and akgg-r2
     # args.qrels = io.TextIOWrapper(io.open("%s%s-qrel.tsv" % (args.path, args.data.split("-")[0]),'rb'), 'UTF-8')
