@@ -73,9 +73,9 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     else:
         for epoch in range(MAX_EPOCH):
             t2 = time.time()
-            # loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args)
-            # txt = f'train epoch={epoch} loss={loss}'
-            # print2file(args.out_dir, modelName, ".txt", txt, fold)
+            loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args)
+            txt = f'train epoch={epoch} loss={loss}'
+            print2file(args.out_dir, modelName, ".txt", txt, fold)
 
             valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
                                                                     model_out_dir, data, args, "valid")
