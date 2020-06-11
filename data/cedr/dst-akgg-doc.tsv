@@ -1,0 +1,772 @@
+doc	0	startTime
+doc	1	result
+doc	2	target
+doc	3	name
+doc	4	actionStatus
+doc	5	object
+doc	6	instrument
+doc	7	disambiguatingDescription
+doc	8	description
+doc	9	participant
+doc	10	agent
+doc	11	potentialAction
+doc	12	endTime
+doc	13	additionalType
+doc	14	image
+doc	15	location
+doc	16	alternateName
+doc	17	url
+doc	18	identifier
+doc	19	error
+doc	20	recordedAt
+doc	21	musicBy
+doc	22	character
+doc	23	workExample
+doc	24	educationalUse
+doc	25	releasedEvent
+doc	26	actor
+doc	27	author
+doc	28	version
+doc	29	isFamilyFriendly
+doc	30	material
+doc	31	publisher
+doc	32	producer
+doc	33	accountablePerson
+doc	34	commentCount
+doc	35	alternativeHeadline
+doc	36	headline
+doc	37	timeRequired
+doc	38	isPartOf
+doc	39	exampleOfWork
+doc	40	hasPart
+doc	41	isBasedOn
+doc	42	position
+doc	43	video
+doc	44	accessibilityHazard
+doc	45	mentions
+doc	46	provider
+doc	47	audio
+doc	48	copyrightYear
+doc	49	contentRating
+doc	50	creator
+doc	51	award
+doc	52	director
+doc	53	productionCompany
+doc	54	genre
+doc	55	schemaVersion
+doc	56	trailer
+doc	57	publication
+doc	58	audience
+doc	59	inAlbum
+doc	60	byArtist
+doc	61	offers
+doc	62	locationCreated
+doc	63	review
+doc	64	dateModified
+doc	65	countryOfOrigin
+doc	66	comment
+doc	67	recordingOf
+doc	68	license
+doc	69	inLanguage
+doc	70	accessibilityFeature
+doc	71	publishingPrinciples
+doc	72	text
+doc	73	contentLocation
+doc	74	keywords
+doc	75	subtitleLanguage
+doc	76	accessibilityControl
+doc	77	temporalCoverage
+doc	78	accessModeSufficient
+doc	79	thumbnailUrl
+doc	80	numberOfSeasons
+doc	81	numberOfEpisodes
+doc	82	sourceOrganization
+doc	83	episode
+doc	84	containsSeason
+doc	85	translator
+doc	86	performer
+doc	87	previousStartDate
+doc	88	endDate
+doc	89	attendee
+doc	90	duration
+doc	91	recordedIn
+doc	92	startDate
+doc	93	eventStatus
+doc	94	workFeatured
+doc	95	organizer
+doc	96	funder
+doc	97	contributor
+doc	98	subEvent
+doc	99	sponsor
+doc	100	remainingAttendeeCapacity
+doc	101	competitor
+doc	102	awayTeam
+doc	103	typicalAgeRange
+doc	104	homeTeam
+doc	105	doorTime
+doc	106	workPerformed
+doc	107	composer
+doc	108	isAccessibleForFree
+doc	109	aggregateRating
+doc	110	maximumAttendeeCapacity
+doc	111	mainEntityOfPage
+doc	112	category
+doc	113	logo
+doc	114	serviceType
+doc	115	isRelatedTo
+doc	116	brand
+doc	117	serviceOutput
+doc	118	availableChannel
+doc	119	isSimilarTo
+doc	120	annualPercentageRate
+doc	121	interestRate
+doc	122	hasOfferCatalog
+doc	123	providerMobility
+doc	124	feesAndCommissionsSpecification
+doc	125	hoursAvailable
+doc	126	areaServed
+doc	127	broker
+doc	128	relevantSpeciality
+doc	129	anatomicalSystem
+doc	130	medicalSpecimen
+doc	131	preparation
+doc	132	medicineSystem
+doc	133	newborn
+doc	134	medical Report
+doc	135	anatomicalStructure
+doc	136	medicalUnit
+doc	137	study
+doc	138	medicalRoom
+doc	139	howPerformed
+doc	140	careReason
+doc	141	physicalExamination
+doc	142	medicalDepartment
+doc	143	medicalClinic
+doc	144	careProvider
+doc	145	code
+doc	146	legalStatus
+doc	147	recognizingAuthority
+doc	148	associatedAnatomy
+doc	149	primaryPrevention
+doc	150	pathophysiology
+doc	151	expectedPrognosis
+doc	152	differentialDiagnosis
+doc	153	riskFactor
+doc	154	epidemiology
+doc	155	stage
+doc	156	naturalProgression
+doc	157	cause
+doc	158	drug
+doc	159	possibleComplication
+doc	160	guideline
+doc	161	signOrSymptom
+doc	162	subtype
+doc	163	possibleTreatment
+doc	164	comprisedOf
+doc	165	associatedPathophysiology
+doc	166	relatedCondition
+doc	167	relatedTherapy
+doc	168	status
+doc	169	secondaryPrevention
+doc	170	typicalTest
+doc	171	relatedStructure
+doc	172	alcoholWarning
+doc	173	dosageForm
+doc	174	maximumIntake
+doc	175	isAvailableGenerically
+doc	176	warning
+doc	177	drugUnit
+doc	178	prescriptionStatus
+doc	179	overdosage
+doc	180	cost
+doc	181	activeIngredient
+doc	182	relatedDrug
+doc	183	manufacturer
+doc	184	isProprietary
+doc	185	doseSchedule
+doc	186	interactingDrug
+doc	187	globalLocationNumber
+doc	188	makesOffer
+doc	189	numberOfEmployees
+doc	190	owns
+doc	191	isicV4
+doc	192	founder
+doc	193	department
+doc	194	employee
+doc	195	parentOrganization
+doc	196	memberOf
+doc	197	taxID
+doc	198	email
+doc	199	telephone
+doc	200	event
+doc	201	address
+doc	202	foundingDate
+doc	203	foundingLocation
+doc	204	legalName
+doc	205	vatID
+doc	206	member
+doc	207	seeks
+doc	208	faxNumber
+doc	209	subOrganization
+doc	210	hasPOS
+doc	211	sport
+doc	212	alumni
+doc	213	inBroadcastLineup
+doc	214	broadcastChannelId
+doc	215	providesBroadcastService
+doc	216	broadcastServiceTier
+doc	217	contactPoint
+doc	218	album
+doc	219	iataCode
+doc	220	boardingPolicy
+doc	221	children
+doc	222	gender
+doc	223	homeLocation
+doc	224	knows
+doc	225	jobTitle
+doc	226	spouse
+doc	227	colleague
+doc	228	worksFor
+doc	229	nationality
+doc	230	deathPlace
+doc	231	height
+doc	232	follows
+doc	233	relatedTo
+doc	234	duns
+doc	235	workLocation
+doc	236	sibling
+doc	237	givenName
+doc	238	performerIn
+doc	239	affiliation
+doc	240	parent
+doc	241	familyName
+doc	242	deathDate
+doc	243	birthPlace
+doc	244	weight
+doc	245	birthDate
+doc	246	alumniOf
+doc	247	additionalName
+doc	248	containedInPlace
+doc	249	openingHoursSpecification
+doc	250	specialOpeningHoursSpecification
+doc	251	geo
+doc	252	containsPlace
+doc	253	hasMap
+doc	254	smokingAllowed
+doc	255	additionalProperty
+doc	256	branchCode
+doc	257	amenityFeature
+doc	258	photo
+doc	259	floorSize
+doc	260	petsAllowed
+doc	261	permittedUsage
+doc	262	openingHours
+doc	263	productID
+doc	264	color
+doc	265	itemCondition
+doc	266	isAccessoryOrSparePartFor
+doc	267	model
+doc	268	releaseDate
+doc	269	productionDate
+doc	270	isConsumableFor
+doc	271	purchaseDate
+doc	272	depth
+doc	273	vehicleInteriorColor
+doc	274	vehicleTransmission
+doc	275	vehicleEngine
+doc	276	vehicleModelDate
+doc	277	mpn
+doc	278	width
+doc	279	driveWheelConfiguration
+doc	280	sku
+doc	281	dateVehicleFirstRegistered
+doc	282	vehicleSeatingCapacity
+doc	283	vehicleInteriorType
+doc	284	knownVehicleDamages
+doc	285	fuelType
+doc	286	mileageFromOdometer
+doc	287	fuelEfficiency
+doc	288	fuelConsumption
+doc	289	vehicleIdentificationNumber
+doc	290	vehicleSpecialUsage
+doc	291	vehicleConfiguration
+doc	292	numberOfAxles
+doc	293	numberOfForwardGears
+doc	294	numberOfAirbags
+doc	295	numberOfDoors
+doc	296	indication
+doc	297	followup
+doc	298	adverseEvent
+doc	299	drugClass
+doc	300	track
+doc	301	numberOfRooms
+doc	302	priceRange
+doc	303	date of birth
+doc	304	 sex
+doc	305	 height
+doc	306	 weight
+doc	307	 waist
+doc	308	 hip
+doc	309	 activity level
+doc	310	 food intake
+doc	311	 water intake
+doc	312	 blood pressure
+doc	313	 sleep
+doc	314	traders
+doc	315	 orders
+doc	316	 short selling
+doc	317	 online brokers
+doc	318	 discount service
+doc	319	 price
+doc	320	 brokerage fees
+doc	321	day trading
+doc	322	 electronically traded index fund (etf)
+doc	323	photos
+doc	324	 access
+doc	325	extra service
+doc	326	 sales tools
+doc	327	 realtors
+doc	328	 professional-grade videos of the home
+doc	329	 or perhaps even a 3-d video tour; area maps
+doc	330	 perhaps including drone photos; detailed
+doc	331	 and possibly 3-d
+doc	332	 floor plans; online access to schedules
+doc	333	 checklists
+doc	334	 and documents once a potential transaction begins; and virtual staging
+doc	335	recipient's email address
+doc	336	 subject
+doc	337	 message
+doc	338	attachment
+doc	339	website
+doc	340	 descriptioon of the furniture
+doc	341	 mateirals
+doc	342	 condition
+doc	343	 photo
+doc	344	 delivery options
+doc	345	story
+doc	346	site
+doc	347	 tag
+doc	348	copyright
+doc	349	frame size
+doc	350	 lens width
+doc	351	 bridge width
+doc	352	 temple length
+doc	353	 lens height
+doc	354	 colour
+doc	355	 prescription
+doc	356	return and refund policy
+doc	357	address of starting location
+doc	358	 destination
+doc	359	 transportation method
+doc	360	 
+doc	361	additional stops
+doc	362	 avoid highways
+doc	363	 tolls
+doc	364	 or ferries
+doc	365	 share directions
+doc	366	 map details
+doc	367	destination
+doc	368	details
+doc	369	 location
+doc	370	 emergency services
+doc	371	name
+doc	372	 injured person's name
+doc	373	name of the game
+doc	374	 game title
+doc	375	 payment method
+doc	376	purchase price
+doc	377	 discounts
+doc	378	 free game
+doc	379	 language
+doc	380	 credit or debit card details
+doc	381	 expire date
+doc	382	 security code
+doc	383	 billing address
+doc	384	 account
+doc	385	 card information
+doc	386	account
+doc	387	 bank account
+doc	388	 credit card
+doc	389	 recipient’s email address
+doc	390	 recipient’sphone number
+doc	391	 recipient’s name
+doc	392	 method of payment
+doc	393	card
+doc	394	restaurant
+doc	395	 size of party
+doc	396	 date
+doc	397	 time
+doc	398	backup date
+doc	399	text
+doc	400	 mailing address
+doc	401	 year of graduation
+doc	402	 signature
+doc	403	 school
+doc	404	event type
+doc	405	 fundraising goal
+doc	406	 audience
+doc	407	 target
+doc	408	 budget
+doc	409	 place
+doc	410	 services
+doc	411	authorities
+doc	412	 paperwork
+doc	413	 security or wait staff. schedule food service
+doc	414	 entertainment
+doc	415	 volunteers
+doc	416	beer
+doc	417	 food
+doc	418	 style of beer
+doc	419	region
+doc	420	 flavors
+doc	421	 aromas
+doc	422	resting pulse rate
+doc	423	 age
+doc	424	 body mass index (bmi)
+doc	425	 waist-to-hip ratio
+doc	426	 body fat
+doc	427	 nutrition
+doc	428	smoking
+doc	429	 alcohol
+doc	430	movie
+doc	431	 showtime
+doc	432	 map
+doc	433	 train line 
+doc	434	 ticket
+doc	435	discount
+doc	436	calendar
+doc	437	 timeslot
+doc	438	appointment app
+doc	439	uber
+doc	440	 mobile phone number
+doc	441	 pick up location
+doc	442	vehicle type
+doc	443	music station
+doc	444	 internet
+doc	445	 online platform
+doc	446	playlist
+doc	447	clock app
+doc	448	 alarm clock
+doc	449	phone
+doc	450	email
+doc	451	 instant messaging
+doc	452	recipient
+doc	453	mobile app
+doc	454	 website
+doc	455	 imessage
+doc	456	location
+doc	457	online grocery store
+doc	458	 food type
+doc	459	personal account
+doc	460	miles of a car
+doc	461	 problems of a car
+doc	462	 appraisal site
+doc	463	similar cars
+doc	464	 advertisement
+doc	465	 picture of a car
+doc	466	apple account
+doc	467	 geniusbar
+doc	468	 device and problem
+doc	469	 time slot
+doc	470	trustworthy website
+doc	471	 store
+doc	472	 shoe
+doc	473	return policy
+doc	474	credit score
+doc	475	
+doc	476	microlending
+doc	477	school
+doc	478	 courses
+doc	479	school website
+doc	480	pizzeria
+doc	481	 menu
+doc	482	 order
+doc	483	pizza type
+doc	484	 email
+doc	485	 sms
+doc	486	phone number
+doc	487	committee
+doc	488	 goals
+doc	489	 agenda
+doc	490	 city
+doc	491	 budget 
+doc	492	 method of sales
+doc	493	 venue 
+doc	494	 contents
+doc	495	industry leader
+doc	496	airbnb page
+doc	497	 adress
+doc	498	 apartment
+doc	499	name and title
+doc	500	amazon account
+doc	501	 amazon return center
+doc	502	 item
+doc	503	 return option
+doc	504	 return label
+doc	505	 ebay
+doc	506	 seller
+doc	507	 tracking number
+doc	508	 walmart
+doc	509	 return confirmation
+doc	510	online platform
+doc	511	item
+doc	512	 quantity
+doc	513	 return address
+doc	514	comment
+doc	515	 reason for return
+doc	516	 label
+doc	517	  exchange
+doc	518	train line
+doc	519	 departure station
+doc	520	 timetable
+doc	521	 type of ticket (single or return)
+doc	522	 payment details
+doc	523	 ticket collection
+doc	524	seat reservation
+doc	525	 seating position
+doc	526	date
+doc	527	 name of event
+doc	528	 start time
+doc	529	 end time
+doc	530	 participants
+doc	531	notes
+doc	532	 attachment
+doc	533	 reminder
+doc	534	 participant contact details
+doc	535	 vehicle type
+doc	536	name (if order for others)
+doc	537	 fare option
+doc	538	 split fare
+doc	539	music radio plaforms
+doc	540	 stations
+doc	541	 genre
+doc	542	 artist
+doc	543	hour
+doc	544	 minute
+doc	545	platform
+doc	546	 recipient's email
+doc	547	 recipient's number
+doc	548	city
+doc	549	 state
+doc	550	 zip code
+doc	551	 location name
+doc	552	shopping list
+doc	553	 delivery address
+doc	554	grocery stores
+doc	555	make
+doc	556	 model
+doc	557	 year
+doc	558	 mileage
+doc	559	 interior picture
+doc	560	 exterior picture
+doc	561	 seller's contact details
+doc	562	best features
+doc	563	 cosmetic problems
+doc	564	 mechanical problems
+doc	565	 willingness to negotiate
+doc	566	 hardware issue
+doc	567	 type of device
+doc	568	 store location
+doc	569	brand
+doc	570	 size
+doc	571	 occasion
+doc	572	 materials
+doc	573	 picture
+doc	574	 customer reviews
+doc	575	 terms of loan
+doc	576	 name
+doc	577	 address
+doc	578	 contact details
+doc	579	 annual income
+doc	580	 amount
+doc	581	terms of use
+doc	582	 microlending
+doc	583	school’s accreditation
+doc	584	 availability of courses
+doc	585	 eligibility criteria
+doc	586	 your info
+doc	587	academic advisor 
+doc	588	  size
+doc	589	 cheese
+doc	590	 crust
+doc	591	 sauce
+doc	592	 and toppings
+doc	593	 delivery information
+doc	594	 pick up
+doc	595	 phone number
+doc	596	coupons
+doc	597	 specials
+doc	598	  deals
+doc	599	  promo codes.
+doc	600	tracking number
+doc	601	express service
+doc	602	venue
+doc	603	 catering services
+doc	604	 sponsors
+doc	605	 budgets
+doc	606	 committee
+doc	607	 dates
+doc	608	 name. length of a conference
+doc	609	 people
+doc	610	 ticket price
+doc	611	 type of sessions
+doc	612	menu
+doc	613	 other activities
+doc	614	 tourist destination
+doc	615	address
+doc	616	 email address
+doc	617	 property type
+doc	618	 room type
+doc	619	 number of people the space accommodates
+doc	620	 privacy
+doc	621	 base price
+doc	622	 currency
+doc	623	description
+doc	624	 photos
+doc	625	 number of bathrooms
+doc	626	 movie title
+doc	627	 number of tickets
+doc	628	 ticket redemption
+doc	629	imdb data
+doc	630	 trailers
+doc	631	 reviews
+doc	632	 discount (i.e.child/senior/student tickets)
+doc	633	 seat
+doc	634	 snack
+doc	636	account type
+doc	637	amount
+doc	638	recipient account name
+doc	639	recipient account type
+doc	640	from location
+doc	641	to location
+doc	642	leaving date
+doc	643	travelers
+doc	644	leaving time
+doc	645	origin
+doc	646	destination
+doc	647	departure date
+doc	648	group size
+doc	649	fare type
+doc	650	departure time
+doc	651	event date
+doc	652	event name
+doc	653	event location
+doc	654	event time
+doc	655	category
+doc	656	city of event
+doc	657	subcategory
+doc	658	date
+doc	659	number of seats
+doc	660	event type
+doc	661	city
+doc	662	number of tickets
+doc	663	origin city
+doc	664	destination city
+doc	665	seating class
+doc	666	passengers
+doc	667	refundable
+doc	668	airlines
+doc	669	return date
+doc	670	outbound departure time
+doc	671	inbound departure time
+doc	672	area
+doc	673	number of beds
+doc	674	number of baths
+doc	675	pets allowed
+doc	676	furnished
+doc	677	property name
+doc	678	visit date
+doc	679	hotel name
+doc	680	check in date
+doc	681	number of days
+doc	682	number of rooms
+doc	683	star rating
+doc	684	has wifi
+doc	685	where to
+doc	686	number of adults
+doc	687	check out date
+doc	688	has laundry service
+doc	689	rating
+doc	690	location
+doc	691	pets welcome
+doc	692	genre
+doc	693	directed by
+doc	694	title
+doc	695	subtitles
+doc	696	movie name
+doc	697	show date
+doc	698	show time
+doc	699	show type
+doc	700	theater name
+doc	701	artist
+doc	702	album
+doc	703	year
+doc	704	song name
+doc	705	playback device
+doc	706	pickup city
+doc	707	pickup date
+doc	708	pickup time
+doc	709	dropoff date
+doc	710	type
+doc	711	pickup location
+doc	712	car type
+doc	713	restaurant name
+doc	714	time
+doc	715	party size
+doc	716	cuisine
+doc	717	has live music
+doc	718	serves alcohol
+doc	719	price range
+doc	720	number of riders
+doc	721	shared ride
+doc	722	ride type
+doc	723	stylist name
+doc	724	appointment time
+doc	725	appointment date
+doc	726	is unisex
+doc	727	dentist name
+doc	728	offers cosmetic services
+doc	729	doctor name
+doc	730	free entry
+doc	731	good for kids
+doc	732	new alarm time
+doc	733	new alarm name
+doc	734	transfer amount
+doc	735	recipient name
+doc	736	number checked bags
+doc	737	flight class
+doc	738	place name
+doc	739	stay length
+doc	740	smoking allowed
+doc	741	actors
+doc	742	director
+doc	743	subtitle language
+doc	744	starring
+doc	745	has vegetarian options
+doc	746	has seating outdoors
+doc	747	therapist name
+doc	748	from city
+doc	749	to city
+doc	750	num passengers
+doc	751	additional luggage
+doc	752	origin airport
+doc	753	destination airport
+doc	754	intent
+doc	755	has garage
+doc	756	in unit laundry
+doc	757	contact name
+doc	758	cast
+doc	759	track
+doc	760	device
+doc	761	receiver
+doc	762	private visibility
+doc	763	payment method
+doc	764	start date
+doc	765	end date
+doc	766	add insurance
+doc	767	from
+doc	768	to
+doc	769	date of journey
+doc	770	journey start time
+doc	771	trip protection
+doc	772	class
