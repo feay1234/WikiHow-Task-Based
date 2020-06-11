@@ -297,7 +297,8 @@ def main_cli():
     # argument
     parser = argparse.ArgumentParser('CEDR model training and validation')
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
-    parser.add_argument('--data', default='akgg-wdc-10m')
+    parser.add_argument('--data', default='dst-ucl')
+    # parser.add_argument('--data', default='akgg')
     # parser.add_argument('--data', default='eai')
     parser.add_argument('--path', default="data/cedr/")
     parser.add_argument('--wikifile', default="wikihow")
@@ -305,7 +306,8 @@ def main_cli():
     parser.add_argument('--initial_bert_weights', type=argparse.FileType('rb'))
     parser.add_argument('--model_out_dir', default="models/vbert")
     parser.add_argument('--epoch', type=int, default=20)
-    parser.add_argument('--fold', type=int, default=5)
+    # parser.add_argument('--fold', type=int, default=5)
+    parser.add_argument('--fold', type=int, default=1)
     parser.add_argument('--out_dir', default="out/")
     parser.add_argument('--evalMode', default="all")
     parser.add_argument('--mode', type=int, default=1)
@@ -390,7 +392,8 @@ def main_cli():
 
     print(modelName)
 
-    df = pd.read_csv("%s%s-qrel.tsv" % (args.path, args.data.split("-")[0]), sep="\t", names=["qid", "empty", "pid", "rele_label", "etype"])
+    # df = pd.read_csv("%s%s-qrel.tsv" % (args.path, args.data.split("-")[0]), sep="\t", names=["qid", "empty", "pid", "rele_label", "etype"])
+    df = pd.read_csv("%s%s-qrel.tsv" % (args.path, args.data), sep="\t", names=["qid", "empty", "pid", "rele_label", "etype"])
     qrelDict = collections.defaultdict(dict)
     type2pids = collections.defaultdict(set)
     for qid, prop, label, etype in df[['qid', 'pid', 'rele_label', 'etype']].values:
