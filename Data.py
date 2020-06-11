@@ -146,8 +146,10 @@ def _iter_valid_records(model, dataset, run, args):
     ds_queries, ds_docs, ds_wikis, ds_questions, ds_qtypes = dataset
     for qid in run:
         query_tok = model.tokenize(ds_queries[qid])
-        wiki_tok = model.tokenize(ds_wikis[qid])
-        question_tok = model.tokenize(ds_questions[qid])
+
+        if args.mode == 2:
+            wiki_tok = model.tokenize(ds_wikis[qid])
+            question_tok = model.tokenize(ds_questions[qid])
 
         for did in run[qid]:
             doc = ds_docs.get(did)
@@ -155,7 +157,10 @@ def _iter_valid_records(model, dataset, run, args):
                 tqdm.write(f'missing doc {did}! Skipping')
                 continue
             doc_tok = model.tokenize(doc)
-            yield qid, did, query_tok, doc_tok, wiki_tok, question_tok, ds_queries[qid], doc, ds_wikis[qid]
+            if args.mode == 2:
+                yield qid, did, query_tok, doc_tok, wiki_tok, question_tok, ds_queries[qid], doc, ds_wikis[qid]
+            else:
+                yield qid, did, query_tok, doc_tok, [], [], ds_queries[qid], doc, ""
 
 
 def _pack_n_ship(batch, data, args):

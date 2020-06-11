@@ -73,9 +73,9 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
     else:
         for epoch in range(MAX_EPOCH):
             t2 = time.time()
-            loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args)
-            txt = f'train epoch={epoch} loss={loss}'
-            print2file(args.out_dir, modelName, ".txt", txt, fold)
+            # loss = train_iteration(model, optimizer, dataset, train_pairs, qrels, data, args)
+            # txt = f'train epoch={epoch} loss={loss}'
+            # print2file(args.out_dir, modelName, ".txt", txt, fold)
 
             valid_qids, valid_results, valid_predictions = validate(model, dataset, valid_run, qrelDict, epoch,
                                                                     model_out_dir, data, args, "valid")
@@ -297,7 +297,7 @@ def main_cli():
     # argument
     parser = argparse.ArgumentParser('CEDR model training and validation')
     parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
-    parser.add_argument('--data', default='dst-ucl')
+    parser.add_argument('--data', default='dst-akgg')
     # parser.add_argument('--data', default='akgg')
     # parser.add_argument('--data', default='eai')
     parser.add_argument('--path', default="data/cedr/")
