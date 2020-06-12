@@ -496,9 +496,8 @@ class RandomRanker(OriginalBertRanker):
     def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
 
         res = []
-        memo = {}
         for i in range(query_tok.shape[0]):
-            res.append(random.choice([1,2]))
+            res.append(random.choice([0,1]))
 
         # print(res)
         res = np.array(res)
