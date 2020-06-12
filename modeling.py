@@ -1,5 +1,5 @@
 import pickle
-
+import random
 from pytools import memoize_method
 import torch
 import torch.nn.functional as F
@@ -486,6 +486,29 @@ class UnsupRanker(OriginalBertRanker):
     @memoize_method
     def tokenize(self, text):
         return self.encoder.encode([text])[0]
+
+class RandomRanker(OriginalBertRanker):
+    def __init__(self, args):
+        super().__init__()
+
+        self.args = args
+
+    def forward(self, query_tok, doc_tok, wiki_tok, question_tok):
+
+        res = []
+        memo = {}
+        for i in range(query_tok.shape[0]):
+            res.append(random.choice([1,2]))
+
+        # print(res)
+        res = np.array(res)
+        res = res.reshape((len(res), 1))
+
+        return Data.toTensor(res)
+
+    @memoize_method
+    def tokenize(self, text):
+        return  np.zeros(100)
 
 class SentenceTransformerRanker(OriginalBertRanker):
     def __init__(self, args):

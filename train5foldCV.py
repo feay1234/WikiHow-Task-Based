@@ -36,6 +36,7 @@ MODEL_MAP = {
     'mul_cedr_pacrr': modeling.CedrPacrrRanker,
     'sent_transformer': modeling.SentenceTransformerRanker,
     'unsup': modeling.UnsupRanker,
+    'random': modeling.RandomRanker,
 }
 
 
@@ -57,7 +58,7 @@ def main(model, dataset, train_pairs, qrels, valid_run, test_run, model_out_dir,
 
     print("Fold: %d" % fold)
 
-    if args.model in ["unsup"]:
+    if args.model in ["unsup", "random"]:
 
         test_qids, test_results, test_predictions = validate(model, dataset, test_run, qrelDict, 0,
                                                              model_out_dir, data, args, "test")
@@ -170,7 +171,6 @@ def run_model(model, dataset, run, runf, qrels, data, args, desc='valid'):
     rerank_run = {}
     with torch.no_grad(), tqdm(total=sum(len(r) for r in run.values()), ncols=80, desc=desc, leave=False) as pbar:
         model.eval()
-        # 1234
         for records in Data.iter_valid_records(model, dataset, run, BATCH_SIZE, data, args):
             if args.model in ["sbert", "crossbert", "crossbert2", "mulbert", "mul_cedr_drmm", "mul_cedr_knrm", "mul_cedr_pacrr"]:
                 scores = model(records['query_tok'],
@@ -296,7 +296,7 @@ def result2file(path, name, format, res, qids, fold):
 def main_cli():
     # argument
     parser = argparse.ArgumentParser('CEDR model training and validation')
-    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='vanilla_bert')
+    parser.add_argument('--model', choices=MODEL_MAP.keys(), default='random')
     parser.add_argument('--data', default='dst-ucl-akgg')
     # parser.add_argument('--data', default='akgg')
     # parser.add_argument('--data', default='eai')
@@ -412,7 +412,7 @@ def main_cli():
     t1 = time.time()
 
 
-    args.isUnsupervised = True if args.model in ["sen_emb"] else False
+    args.isUnsupervised = True if args.model in ["sen_emb", "random"] else False
 
 
     for fold in range(len(train_pairs)):
