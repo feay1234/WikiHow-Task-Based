@@ -73,6 +73,6 @@ for file in files:
             # if detect(title) == "en":
             with open(file.replace(".gz", ".tsv"), 'a') as the_file:
                 for p in memo[website]:
-                    the_file.write('%s\t%s\t%s\n' % (website, p, memo[website][p]))
+                    the_file.write('%s\t%s\t%s\t%s\n' % (entityType, website, p, memo[website][p]))
         except:
             continue
