@@ -45,11 +45,12 @@ for file in files:
                 # p = l[1].split("/")[-1].replace(">","")
                 # memo[website].add(p)
                 p = l[1].split("/")[-1].replace(">", "")
-                val = row.text.split("\"")[1].encode('ascii', 'ignore').decode('unicode_escape')
+                val = cleanhtml(row.text.split("\"")[1].encode('ascii', 'ignore').decode('unicode_escape'))
                 # if detect(val) != "en":
                 #     continue
                 # print(l)
                 # print(p)
+                print(val)
                 if p not in memo[website]:
                     memo[website][p] = val
         except:
