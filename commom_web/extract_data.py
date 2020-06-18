@@ -19,7 +19,7 @@ def cleanhtml(raw_html):
 
 
 parser = argparse.ArgumentParser('Common Web Data Preprocessing')
-parser.add_argument('--dir', type=str)
+parser.add_argument('--dir', type=str, default="/Users/jarana/Downloads/")
 parser.add_argument('--nrows', type=int, default=100)
 args = parser.parse_args()
 
@@ -40,12 +40,16 @@ for file in files:
         try:
             if "schema.org" in l[1]:
                 website = l[-2].replace("<", "").replace(">", "")
-                if "https://www" not in website:
-                    continue
+                # if "https://www" not in website:
+                #     continue
                 # p = l[1].split("/")[-1].replace(">","")
                 # memo[website].add(p)
                 p = l[1].split("/")[-1].replace(">", "")
-                val = row.text.split("\"")[1]
+                val = row.text.split("\"")[1].encode('ascii', 'ignore').decode('unicode_escape')
+                # if detect(val) != "en":
+                #     continue
+                # print(l)
+                # print(p)
                 if p not in memo[website]:
                     memo[website][p] = val
         except:
@@ -53,22 +57,22 @@ for file in files:
 
     for website in memo:
         try:
-            if "description" in memo[website]:
-                title = memo[website]['description'].encode('ascii', 'ignore').decode('unicode_escape')
+            # if "description" in memo[website]:
+            #     title = memo[website]['description'].encode('ascii', 'ignore').decode('unicode_escape')
+            #
+            #     if title == "":
+            #         continue
+            #
+            #     title +=  + " " + entityType
 
-                if title == "":
-                    continue
-                    
-                title +=  + " " + entityType
-
-                with open(file.replace(".gz", ".tsv"), 'a') as the_file:
-                    for p in memo[website]:
-                        the_file.write('%s\t%s\n' % (title, p))
+                # with open(file.replace(".gz", ".tsv"), 'a') as the_file:
+                #     for p in memo[website]:
+                #         the_file.write('%s\t%s\n' % (title, p))
             # Get title from website
             # title = getTitle(website)
             # if detect(title) == "en":
-            #     with open(file.replace(".gz", ".tsv"), 'a') as the_file:
-            #         for p in memo[website]:
-            #             the_file.write('%s\t%s\n' % (title, p))
+            with open(file.replace(".gz", ".tsv"), 'a') as the_file:
+                for p in memo[website]:
+                    the_file.write('%s\t%s\t%s\n' % (website, p, memo[website][p]))
         except:
             continue
